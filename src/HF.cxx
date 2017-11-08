@@ -87,6 +87,7 @@ void HF::calculateVd(double gamma) {
         for (auto &vdLm : _vd[ko]) { // calculate a term in square brackets above
           int vdl = vdLm.first.first; // these are the l and m for Y*_i
           int vdm = vdLm.first.second;
+          if (vdl != lj || vdm != mj) continue;
           std::vector<double> &currentVd = vdLm.second; // this is the r-dependent part
 
           std::vector<double> vd(_g.N(), 0); // calculate it here first
