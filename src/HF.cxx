@@ -62,7 +62,7 @@ void HF::solve(int NiterSCF, int Niter, double F0stop) {
 // T2 = Ylm(Ob)
 //
 // We multiply by Y*lomo(Ob) and take the existing Yljmj(Ob) from the orbital and integrate in dOb to get the radial equations
-// int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^m int Ylm Ylo(-mo) Yljmj dOb = sqrt((2l+1)/(4pi)) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
+// int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^m int Ylm Ylo(-mo) Yljmj dOb = sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
 //
 //
 // V = \sum_m \sum_l=0^inf beta(rb, l) T1(l, m) T2(l, m)
@@ -117,8 +117,9 @@ void HF::calculateVd(double gamma) {
                     double T = 0;
                     for (int m = -l; m < l + 1; ++m) {
                       double T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
-                      // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^m int Ylm Ylo(-mo) Yljmj dOb = sqrt((2l+1)/(4pi)) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
-                      double T2 = std::sqrt((2*l+1)*(2*vdl+1)/(4*M_PI*(2*lj+1)))*CG(l, vdl, 0, 0, lj, 0)*CG(l, vdl, m, -vdm, lj, -mj);
+                      // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
+                      double T2 = 0;
+                      T2 = std::pow(-1, vdm+mj)*std::sqrt((2*l+1)*(2*vdl+1)/(4*M_PI*(2*lj+1)))*CG(l, vdl, 0, 0, lj, 0)*CG(l, vdl, m, -vdm, lj, -mj);
                       T += T1*T2;
                     }
                     vd[ir2] += beta*T;
