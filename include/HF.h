@@ -6,6 +6,11 @@
 #include <vector>
 #include <map>
 
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
+using namespace Eigen;
+
 typedef std::map<std::pair<int, int>, std::vector<double> > Vd;
 typedef std::map<std::pair<int, int>, std::vector<double> > Vex;
 
@@ -37,14 +42,18 @@ class HF {
 
     void solve(int NiterSCF, int Niter, double F0stop);
     void solveForFixedPotentials(int Niter, double F0stop);
+
+    void calculateFMatrix(std::vector<MatrixXd> &F, std::vector<double> &E);
+
     long double step();
-    long double solveOrbitalFixedEnergy(double E, int k, int icl_ref, int &nodes);
-    void addOrbital(int L, int initial_n = 1, int initial_l = 0, int initial_m = 0);
+    std::vector<double> solveOrbitalFixedEnergy(std::vector<double> &E, std::vector<int> &l, std::vector<MatrixXd> &Fm, std::vector<int> &icl);
+    void addOrbital(int L, int s, int initial_n = 1, int initial_l = 0, int initial_m = 0);
 
     std::vector<double> getOrbital(int no, int mo, int lo);
 
     std::vector<double> getNucleusPotential();
-    std::vector<double> getDirectPotential();
+    std::vector<double> getDirectPotential(int k);
+    std::vector<double> getExchangePotential(int k);
 
     void gammaSCF(double g);
 
@@ -52,9 +61,9 @@ class HF {
     void calculateVd(double gamma);
     void calculateVex(double gamma);
 
-    void solveInward(double E, int n, int l, std::vector<double> &solution, std::vector<double> &f);
-    void solveOutward(double E, int n, int l, std::vector<double> &solution, std::vector<double> &f);
-    void match(Orbital &o, int l, int m, int icl, std::vector<double> &inward, std::vector<double> &outward);
+    void solveInward(std::vector<double> &E, std::vector<int> &l, std::vector<VectorXd> &solution, std::vector<MatrixXd> &Fm);
+    void solveOutward(std::vector<double> &E, std::vector<int> &l, std::vector<VectorXd> &solution, std::vector<MatrixXd> &Fm);
+    void match(std::vector<VectorXd> &o, std::vector<int> &icl, std::vector<VectorXd> &inward, std::vector<VectorXd> &outward);
 
     const Grid &_g;
     double _Z;

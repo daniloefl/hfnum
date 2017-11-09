@@ -3,8 +3,8 @@
 #include "Grid.h"
 #include <cmath>
 
-Orbital::Orbital(int N, int L, int initial_n, int initial_l, int initial_m)
- : _N(N), _L(L), _initial_n(initial_n), _initial_l(initial_l), _initial_m(initial_m) {
+Orbital::Orbital(int N, int s, int L, int initial_n, int initial_l, int initial_m)
+ : _N(N), _s(s), _L(L), _initial_n(initial_n), _initial_l(initial_l), _initial_m(initial_m) {
   load();
   _torenorm = true;
 }
@@ -20,6 +20,14 @@ int Orbital::length() const {
     lsum += 2*l + 1;
   }
   return lsum*_N;
+}
+
+int Orbital::spin() const {
+  return _s;
+}
+
+void Orbital::spin(int s) {
+  _s = s;
 }
 
 int Orbital::initialN() const {
@@ -45,6 +53,7 @@ Orbital::Orbital(const Orbital &o) {
   _initial_n = o._initial_n;
   _initial_l = o._initial_l;
   _initial_m = o._initial_m;
+  _s = o._s;
   for (int i = 0; i < lsum*_N; ++i) _wf[i] = o._wf[i];
   for (int i = 0; i < lsum*_N; ++i) _wf_norm[i] = o._wf_norm[i];
   _torenorm = true;
@@ -63,6 +72,7 @@ Orbital &Orbital::operator =(const Orbital &o) {
   _initial_n = o._initial_n;
   _initial_l = o._initial_l;
   _initial_m = o._initial_m;
+  _s = o._s;
   for (int i = 0; i < lsum*_N; ++i) _wf[i] = o._wf[i];
   for (int i = 0; i < lsum*_N; ++i) _wf_norm[i] = o._wf_norm[i];
   _torenorm = true;

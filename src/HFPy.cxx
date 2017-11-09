@@ -29,9 +29,16 @@ python::list HFPy::getNucleusPotential() {
   for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
   return l;
 }
-python::list HFPy::getDirectPotential() {
+python::list HFPy::getDirectPotential(int k) {
   python::list l;
-  std::vector<double> v = _h.getDirectPotential();
+  std::vector<double> v = _h.getDirectPotential(k);
+  for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
+  return l;
+}
+
+python::list HFPy::getExchangePotential(int k) {
+  python::list l;
+  std::vector<double> v = _h.getExchangePotential(k);
   for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
   return l;
 }
@@ -40,8 +47,8 @@ void HFPy::solve(int NiterSCF, int Niter, double F0stop) {
   _h.solve(NiterSCF, Niter, F0stop);
 }
 
-void HFPy::addOrbital(int L, int initial_n, int initial_l, int initial_m) {
-  _h.addOrbital(L, initial_n, initial_l, initial_m);
+void HFPy::addOrbital(int L, int s, int initial_n, int initial_l, int initial_m) {
+  _h.addOrbital(L, s, initial_n, initial_l, initial_m);
 }
 
 python::list HFPy::getR() const {

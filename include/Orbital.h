@@ -5,7 +5,7 @@ class Grid;
 
 class Orbital {
   public:
-    Orbital(int N = 150, int L = 1, int initial_n = 1, int initial_l = 0, int initial_m = 0);
+    Orbital(int N = 150, int s = 1, int L = 1, int initial_n = 1, int initial_l = 0, int initial_m = 0);
     Orbital(const Orbital &o);
     virtual ~Orbital();
 
@@ -21,6 +21,9 @@ class Orbital {
     int initialL() const;
     int initialM() const;
 
+    int spin() const;
+    void spin(int s);
+
     void E(double E_in);
     double E() const;
 
@@ -31,6 +34,8 @@ class Orbital {
   private:
 
     void load();
+
+    int _s;
 
     int _N;
     int _L;

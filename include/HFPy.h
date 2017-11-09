@@ -17,13 +17,14 @@ class HFPy {
     virtual ~HFPy();
 
     void solve(int NiterSCF, int Niter, double F0stop);
-    void addOrbital(int L, int initial_n, int initial_l, int initial_m);
+    void addOrbital(int L, int s, int initial_n, int initial_l, int initial_m);
     boost::python::list getR() const;
     boost::python::list getOrbital(int no, int mo, int lo);
     void gammaSCF(double g);
 
     boost::python::list getNucleusPotential();
-    boost::python::list getDirectPotential();
+    boost::python::list getDirectPotential(int k);
+    boost::python::list getExchangePotential(int k);
 
   private:
     Grid _g;

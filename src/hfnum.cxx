@@ -15,6 +15,7 @@ BOOST_PYTHON_MODULE(hfnum)
     .def("gammaSCF", &HFPy::gammaSCF)
     .def("getNucleusPotential", &HFPy::getNucleusPotential)
     .def("getDirectPotential", &HFPy::getDirectPotential)
+    .def("getExchangePotential", &HFPy::getExchangePotential)
   ;
 }
 
