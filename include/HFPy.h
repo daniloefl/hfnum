@@ -24,7 +24,7 @@ class HFPy {
 
     boost::python::list getNucleusPotential();
     boost::python::list getDirectPotential(int k);
-    boost::python::list getExchangePotential(int k);
+    boost::python::list getExchangePotential(int k, int k2);
 
   private:
     Grid _g;

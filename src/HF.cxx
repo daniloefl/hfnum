@@ -17,7 +17,7 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
-HF::HF(const Grid &g, double Z)
+HF::HF(const Grid &g, ldouble Z)
   : _g(g), _Z(Z) {
   _pot.resize(_g.N());
   _potIndep.resize(_g.N());
@@ -26,25 +26,26 @@ HF::HF(const Grid &g, double Z)
     _potIndep[k] = 0;
   }
   _gamma_scf = 0.7;
+  _norm = 1;
 }
 
 HF::~HF() {
 }
 
-std::vector<double> HF::getOrbital(int no, int lo, int mo) {
+std::vector<ldouble> HF::getOrbital(int no, int lo, int mo) {
   Orbital &o = _o[no];
-  std::vector<double> res;
+  std::vector<ldouble> res;
   for (int k = 0; k < _g.N(); ++k) {
     res.push_back(o.getNorm(k, lo, mo, _g));
   }
   return res;
 }
 
-void HF::gammaSCF(double g) {
+void HF::gammaSCF(ldouble g) {
   _gamma_scf = g;
 }
 
-void HF::solve(int NiterSCF, int Niter, double F0stop) {
+void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
   _dE.resize(_o.size());
   int nStepSCF = 0;
   while (nStepSCF < NiterSCF) {
@@ -78,7 +79,7 @@ void HF::solve(int NiterSCF, int Niter, double F0stop) {
 //
 // T2 = 1.0/(4*np.pi) int Ylm dOb
 //
-void HF::calculateVex(double gamma) {
+void HF::calculateVex(ldouble gamma) {
   // we are looking to calculate Vex(orbital = o, l = vdl, m = vdm)
   // it shows up in this term of the equation:
   // {int [sum_k1 int rpsi_k1(r1)*rpsi_ko(r1) Y_k1(O)*Y_ko(O)/|r1 - r2| dr1 dO] Y*_i(Oo) Y_j(Oo) dOo} rpsi_j(r2)
@@ -89,55 +90,57 @@ void HF::calculateVex(double gamma) {
     for (int lj = 0; lj < _o[ko].L()+1; ++lj) { // loop over l in Y_j
       for (int mj = -lj; mj < lj+1; ++mj) { // loop over m in Y_j
 
-        for (auto &vexLm : _vex[ko]) { // calculate a term in square brackets above
-          int vexl = vexLm.first.first; // these are the l and m for Y*_i
-          int vexm = vexLm.first.second;
-          if (vexl != lj || vexm != mj) continue;
-          std::vector<double> &currentVex = vexLm.second; // this is the r-dependent part
+        for (int k1 = 0; k1 < _o.size(); ++k1) {
+          if (k1 == ko) continue;
+          // each sub-orbital has a different Ylomo dependency, so there is a different Vd in each case
+          for (int l1 = 0; l1 < _o[k1].L()+1; ++l1) { // loop over l in Y_j
+            for (int m1 = -l1; m1 < l1+1; ++m1) { // loop over m in Y_j
 
-          std::vector<double> vex(_g.N(), 0); // calculate it here first
-          // loop over orbitals (this is the sum over k1 above)
-          for (int k1 = 0; k1 < _o.size(); ++k1) {
-            if (_o[k1].spin() != _o[ko].spin()) continue;
+              for (auto &vexLm : _vex[std::pair<int,int>(ko,k1)]) { // calculate a term in square brackets above
+                int vexl = vexLm.first.first; // these are the l and m for Y*_i
+                int vexm = vexLm.first.second;
+                if (vexl != lj || vexm != mj) continue;
+                std::vector<ldouble> &currentVex = vexLm.second; // this is the r-dependent part
 
-            for (int l1 = 0; l1 < _o[k1].L()+1; ++l1) { // each orbital in the sum is actually orb_ko = sum_l1,m1 rpsi_l1,m1 Y_l1m1, so loop over this sum
-              for (int m1 = -l1; m1 < l1+1; ++m1) {
+                std::vector<ldouble> vex(_g.N(), 0); // calculate it here first
+                // loop over orbitals (this is the sum over k1 above)
+                if (_o[k1].spin() != _o[ko].spin()) continue;
 
                 // now actually calculate it from the expansion above
                 int lmax = 2;
                 for (int l = 0; l < lmax+1; ++l) {
                   for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
-                    double beta = 0;
-                    double r2 = _g(ir2);
+                    ldouble beta = 0;
+                    ldouble r2 = _g(ir2);
                     for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
-                      double r1 = _g(ir1);
-                      double dr = 0;
+                      ldouble r1 = _g(ir1);
+                      ldouble dr = 0;
                       if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
-                      double rs = r1;
-                      double rb = r2;
+                      ldouble rs = r1;
+                      ldouble rb = r2;
                       if (rb < rs) {
                         rs = r2;
                         rb = r1;
                       }
                       beta += 4*M_PI/(2.0*l + 1.0)*_o[k1].getNorm(ir1, l1, m1, _g)*_o[ko].getNorm(ir1, lj, mj, _g)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
                     }
-                    double T = 0;
+                    ldouble T = 0;
                     for (int m = -l; m < l + 1; ++m) {
-                      double T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
+                      ldouble T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
                       // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
-                      double T2 = 0;
+                      ldouble T2 = 0;
                       T2 = std::pow(-1, vexm+mj)*std::sqrt((2*l+1)*(2*vexl+1)/(4*M_PI*(2*lj+1)))*CG(l, vexl, 0, 0, lj, 0)*CG(l, vexl, m, -vexm, lj, -mj);
                       T += T1*T2;
                     }
                     vex[ir2] += beta*T;
                   } // for each r in Vex integration
                 } // for each l in the 1/|r1 - r2| expansion in sph. harm.
+                for (int k = 0; k < _g.N(); ++k) currentVex[k] = (1-gamma)*currentVex[k] + gamma*vex[k];
               } // for each m1 of the orbital basis expansion
+
             } // for each l1 of the orbital basis expansion
 
           } // for each orbital in the Vex sum
-
-          for (int k = 0; k < _g.N(); ++k) currentVex[k] = (1-gamma)*currentVex[k] + gamma*vex[k];
 
         } // for each Vd term in a unique equation coming from the multiplication by Y*_i
       } // for each m in the orbital basis expansion
@@ -167,7 +170,7 @@ void HF::calculateVex(double gamma) {
 //
 // T2 = 1.0/(4*np.pi) int Ylm dOb
 //
-void HF::calculateVd(double gamma) {
+void HF::calculateVd(ldouble gamma) {
   // we are looking to calculate Vd(orbital = o, l = vdl, m = vdm)
   // it shows up in this term of the equation:
   // {int [sum_k1 int rpsi_k1(r1)*rpsi_k1(r1) Y_k1(O)*Y_k1(O)/|r1 - r2| dr1 dO] Y*_i(Oo) Y_j(Oo) dOo} rpsi_j(r2)
@@ -182,11 +185,12 @@ void HF::calculateVd(double gamma) {
           int vdl = vdLm.first.first; // these are the l and m for Y*_i
           int vdm = vdLm.first.second;
           if (vdl != lj || vdm != mj) continue;
-          std::vector<double> &currentVd = vdLm.second; // this is the r-dependent part
+          std::vector<ldouble> &currentVd = vdLm.second; // this is the r-dependent part
 
-          std::vector<double> vd(_g.N(), 0); // calculate it here first
+          std::vector<ldouble> vd(_g.N(), 0); // calculate it here first
           // loop over orbitals (this is the sum over k1 above)
           for (int k1 = 0; k1 < _o.size(); ++k1) {
+            if (k1 == ko) continue;
 
             for (int l1 = 0; l1 < _o[k1].L()+1; ++l1) { // each orbital in the sum is actually orb_ko = sum_l1,m1 rpsi_l1,m1 Y_l1m1, so loop over this sum
               for (int m1 = -l1; m1 < l1+1; ++m1) {
@@ -195,25 +199,25 @@ void HF::calculateVd(double gamma) {
                 int lmax = 2;
                 for (int l = 0; l < lmax+1; ++l) {
                   for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
-                    double beta = 0;
-                    double r2 = _g(ir2);
+                    ldouble beta = 0;
+                    ldouble r2 = _g(ir2);
                     for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
-                      double r1 = _g(ir1);
-                      double dr = 0;
+                      ldouble r1 = _g(ir1);
+                      ldouble dr = 0;
                       if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
-                      double rs = r1;
-                      double rb = r2;
+                      ldouble rs = r1;
+                      ldouble rb = r2;
                       if (rb < rs) {
                         rs = r2;
                         rb = r1;
                       }
                       beta += 4*M_PI/(2.0*l + 1.0)*std::pow(_o[k1].getNorm(ir1, l1, m1, _g), 2)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
                     }
-                    double T = 0;
+                    ldouble T = 0;
                     for (int m = -l; m < l + 1; ++m) {
-                      double T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
+                      ldouble T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
                       // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
-                      double T2 = 0;
+                      ldouble T2 = 0;
                       T2 = std::pow(-1, vdm+mj)*std::sqrt((2*l+1)*(2*vdl+1)/(4*M_PI*(2*lj+1)))*CG(l, vdl, 0, 0, lj, 0)*CG(l, vdl, m, -vdm, lj, -mj);
                       T += T1*T2;
                     }
@@ -237,22 +241,22 @@ void HF::calculateVd(double gamma) {
   }
 }
 
-std::vector<double> HF::getNucleusPotential() {
+std::vector<ldouble> HF::getNucleusPotential() {
   return _pot;
 }
 
-std::vector<double> HF::getDirectPotential(int k) {
+std::vector<ldouble> HF::getDirectPotential(int k) {
   return _vd[k][std::pair<int, int>(0, 0)];
 }
 
-std::vector<double> HF::getExchangePotential(int k) {
-  return _vex[k][std::pair<int, int>(0, 0)];
+std::vector<ldouble> HF::getExchangePotential(int k, int k2) {
+  return _vex[std::pair<int,int>(k,k2)][std::pair<int, int>(0, 0)];
 }
 
-void HF::solveForFixedPotentials(int Niter, double F0stop) {
-  double gamma = 0.5; // move in the direction of the negative slope with this velocity per step
+void HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
+  ldouble gamma = 0.5; // move in the direction of the negative slope with this velocity per step
 
-  long double F = 0;
+  ldouble F = 0;
   int nStep = 0;
   while (nStep < Niter) {
     // compute sum of squares of F(x_old)
@@ -260,15 +264,15 @@ void HF::solveForFixedPotentials(int Niter, double F0stop) {
     F = step();
 
     // limit maximum energy step in a single direction to be 0.1*gamma
-    double gscale = 1;
+    ldouble gscale = 1;
 
     // change orbital energies
     std::cout << "Orbital energies at step " << nStep << ", with constraint = " << std::setw(16) << F << "." << std::endl;
     std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "next energy (H) " << std::endl;
     for (int k = 0; k < _o.size(); ++k) {
-      double stepdE = gscale*gamma*_dE[k];
-      double newE = (_o[k].E()+stepdE);
-      std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(14) << _o[k].E() << " " << std::setw(16) << std::setprecision(16) << newE << std::endl;
+      ldouble stepdE = gscale*gamma*_dE[k];
+      ldouble newE = (_o[k].E()+stepdE);
+      std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(12) << _o[k].E() << " " << std::setw(16) << std::setprecision(12) << newE << std::endl;
       _o[k].E(newE);
     }
 
@@ -276,14 +280,14 @@ void HF::solveForFixedPotentials(int Niter, double F0stop) {
   }
 }
 
-void HF::calculateFMatrix(std::vector<MatrixXd> &F, std::vector<double> &E) {
+void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<ldouble> &E) {
   int N = 0;
   for (int k = 0; k < _o.size(); ++k) {
     N += _o[k].L()+1;
   }
   F.resize(_g.N());
   for (int i = 0; i < _g.N(); ++i) {
-    double r = _g(i);
+    ldouble r = _g(i);
     F[i].resize(N, N);
     F[i].setZero();
     int idx1 = 0;
@@ -296,15 +300,13 @@ void HF::calculateFMatrix(std::vector<MatrixXd> &F, std::vector<double> &E) {
           for (int k2 = 0; k2 < _o.size(); ++k2) {
             for (int l2 = 0; l2 < _o[k2].L()+1; ++l2) {
               for (int m2 = -l2; m2 < l2+1; ++m2) {
-                double vex = _vex[k2][std::pair<int, int>(l2, m2)][i];
-                if (_o[k2].spin() != _o[k].spin()) vex = 0;
                 if (idx1 == idx2) {
-                  double a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(l, m)][i] + vex) - std::pow(l + 0.5, 2);
+                  ldouble a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(l, m)][i]) - std::pow(l + 0.5, 2);
                   F[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
-                } else {
-                  double a = 2*std::pow(r, 2)*vex;
-                  F[i](idx1,idx2) += a*std::pow(_g.dx(), 2)/12.0;
                 }
+                ldouble vex = _vex[std::pair<int,int>(k, k2)][std::pair<int, int>(l2, m2)][i];
+                ldouble a = 2*std::pow(r, 2)*vex;
+                F[i](idx1,idx2) += a*std::pow(_g.dx(), 2)/12.0;
                 idx2 += 1;
               }
             }
@@ -314,10 +316,17 @@ void HF::calculateFMatrix(std::vector<MatrixXd> &F, std::vector<double> &E) {
       }
     }
   }
+  //for (int k = 0; k < _o.size(); ++k) {
+  //  std::cout << "Vd["<<k<<"] = " << _vd[k][std::pair<int, int>(0, 0)][2] << std::endl;
+  //  for (int k2 = 0; k2 < _o.size(); ++k2) {
+  //    std::cout << "Vex["<<k<<","<<k2<<"] = " << _vex[std::pair<int,int>(k,k2)][std::pair<int, int>(0, 0)][2] << std::endl;
+  //  }
+  //}
+  //std::cout << "Calculate F at 2: " << F[2] << std::endl;
 }
 
 // solve for a fixed energy and calculate _dE for the next step
-long double HF::step() {
+ldouble HF::step() {
   // TODO: Ignore off-diagonal entries due to vxc now ... will add iteratively later
   // https://ocw.mit.edu/courses/mathematics/18-409-topics-in-theoretical-computer-science-an-algorithmists-toolkit-fall-2009/lecture-notes/MIT18_409F09_scribe21.pdf
   int N = 0;
@@ -325,52 +334,75 @@ long double HF::step() {
     N += _o[k].L()+1;
   }
 
-  std::vector<double> E(_o.size(), 0);
-  std::vector<double> EdE(_o.size(), 0);
+  std::vector<ldouble> E(_o.size(), 0);
   std::vector<int> l(_o.size(), 0);
-  double dE = 0.1;
 
-  std::vector<int> icl(_o.size(), 0);
+  std::vector<int> icl(_o.size(), -1);
   for (int k = 0; k < _o.size(); ++k) {
     E[k] = _o[k].E();
-    EdE[k] = E[k]+dE;
     l[k] = _o[k].initialL();
 
     int lmain = _o[k].initialL();
     int mmain = _o[k].initialM();
     // calculate crossing of potential at zero for lmain,mmain
-    double a_m1 = 0;
-    for (int i = 1; i < _g.N(); ++i) {
-      double r = _g(i);
-      double a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[k][std::pair<int,int>(lmain, mmain)][i]) - std::pow(lmain + 0.5, 2);
-      if (a*a_m1 < 0) {
+    ldouble a_m1 = 0;
+    for (int i = 3; i < _g.N()-3; ++i) {
+      ldouble r = _g(i);
+      ldouble a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i]) - std::pow(lmain + 0.5, 2);
+      if (icl[k] < 0 && a*a_m1 < 0) {
         icl[k] = i;
         break;
       }
       a_m1 = a;
     }
+    if (icl[k] < 0) icl[k] = 10;
   }
 
-  long double F = 0;
-  std::vector<MatrixXd> Fm1;
-  std::vector<MatrixXd> Fm2;
+  std::vector<ldouble> dE(_o.size(), 0);
+  std::vector<ldouble> EdE(_o.size(), 0);
+  for (int k = 0; k < _o.size(); ++k) {
+    dE[k] = -1e-1;
+    EdE[k] = E[k] + dE[k];
+  }
+
+  std::vector<MatrixXld> Fm1;
+  std::vector<MatrixXld> Fm2;
   calculateFMatrix(Fm1, EdE);
   calculateFMatrix(Fm2, E);
 
-  std::vector<double> F1 = solveOrbitalFixedEnergy(EdE, l, Fm1, icl);
-  std::vector<double> F2 = solveOrbitalFixedEnergy(E, l, Fm2, icl);
-  for (int k = 0; k < _o.size(); ++k) {
-    if (F2[k] != F1[k]) {
-      _dE[k] = -F2[k]*dE/(F1[k] - F2[k]);
-    } else {
-      _dE[k] = dE;
+  std::vector<ldouble> F1;
+  std::vector<ldouble> F2;
+  int iter = 0;
+  do {
+    if (F1.size() == _o.size()) {
+      for (int k = 0; k < _o.size(); ++k) {
+        if (std::fabs(F2[k] - F1[k]) < 1e-5) {
+          dE[k] *= 2;
+          EdE[k] = E[k] + dE[k];
+        }
+      }
     }
+    F1 = solveOrbitalFixedEnergy(EdE, l, Fm1, icl);
+    F2 = solveOrbitalFixedEnergy(E, l, Fm2, icl);
+  } while (iter++ < 5);
+
+  ldouble F = 0;
+  for (int k = 0; k < _o.size(); ++k) {
+    if (std::fabs(F2[k] - F1[k]) > 1e-5) {
+      std::cout << "Orbital " << k << ", F1 = " << F1[k] << ", F2 = " << F2[k] << ", F1 - F2 = " << F1[k] - F2[k] << ", dE = " << -F2[k]*dE[k]/(F1[k] - F2[k]) << std::endl;
+      _dE[k] = -F2[k]*dE[k]/(F1[k] - F2[k]);
+    } else {
+      std::cout << "Orbital " << k << ", F1 = " << F1[k] << ", F2 = " << F2[k] << ", F1 - F2 = " << F1[k] - F2[k] << std::endl;
+      _dE[k] = dE[k];
+    }
+    //if (std::fabs(_dE[k]) > 0.05) _dE[k] = _dE[k]/std::fabs(_dE[k])*0.05;
+    //if (E[k] + _dE[k] >= 0) _dE[k] = -_dE[k]; //-_Z*_Z;
     F += F2[k];
   }
   return F;
 }
 
-void HF::solveInward(std::vector<double> &E, std::vector<int> &l, std::vector<VectorXd> &solution, std::vector<MatrixXd> &Fm) {
+void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm) {
   int N = _g.N();
   int M = 0;
   for (int k = 0; k < _o.size(); ++k) {
@@ -384,8 +416,13 @@ void HF::solveInward(std::vector<double> &E, std::vector<int> &l, std::vector<Ve
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         if (l == _o[k].initialL() && m == _o[k].initialM()) {
-          solution[N-1](idx) = 0;//std::exp(-std::sqrt(-2*E)*_g(N-1));
-          solution[N-2](idx) = _g(N-1) - _g(N-2);//std::exp(-std::sqrt(-2*E)*_g(N-2));
+          if (E[k] < 0) {
+            solution[N-1](idx) = std::exp(-std::sqrt(-2*E[k])*_g(N-1));
+            solution[N-2](idx) = std::exp(-std::sqrt(-2*E[k])*_g(N-2));
+          } else {
+            solution[N-1](idx) = 0;
+            solution[N-2](idx) = (_g(N-1) - _g(N-2));
+          }
         }
         idx += 1;
       }
@@ -396,7 +433,9 @@ void HF::solveInward(std::vector<double> &E, std::vector<int> &l, std::vector<Ve
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         for (int i = N-2; i > 0; --i) {
-          solution[i-1] = (Fm[i-1]).inverse()*((MatrixXd::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1]));
+          JacobiSVD<MatrixXld> dec(Fm[i-1], ComputeThinU | ComputeThinV);
+          //solution[i-1] = (Fm[i-1]).inverse()*((MatrixXd::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1]));
+          solution[i-1] = dec.solve((MatrixXld::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1]));
         }
         idx += 1;
       }
@@ -404,7 +443,7 @@ void HF::solveInward(std::vector<double> &E, std::vector<int> &l, std::vector<Ve
   }
 }
 
-void HF::solveOutward(std::vector<double> &E, std::vector<int> &li, std::vector<VectorXd> &solution, std::vector<MatrixXd> &Fm) {
+void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm) {
   int N = _g.N();
   int M = 0;
   for (int k = 0; k < _o.size(); ++k) {
@@ -418,8 +457,8 @@ void HF::solveOutward(std::vector<double> &E, std::vector<int> &li, std::vector<
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         if (l == _o[k].initialL() && m == _o[k].initialM()) {
-          solution[0](idx) = std::pow(_Z*_g(0), li[k]+0.5);
-          solution[1](idx) = std::pow(_Z*_g(1), li[k]+0.5);
+          solution[0](idx) = _norm*std::pow(_Z*_g(0), li[k]+0.5); // /((ldouble) _o[k].initialN());
+          solution[1](idx) = _norm*std::pow(_Z*_g(1), li[k]+0.5); // /((ldouble) _o[k].initialN());
         }
         idx += 1;
       }
@@ -430,14 +469,16 @@ void HF::solveOutward(std::vector<double> &E, std::vector<int> &li, std::vector<
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         for (int i = 1; i < N-1; ++i) {
-          solution[i+1] = (Fm[i+1]).inverse()*((MatrixXd::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
+          JacobiSVD<MatrixXld> dec(Fm[i+1], ComputeThinU | ComputeThinV);
+          //solution[i+1] = (Fm[i+1]).inverse()*((MatrixXd::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
+          solution[i+1] = dec.solve((MatrixXld::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
         }
         idx += 1;
       }
     }
   }
 }
-void HF::match(std::vector<VectorXd> &o, std::vector<int> &icl, std::vector<VectorXd> &inward, std::vector<VectorXd> &outward) {
+void HF::match(std::vector<VectorXld> &o, std::vector<int> &icl, std::vector<VectorXld> &inward, std::vector<VectorXld> &outward) {
   int M = 0;
   for (int k = 0; k < _o.size(); ++k) {
     M += _o[k].L()+1;
@@ -446,37 +487,82 @@ void HF::match(std::vector<VectorXd> &o, std::vector<int> &icl, std::vector<Vect
     o[i].resize(M);
   }
 
+  int idx = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    double ratio = outward[icl[k]](k)/inward[icl[k]](k);
-    for (int i = 0; i < _g.N(); ++i) {
-      if (i < icl[k]) {
-        o[i](k) = outward[i](k);
-      } else {
-        o[i](k) = ratio*inward[i](k);
+    ldouble ratio = outward[icl[k]](k)/inward[icl[k]](k);
+    for (int l = 0; l < _o[k].L()+1; ++l) {
+      for (int m = -l; m < l+1; ++m) {
+        for (int i = 0; i < _g.N(); ++i) {
+          if (i <= icl[k]) {
+            o[i](idx) = outward[i](idx);
+          } else {
+            o[i](idx) = ratio*inward[i](idx);
+          }
+        }
+        idx += 1;
       }
     }
   }
 }
-std::vector<double> HF::solveOrbitalFixedEnergy(std::vector<double> &E, std::vector<int> &l, std::vector<MatrixXd> &Fm, std::vector<int> &icl) {
-  std::vector<double> F(_o.size(), 0);
+std::vector<ldouble> HF::solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<int> &icl) {
+  int M = 0;
+  for (int k = 0; k < _o.size(); ++k) {
+    M += _o[k].L()+1;
+  }
 
-  std::vector<VectorXd> inward(_g.N());
-  std::vector<VectorXd> outward(_g.N());
-  std::vector<VectorXd> matched(_g.N());
-  solveInward(E, l, inward, Fm);
+  std::vector<ldouble> F(_o.size(), 0);
+
+  std::vector<VectorXld> inward(_g.N());
+  std::vector<VectorXld> outward(_g.N());
+  std::vector<VectorXld> matched(_g.N());
+
+  int idx = 0;
+
   solveOutward(E, l, outward, Fm);
+  solveInward(E, l, inward, Fm);
   match(matched, icl, inward, outward);
 
+  /*
+  for (int k = 0; k < _o.size(); ++k) {
+    for (int l = 0; l < _o[k].L()+1; ++l) {
+      for (int m = -l; m < l+1; ++m) {
+        if (m == _o[k].initialM() && l == _o[k].initialL())
+          F[k] += outward[_g.N()-1](idx);
+        idx += 1;
+      }
+    }
+  }*/
+
   // calculate mis-match vector F
-  int idx = 0;
+  for (int k = 0; k < _o.size(); ++k) {
+    //std::cout << "product icl = " << icl[k] << std::endl;
+    //std::cout << Fm[icl[k]] << std::endl;
+    //std::cout << Fm[icl[k]-1] << std::endl;
+    //std::cout << Fm[icl[k]+1] << std::endl;
+    //std::cout << matched[icl[k]] << std::endl;
+    //std::cout << matched[icl[k]-1] << std::endl; 
+    //std::cout << matched[icl[k]+1] << std::endl;
+    VectorXld prodIcl = (MatrixXld::Identity(M,M)*12 - Fm[icl[k]]*10)*matched[icl[k]] - Fm[icl[k]-1]*matched[icl[k]-1] - Fm[icl[k]+1]*matched[icl[k]+1];
+    //F[k] += std::sqrt(prodIcl.transpose()*prodIcl);
+    for (int l = 0; l < _o[k].L()+1; ++l) {
+      for (int m = -l; m < l+1; ++m) {
+        if (m == _o[k].initialM() && l == _o[k].initialL())
+          F[k] += prodIcl[idx];
+        idx += 1;
+      }
+    }
+    //std::cout << "Orbital " << k << ": mismatch: " << F[k] << "in position " << _g(icl[k]) << "(" << icl[k] << ")" << " decomposition: " << prodIcl << std::endl;
+  }
+  
+  idx = 0;
   for (int k = 0; k < _o.size(); ++k) {
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         for (int i = 0; i < _g.N(); ++i) {
           _o[k](i, l, m) = matched[i](idx);
         }
-        if (m == _o[k].initialM() && l == _o[k].initialL())
-          F[k] += std::pow((12 - 10*Fm[icl[k]](idx, idx))*_o[k](icl[k], l, m) - Fm[icl[k]-1](idx, idx)*_o[k](icl[k]-1, l, m) - Fm[icl[k]+1](idx, idx)*_o[k](icl[k]+1, l, m), 2);
+        //if (m == _o[k].initialM() && l == _o[k].initialL())
+        //  F[k] += std::pow((12 - 10*Fm[icl[k]](idx, idx))*_o[k](icl[k], l, m) - Fm[icl[k]-1](idx, idx)*_o[k](icl[k]-1, l, m) - Fm[icl[k]+1](idx, idx)*_o[k](icl[k]+1, l, m), 2);
         idx += 1;
       }
     }
@@ -492,7 +578,7 @@ void HF::addOrbital(int L, int s, int initial_n, int initial_l, int initial_m) {
     _o[k].E(-_Z*_Z*0.5/std::pow(_o[k].initialN(), 2));
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
-        double v = 0;
+        ldouble v = 0;
         if (l == _o[k].initialL() && m == _o[k].initialM()) v = 1;
         for (int ir = 0; ir < _g.N(); ++ir) { // for each radial point
           _o[k](ir, l, m) = v;
@@ -504,15 +590,17 @@ void HF::addOrbital(int L, int s, int initial_n, int initial_l, int initial_m) {
   _vex.clear();
   for (int k = 0; k < _o.size(); ++k) {
     _vd[k] = Vd();
-    _vd[k][std::pair<int, int>(0, 0)] = std::vector<double>(_g.N(), 0);
-    _vd[k][std::pair<int, int>(1, -1)] = std::vector<double>(_g.N(), 0);
-    _vd[k][std::pair<int, int>(1, 0)] = std::vector<double>(_g.N(), 0);
-    _vd[k][std::pair<int, int>(1, 1)] = std::vector<double>(_g.N(), 0);
-    _vex[k] = Vex();
-    _vex[k][std::pair<int, int>(0, 0)] = std::vector<double>(_g.N(), 0);
-    _vex[k][std::pair<int, int>(1, -1)] = std::vector<double>(_g.N(), 0);
-    _vex[k][std::pair<int, int>(1, 0)] = std::vector<double>(_g.N(), 0);
-    _vex[k][std::pair<int, int>(1, 1)] = std::vector<double>(_g.N(), 0);
+    _vd[k][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g.N(), 0);
+    _vd[k][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g.N(), 0);
+    _vd[k][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g.N(), 0);
+    _vd[k][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g.N(), 0);
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      _vex[std::pair<int, int>(k, k2)] = Vex();
+      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g.N(), 0);
+      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g.N(), 0);
+      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g.N(), 0);
+      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g.N(), 0);
+    }
   }
 }
 

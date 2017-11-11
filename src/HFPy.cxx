@@ -25,20 +25,20 @@ void HFPy::gammaSCF(double g) {
 
 python::list HFPy::getNucleusPotential() {
   python::list l;
-  std::vector<double> v = _h.getNucleusPotential();
+  std::vector<ldouble> v = _h.getNucleusPotential();
   for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
   return l;
 }
 python::list HFPy::getDirectPotential(int k) {
   python::list l;
-  std::vector<double> v = _h.getDirectPotential(k);
+  std::vector<ldouble> v = _h.getDirectPotential(k);
   for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
   return l;
 }
 
-python::list HFPy::getExchangePotential(int k) {
+python::list HFPy::getExchangePotential(int k, int k2) {
   python::list l;
-  std::vector<double> v = _h.getExchangePotential(k);
+  std::vector<ldouble> v = _h.getExchangePotential(k, k2);
   for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
   return l;
 }
@@ -58,7 +58,7 @@ python::list HFPy::getR() const {
 }
 
 python::list HFPy::getOrbital(int no, int lo, int mo) {
-  std::vector<double> o = _h.getOrbital(no, lo, mo);
+  std::vector<ldouble> o = _h.getOrbital(no, lo, mo);
   python::list l;
   for (int k = 0; k < o.size(); ++k) l.append(o[k]);
   return l;

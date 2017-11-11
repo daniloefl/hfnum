@@ -11,8 +11,13 @@
 
 using namespace Eigen;
 
-typedef std::map<std::pair<int, int>, std::vector<double> > Vd;
-typedef std::map<std::pair<int, int>, std::vector<double> > Vex;
+typedef long double ldouble;
+typedef Matrix<ldouble, Dynamic, Dynamic> MatrixXld;
+typedef Matrix<ldouble, Dynamic, 1> VectorXld;
+
+typedef std::map<std::pair<int, int>, std::vector<ldouble> > Vd;
+typedef std::map<std::pair<int, int>, std::vector<ldouble> > Vex;
+
 
 // Objective: solve deriv(deriv(orbitals)) + g*orbitals = s using Newton-Raphson
 // The orbitals are discretised in a Grid
@@ -37,46 +42,48 @@ typedef std::map<std::pair<int, int>, std::vector<double> > Vex;
 //   * Repeat (++)
 class HF {
   public:
-    HF(const Grid &g, double Z);
+    HF(const Grid &g, ldouble Z);
     virtual ~HF();
 
-    void solve(int NiterSCF, int Niter, double F0stop);
-    void solveForFixedPotentials(int Niter, double F0stop);
+    void solve(int NiterSCF, int Niter, ldouble F0stop);
+    void solveForFixedPotentials(int Niter, ldouble F0stop);
 
-    void calculateFMatrix(std::vector<MatrixXd> &F, std::vector<double> &E);
+    void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<ldouble> &E);
 
-    long double step();
-    std::vector<double> solveOrbitalFixedEnergy(std::vector<double> &E, std::vector<int> &l, std::vector<MatrixXd> &Fm, std::vector<int> &icl);
+    ldouble step();
+    std::vector<ldouble> solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<int> &icl);
     void addOrbital(int L, int s, int initial_n = 1, int initial_l = 0, int initial_m = 0);
 
-    std::vector<double> getOrbital(int no, int mo, int lo);
+    std::vector<ldouble> getOrbital(int no, int mo, int lo);
 
-    std::vector<double> getNucleusPotential();
-    std::vector<double> getDirectPotential(int k);
-    std::vector<double> getExchangePotential(int k);
+    std::vector<ldouble> getNucleusPotential();
+    std::vector<ldouble> getDirectPotential(int k);
+    std::vector<ldouble> getExchangePotential(int k, int k2);
 
-    void gammaSCF(double g);
+    void gammaSCF(ldouble g);
 
   private:
-    void calculateVd(double gamma);
-    void calculateVex(double gamma);
+    void calculateVd(ldouble gamma);
+    void calculateVex(ldouble gamma);
 
-    void solveInward(std::vector<double> &E, std::vector<int> &l, std::vector<VectorXd> &solution, std::vector<MatrixXd> &Fm);
-    void solveOutward(std::vector<double> &E, std::vector<int> &l, std::vector<VectorXd> &solution, std::vector<MatrixXd> &Fm);
-    void match(std::vector<VectorXd> &o, std::vector<int> &icl, std::vector<VectorXd> &inward, std::vector<VectorXd> &outward);
+    void solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm);
+    void solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm);
+    void match(std::vector<VectorXld> &o, std::vector<int> &icl, std::vector<VectorXld> &inward, std::vector<VectorXld> &outward);
 
     const Grid &_g;
-    double _Z;
+    ldouble _Z;
     std::vector<Orbital> _o;
 
-    std::vector<double> _pot;            // effective potential
-    std::vector<double> _potIndep;       // non-multiplicative part of the potential
+    std::vector<ldouble> _pot;            // effective potential
+    std::vector<ldouble> _potIndep;       // non-multiplicative part of the potential
     std::map<int, Vd>   _vd;             // vd
-    std::map<int, Vex>  _vex;            // vex
+    std::map<std::pair<int, int>, Vex>  _vex; // vex
 
-    std::vector<double> _dE;             // resulting delta energy
+    std::vector<ldouble> _dE;             // resulting delta energy
     
-    double _gamma_scf;
+    ldouble _gamma_scf;
+
+    ldouble _norm;
 };
 
 #endif
