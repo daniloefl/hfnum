@@ -2,12 +2,17 @@
 
 #include <cmath>
 
-Grid::Grid(double dx, int N, double rmin) {
+Grid::Grid(bool isLog, double dx, int N, double rmin) {
+  _isLog = isLog;
   _N = N;
   _dx = dx;
   _rmin = rmin;
   _r = new double[_N];
-  for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  if (_isLog) {
+    for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  } else {
+    for (int k = 0; k < _N; ++k) _r[k] = _rmin + k*_dx;
+  }
 }
 
 Grid::~Grid() {
@@ -30,7 +35,12 @@ Grid::Grid(const Grid &g) {
   _dx = g._dx;
   _rmin = g._rmin;
   _r = new double[_N];
-  for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  _isLog = g._isLog;
+  if (_isLog) {
+    for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  } else {
+    for (int k = 0; k < _N; ++k) _r[k] = _rmin + k*_dx;
+  }
   
 }
 
@@ -40,6 +50,15 @@ Grid &Grid::operator =(const Grid &g) {
   _dx = g._dx;
   _rmin = g._rmin;
   _r = new double[_N];
-  for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  _isLog = g._isLog;
+  if (_isLog) {
+    for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  } else {
+    for (int k = 0; k < _N; ++k) _r[k] = _rmin + k*_dx;
+  }
   return *this;
+}
+
+bool Grid::isLog() const {
+  return _isLog;
 }

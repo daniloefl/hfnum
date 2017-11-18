@@ -307,7 +307,7 @@ std::vector<ldouble> HF::getExchangePotential(int k, int k2) {
 }
 
 void HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
-  ldouble gamma = 0.1; // move in the direction of the negative slope with this velocity per step
+  ldouble gamma = 0.5; // move in the direction of the negative slope with this velocity per step
 
   ldouble F = 0;
   int nStep = 0;
@@ -355,14 +355,18 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<ldouble> &E) {
               for (int m2 = -l2; m2 < l2+1; ++m2) {
 
                 if (idx1 == idx2) {
-                  ldouble a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(l, m)][i]) - std::pow(l + 0.5, 2);
+                  ldouble a = 0;
+                  if (_g.isLog()) a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(l, m)][i]) - std::pow(l + 0.5, 2);
+                  else a = 2*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(l, m)][i] - l*(l + 1)/std::pow(_g(i), 2));
                   F[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
                   //if (std::pow(a*_g.dx(), 2) > 6) {
                   //  std::cout << "Coefficient = " << a << " at i = " << i << ", r = " << r << " in (" << idx1 << ","<<idx1 <<"), which leads to (a*dx)^2 = " << std::pow(a*_g.dx(), 2) << " > 6 --> This will cause instabilities." << std::endl;
                   //}
                 }
                 ldouble vex = _vex[std::pair<int,int>(k, k2)][std::pair<int, int>(l2, m2)][i];
-                ldouble a = 2*std::pow(r, 2)*vex;
+                ldouble a = 0;
+                if (_g.isLog()) a = 2*std::pow(r, 2)*vex;
+                else a = 2*vex;
                 F[i](idx1,idx2) += a*std::pow(_g.dx(), 2)/12.0;
                 //if (std::pow(a*_g.dx(), 2) > 6) {
                 //  std::cout << "Coefficient = " << a << " at i = " << i << ", r = " << r << " in (" << idx1 << ","<<idx2 <<"), which leads to (a*dx)^2 = " << std::pow(a*_g.dx(), 2) << " > 6 --> This will cause instabilities." << std::endl;
@@ -409,7 +413,9 @@ ldouble HF::step() {
     ldouble a_m1 = 0;
     for (int i = 3; i < _g.N()-3; ++i) {
       ldouble r = _g(i);
-      ldouble a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - std::pow(lmain + 0.5, 2);
+      ldouble a = 0;
+      if (_g.isLog()) a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - std::pow(lmain + 0.5, 2);
+      else a = 2*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i] - lmain*(lmain+1)/std::pow(r, 2));
       if (icl[k] < 0 && a*a_m1 < 0) {
         icl[k] = i;
         break;
@@ -524,11 +530,20 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         if (l == _o[k].initialL() && m == _o[k].initialM()) {
-          solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+0.5);
-          solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+0.5);
-          if (_o[k].initialL() == 0) {
-            solution[0](idx) = std::sqrt(_g(0))*2*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
-            solution[1](idx) = std::sqrt(_g(1))*2*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
+          if (_g.isLog()) {
+            solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+0.5);
+            solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+0.5);
+            if (_o[k].initialL() == 0) {
+              solution[0](idx) = std::sqrt(_g(0))*2*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
+              solution[1](idx) = std::sqrt(_g(1))*2*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
+            }
+          } else {
+            solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+1);
+            solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+1);
+            if (_o[k].initialL() == 0) {
+              solution[0](idx) = 2*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
+              solution[1](idx) = 2*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
+            }
           }
         }
         idx += 1;

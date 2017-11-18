@@ -11,8 +11,8 @@
 #include <Python.h>
 using namespace boost;
 
-HFPy::HFPy(double dx, int N, double rmin, double Z)
-  : _g(dx, N, rmin), _h(_g, Z) {
+HFPy::HFPy(bool isLog, double dx, int N, double rmin, double Z)
+  : _g(isLog, dx, N, rmin), _h(_g, Z) {
   Py_Initialize();
 }
 

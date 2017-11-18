@@ -118,7 +118,8 @@ const double Orbital::getNorm(int i_in, int l_in, int m_in, const Grid &g) {
         }
         for (int m = -l; m < l+1; ++m) {
           int msum = (m+l)*_N;
-          double ov = _wf[k + lsum*_N + msum]*std::pow(r, -0.5);
+          double ov = _wf[k + lsum*_N + msum];
+          if (g.isLog()) ov *= std::pow(r, -0.5);
           _wf_norm[k + lsum*_N + msum] = ov;
           norm += std::pow(ov*r, 2)*dr;
         }

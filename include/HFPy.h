@@ -13,7 +13,7 @@
 class HFPy {
 
   public:
-    HFPy(double dx = 1e-1, int N = 150, double rmin = 1e-4, double Z = 1.0);
+    HFPy(bool isLog = true, double dx = 1e-1, int N = 150, double rmin = 1e-4, double Z = 1.0);
     virtual ~HFPy();
 
     void solve(int NiterSCF, int Niter, double F0stop);

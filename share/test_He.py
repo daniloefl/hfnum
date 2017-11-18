@@ -10,16 +10,19 @@ import seaborn
 import matplotlib.pyplot as plt
 
 Z = 2
-dx = 1e-1/Z
-N = 150*Z
-rmin = 1e-5
-h = hfnum.HF(dx, int(N), rmin, Z)
+#dx = 1e-1/Z
+#N = 150*Z
+#rmin = 1e-5
+dx = 1e-2/Z
+N = 1200*Z
+rmin = 1e-4
+h = hfnum.HF(True, dx, int(N), rmin, Z)
 h.addOrbital(0,  1, 1, 0, 0)
 h.addOrbital(0, -1, 1, 0, 0)
 
 NiterSCF = 1
-Niter = 50
-F0stop = 1e-8
+Niter = 100
+F0stop = 1e-12
 r = h.getR()
 print "Last r:", r[-1]
 print "First r:", r[0:5]
