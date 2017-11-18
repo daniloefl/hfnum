@@ -495,6 +495,10 @@ void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<V
             solution[N-1](idx) = 0;
             solution[N-2](idx) = (_g(N-1) - _g(N-2));
           }
+          if ((_o[k].initialN() - _o[k].initialL() - 1) % 2 == 1) {
+            solution[N-1](idx) *= -1;
+            solution[N-2](idx) *= -1;
+          }
         }
         idx += 1;
       }
@@ -533,17 +537,9 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
           if (_g.isLog()) {
             solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+0.5);
             solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+0.5);
-            if (_o[k].initialL() == 0) {
-              solution[0](idx) = std::sqrt(_g(0))*2*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
-              solution[1](idx) = std::sqrt(_g(1))*2*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
-            }
           } else {
             solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+1);
             solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+1);
-            if (_o[k].initialL() == 0) {
-              solution[0](idx) = 2*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
-              solution[1](idx) = 2*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
-            }
           }
         }
         idx += 1;
