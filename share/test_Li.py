@@ -23,8 +23,8 @@ Z = 3
 
 # log grid
 dx = 1e-2/Z
-N = 1400*Z
-rmin = 1e-5
+N = 1650*Z
+rmin = 1e-6
 h = hfnum.HF(True, dx, int(N), rmin, Z)
 
 h.addOrbital(0,  1, 1, 0, 0)

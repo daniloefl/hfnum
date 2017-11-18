@@ -336,7 +336,7 @@ void HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
 void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<ldouble> &E) {
   int N = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    N += _o[k].L()+1;
+    N += 2*_o[k].L()+1;
   }
   F.resize(_g.N());
   for (int i = 0; i < _g.N(); ++i) {
