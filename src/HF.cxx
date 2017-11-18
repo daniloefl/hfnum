@@ -25,7 +25,7 @@ HF::HF(const Grid &g, ldouble Z)
     _pot[k] = -_Z/_g(k);
     _potIndep[k] = 0;
   }
-  _gamma_scf = 0.7;
+  _gamma_scf = 0.5;
   _norm = 1;
 }
 
@@ -50,10 +50,15 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
   int nStepSCF = 0;
   while (nStepSCF < NiterSCF) {
     std::cout << "SCF step " << nStepSCF << std::endl;
+    //if (nStepSCF == 1) {
+    //  _o[0].E(-3.301485557103038);
+    //  _o[1].E(-3.325613315360123);
+    //  _o[2].E(-0.6090752422026833);
+    //}
     solveForFixedPotentials(Niter, F0stop);
     nStepSCF++;
-    calculateVd(_gamma_scf);
     calculateVex(_gamma_scf);
+    calculateVd(_gamma_scf);
   }
 }
 
@@ -91,7 +96,7 @@ void HF::calculateVex(ldouble gamma) {
       for (int mj = -lj; mj < lj+1; ++mj) { // loop over m in Y_j
 
         for (int k1 = 0; k1 < _o.size(); ++k1) {
-          if (k1 == ko) continue;
+          //if (k1 == ko) continue;
           // each sub-orbital has a different Ylomo dependency, so there is a different Vd in each case
           for (int l1 = 0; l1 < _o[k1].L()+1; ++l1) { // loop over l in Y_j
             for (int m1 = -l1; m1 < l1+1; ++m1) { // loop over m in Y_j
@@ -103,38 +108,67 @@ void HF::calculateVex(ldouble gamma) {
                 std::vector<ldouble> &currentVex = vexLm.second; // this is the r-dependent part
 
                 std::vector<ldouble> vex(_g.N(), 0); // calculate it here first
+
                 // loop over orbitals (this is the sum over k1 above)
                 if (_o[k1].spin() != _o[ko].spin()) continue;
 
-                // now actually calculate it from the expansion above
-                int lmax = 2;
-                for (int l = 0; l < lmax+1; ++l) {
-                  for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
-                    ldouble beta = 0;
-                    ldouble r2 = _g(ir2);
-                    for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
-                      ldouble r1 = _g(ir1);
-                      ldouble dr = 0;
-                      if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
-                      ldouble rs = r1;
-                      ldouble rb = r2;
-                      if (rb < rs) {
-                        rs = r2;
-                        rb = r1;
+                //int nSameShell = 0;
+                //for (int kx = 0; kx < _o.size(); ++kx) {
+                //  if (_o[k1].initialN() == _o[kx].initialN() && _o[k1].initialL() == _o[kx].initialL()) nSameShell += 1;
+                //}
+                //if (nSameShell == 2*_o[ko].initialL() + 1) { // filled sub-shell
+                //  for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+                //    ldouble r2 = _g(ir2);
+                //    for (int l = abs(l1-lj); l < l1+lj+1; ++l) {
+                //      ldouble beta = 0;
+                //      for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
+                //        ldouble r1 = _g(ir1);
+                //        ldouble dr = 0;
+                //        if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
+                //        ldouble rs = r1;
+                //        ldouble rb = r2;
+                //        if (rb < rs) {
+                //          rs = r2;
+                //          rb = r1;
+                //        }
+                //        beta += _o[k1].getNorm(ir1, l1, m1, _g)*_o[ko].getNorm(ir1, lj, mj, _g)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
+                //      }
+                //      vex[ir2] += 1.0/((double) nSameShell)*((double) nSameShell)/(2.0*l + 1.0)*std::pow(CG(l1, lj, 0, 0, l, 0), 2)*beta;
+                //    }
+                //  }
+                //} else { // not filled sub-shell, need to sum over l and m in the spherical harmonics expansion
+
+                  // now actually calculate it from the expansion above
+                  int lmax = 2;
+                  for (int l = 0; l < lmax+1; ++l) {
+                    for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+                      ldouble beta = 0;
+                      ldouble r2 = _g(ir2);
+                      for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
+                        ldouble r1 = _g(ir1);
+                        ldouble dr = 0;
+                        if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
+                        ldouble rs = r1;
+                        ldouble rb = r2;
+                        if (rb < rs) {
+                          rs = r2;
+                          rb = r1;
+                        }
+                        beta += 4*M_PI/(2.0*l + 1.0)*_o[k1].getNorm(ir1, l1, m1, _g)*_o[ko].getNorm(ir1, lj, mj, _g)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
                       }
-                      beta += 4*M_PI/(2.0*l + 1.0)*_o[k1].getNorm(ir1, l1, m1, _g)*_o[ko].getNorm(ir1, lj, mj, _g)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
-                    }
-                    ldouble T = 0;
-                    for (int m = -l; m < l + 1; ++m) {
-                      ldouble T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
-                      // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
-                      ldouble T2 = 0;
-                      T2 = std::pow(-1, vexm+mj)*std::sqrt((2*l+1)*(2*vexl+1)/(4*M_PI*(2*lj+1)))*CG(l, vexl, 0, 0, lj, 0)*CG(l, vexl, m, -vexm, lj, -mj);
-                      T += T1*T2;
-                    }
-                    vex[ir2] += beta*T;
-                  } // for each r in Vex integration
-                } // for each l in the 1/|r1 - r2| expansion in sph. harm.
+                      ldouble T = 0;
+                      for (int m = -l; m < l + 1; ++m) {
+                        ldouble T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
+                        // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
+                        ldouble T2 = 0;
+                        //T2 = std::pow(-1, vexm+mj)*std::sqrt((2*l+1)*(2*vexl+1)/(4*M_PI*(2*lj+1)))*CG(l, vexl, 0, 0, lj, 0)*CG(l, vexl, m, -vexm, lj, -mj);
+                        if (m == 0 && l == 0) T2 = std::pow(4*M_PI, -0.5);
+                        T += T1*T2;
+                      }
+                      vex[ir2] += beta*T;
+                    } // for each r in Vex integration
+                  } // for each l in the 1/|r1 - r2| expansion in sph. harm.
+                //} // if sub-shell is filled
                 for (int k = 0; k < _g.N(); ++k) currentVex[k] = (1-gamma)*currentVex[k] + gamma*vex[k];
               } // for each m1 of the orbital basis expansion
 
@@ -190,47 +224,66 @@ void HF::calculateVd(ldouble gamma) {
           std::vector<ldouble> vd(_g.N(), 0); // calculate it here first
           // loop over orbitals (this is the sum over k1 above)
           for (int k1 = 0; k1 < _o.size(); ++k1) {
-            if (k1 == ko) continue;
+            //int nSameShell = 0;
+            //for (int kx = 0; kx < _o.size(); ++kx) {
+            //  if (_o[k1].initialN() == _o[kx].initialN() && _o[k1].initialL() == _o[kx].initialL()) nSameShell += 1;
+            //}
+            //if (nSameShell == 2*_o[ko].initialL() + 1) { // filled sub-shell
+            //  for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+            //    ldouble beta = 0;
+            //    ldouble r2 = _g(ir2);
+            //    for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
+            //      ldouble r1 = _g(ir1);
+            //      ldouble dr = 0;
+            //      if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
+            //      ldouble rs = r1;
+            //      ldouble rb = r2;
+            //      if (rb < rs) {
+            //        rs = r2;
+            //        rb = r1;
+            //      }
+            //      beta += 1.0/((double) nSameShell)*(2.0*_o[k1].initialL() + 1.0)*std::pow(_o[k1].getNorm(ir1, lj, mj, _g), 2)/rb*std::pow(r1, 2)*dr;
+            //    }
+            //    vd[ir2] += beta;
+            //  }
+            //} else { // not filled sub-shell, need to sum over l and m in the spherical harmonics expansion
+              for (int l1 = 0; l1 < _o[k1].L()+1; ++l1) { // each orbital in the sum is actually orb_ko = sum_l1,m1 rpsi_l1,m1 Y_l1m1, so loop over this sum
+                for (int m1 = -l1; m1 < l1+1; ++m1) {
 
-            for (int l1 = 0; l1 < _o[k1].L()+1; ++l1) { // each orbital in the sum is actually orb_ko = sum_l1,m1 rpsi_l1,m1 Y_l1m1, so loop over this sum
-              for (int m1 = -l1; m1 < l1+1; ++m1) {
-
-                // now actually calculate it from the expansion above
-                int lmax = 2;
-                for (int l = 0; l < lmax+1; ++l) {
-                  for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
-                    ldouble beta = 0;
-                    ldouble r2 = _g(ir2);
-                    for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
-                      ldouble r1 = _g(ir1);
-                      ldouble dr = 0;
-                      if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
-                      ldouble rs = r1;
-                      ldouble rb = r2;
-                      if (rb < rs) {
-                        rs = r2;
-                        rb = r1;
+                  // now actually calculate it from the expansion above
+                  int lmax = 2;
+                  for (int l = 0; l < lmax+1; ++l) {
+                    for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+                      ldouble beta = 0;
+                      ldouble r2 = _g(ir2);
+                      for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
+                        ldouble r1 = _g(ir1);
+                        ldouble dr = 0;
+                        if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
+                        ldouble rs = r1;
+                        ldouble rb = r2;
+                        if (rb < rs) {
+                          rs = r2;
+                          rb = r1;
+                        }
+                        beta += 4*M_PI/(2.0*l + 1.0)*std::pow(_o[k1].getNorm(ir1, l1, m1, _g), 2)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
                       }
-                      beta += 4*M_PI/(2.0*l + 1.0)*std::pow(_o[k1].getNorm(ir1, l1, m1, _g), 2)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
-                    }
-                    ldouble T = 0;
-                    for (int m = -l; m < l + 1; ++m) {
-                      ldouble T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
-                      // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
-                      ldouble T2 = 0;
-                      T2 = std::pow(-1, vdm+mj)*std::sqrt((2*l+1)*(2*vdl+1)/(4*M_PI*(2*lj+1)))*CG(l, vdl, 0, 0, lj, 0)*CG(l, vdl, m, -vdm, lj, -mj);
-                      T += T1*T2;
-                    }
-                    vd[ir2] += beta*T;
-                  } // for each r in Vd integration
-                } // for each l in the 1/|r1 - r2| expansion in sph. harm.
-              } // for each m1 of the orbital basis expansion
-            } // for each l1 of the orbital basis expansion
+                      ldouble T = 0;
+                      for (int m = -l; m < l + 1; ++m) {
+                        ldouble T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
+                        // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
+                        ldouble T2 = 0;
+                        T2 = std::pow(-1, vdm+mj)*std::sqrt((2*l+1)*(2*vdl+1)/(4*M_PI*(2*lj+1)))*CG(l, vdl, 0, 0, lj, 0)*CG(l, vdl, m, -vdm, lj, -mj);
+                        T += T1*T2;
+                      }
+                      vd[ir2] += beta*T;
+                    } // for each r in Vd integration
+                  } // for each l in the 1/|r1 - r2| expansion in sph. harm.
+                } // for each m1 of the orbital basis expansion
+              } // for each l1 of the orbital basis expansion
 
+            //} // if sub-shell filled
           } // for each orbital in the Vd sum
-
-          // for a test in He
-          //for (int k = 0; k < _g.N(); ++k) vd[k] *= 0.5;
 
           for (int k = 0; k < _g.N(); ++k) currentVd[k] = (1-gamma)*currentVd[k] + gamma*vd[k];
 
@@ -254,7 +307,7 @@ std::vector<ldouble> HF::getExchangePotential(int k, int k2) {
 }
 
 void HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
-  ldouble gamma = 0.5; // move in the direction of the negative slope with this velocity per step
+  ldouble gamma = 0.1; // move in the direction of the negative slope with this velocity per step
 
   ldouble F = 0;
   int nStep = 0;
@@ -300,14 +353,22 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<ldouble> &E) {
           for (int k2 = 0; k2 < _o.size(); ++k2) {
             for (int l2 = 0; l2 < _o[k2].L()+1; ++l2) {
               for (int m2 = -l2; m2 < l2+1; ++m2) {
+
                 if (idx1 == idx2) {
                   ldouble a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(l, m)][i]) - std::pow(l + 0.5, 2);
                   F[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
+                  //if (std::pow(a*_g.dx(), 2) > 6) {
+                  //  std::cout << "Coefficient = " << a << " at i = " << i << ", r = " << r << " in (" << idx1 << ","<<idx1 <<"), which leads to (a*dx)^2 = " << std::pow(a*_g.dx(), 2) << " > 6 --> This will cause instabilities." << std::endl;
+                  //}
                 }
                 ldouble vex = _vex[std::pair<int,int>(k, k2)][std::pair<int, int>(l2, m2)][i];
                 ldouble a = 2*std::pow(r, 2)*vex;
                 F[i](idx1,idx2) += a*std::pow(_g.dx(), 2)/12.0;
+                //if (std::pow(a*_g.dx(), 2) > 6) {
+                //  std::cout << "Coefficient = " << a << " at i = " << i << ", r = " << r << " in (" << idx1 << ","<<idx2 <<"), which leads to (a*dx)^2 = " << std::pow(a*_g.dx(), 2) << " > 6 --> This will cause instabilities." << std::endl;
+                //}
                 idx2 += 1;
+
               }
             }
           }
@@ -348,7 +409,7 @@ ldouble HF::step() {
     ldouble a_m1 = 0;
     for (int i = 3; i < _g.N()-3; ++i) {
       ldouble r = _g(i);
-      ldouble a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i]) - std::pow(lmain + 0.5, 2);
+      ldouble a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - std::pow(lmain + 0.5, 2);
       if (icl[k] < 0 && a*a_m1 < 0) {
         icl[k] = i;
         break;
@@ -357,47 +418,54 @@ ldouble HF::step() {
     }
     if (icl[k] < 0) icl[k] = 10;
   }
+  //for (int k = 0; k < _o.size(); ++k) {
+  //  icl[k] = icl[_o.size()-1];
+  //}
 
   std::vector<ldouble> dE(_o.size(), 0);
-  std::vector<ldouble> EdE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = -1e-1;
-    EdE[k] = E[k] + dE[k];
+    dE[k] = -1e-5;
   }
 
-  std::vector<MatrixXld> Fm1;
-  std::vector<MatrixXld> Fm2;
-  calculateFMatrix(Fm1, EdE);
-  calculateFMatrix(Fm2, E);
+  std::vector<MatrixXld> Fmn;
+  calculateFMatrix(Fmn, E);
 
-  std::vector<ldouble> F1;
-  std::vector<ldouble> F2;
-  int iter = 0;
-  do {
-    if (F1.size() == _o.size()) {
-      for (int k = 0; k < _o.size(); ++k) {
-        if (std::fabs(F2[k] - F1[k]) < 1e-5) {
-          dE[k] *= 2;
-          EdE[k] = E[k] + dE[k];
-        }
-      }
+  VectorXld Fn = solveOrbitalFixedEnergy(E, l, Fmn, icl);
+
+  MatrixXld J;
+  //J.resize(_o.size()+1, _o.size()+1);
+  J.resize(_o.size(), _o.size());
+  J.setZero();
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+
+      std::vector<ldouble> EdE = E;
+      EdE[k2] += dE[k2];
+
+      std::vector<MatrixXld> Fmd;
+      calculateFMatrix(Fmd, EdE);
+
+      VectorXld Fd = solveOrbitalFixedEnergy(EdE, l, Fmd, icl);
+      J(k1, k2) = (Fd[k1] - Fn[k1])/dE[k2];
     }
-    F1 = solveOrbitalFixedEnergy(EdE, l, Fm1, icl);
-    F2 = solveOrbitalFixedEnergy(E, l, Fm2, icl);
-  } while (iter++ < 5);
+    //J(_o.size(),k1) += -2*E[k1];
+  }
+  //J(_o.size(),_o.size()) += 1;
+  JacobiSVD<MatrixXld> decJ(J, ComputeThinU | ComputeThinV);
+  VectorXld Fne;
+  //Fne.resize(_o.size()+1, 1);
+  Fne.resize(_o.size(), 1);
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    Fne(k1, 0) = Fn(k1, 0);
+  }
+  //Fne(_o.size(), 0) = 0;
+  VectorXld dEv = -decJ.solve(Fne);
 
   ldouble F = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    if (std::fabs(F2[k] - F1[k]) > 1e-5) {
-      std::cout << "Orbital " << k << ", F1 = " << F1[k] << ", F2 = " << F2[k] << ", F1 - F2 = " << F1[k] - F2[k] << ", dE = " << -F2[k]*dE[k]/(F1[k] - F2[k]) << std::endl;
-      _dE[k] = -F2[k]*dE[k]/(F1[k] - F2[k]);
-    } else {
-      std::cout << "Orbital " << k << ", F1 = " << F1[k] << ", F2 = " << F2[k] << ", F1 - F2 = " << F1[k] - F2[k] << std::endl;
-      _dE[k] = dE[k];
-    }
-    //if (std::fabs(_dE[k]) > 0.05) _dE[k] = _dE[k]/std::fabs(_dE[k])*0.05;
-    //if (E[k] + _dE[k] >= 0) _dE[k] = -_dE[k]; //-_Z*_Z;
-    F += F2[k];
+    _dE[k] = dEv(k);
+    std::cout << "Orbital " << k << ", Fnominal = " << Fn[k] << ", dE(Jacobian) = " << dEv(k) << std::endl;
+    F += Fn(k);
   }
   return F;
 }
@@ -421,7 +489,7 @@ void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<V
             solution[N-2](idx) = std::exp(-std::sqrt(-2*E[k])*_g(N-2));
           } else {
             solution[N-1](idx) = 0;
-            solution[N-2](idx) = (_g(N-1) - _g(N-2));
+            solution[N-2](idx) = 0;//(_g(N-1) - _g(N-2));
           }
         }
         idx += 1;
@@ -434,7 +502,6 @@ void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<V
       for (int m = -l; m < l+1; ++m) {
         for (int i = N-2; i > 0; --i) {
           JacobiSVD<MatrixXld> dec(Fm[i-1], ComputeThinU | ComputeThinV);
-          //solution[i-1] = (Fm[i-1]).inverse()*((MatrixXd::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1]));
           solution[i-1] = dec.solve((MatrixXld::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1]));
         }
         idx += 1;
@@ -457,8 +524,12 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         if (l == _o[k].initialL() && m == _o[k].initialM()) {
-          solution[0](idx) = _norm*std::pow(_Z*_g(0), li[k]+0.5); // /((ldouble) _o[k].initialN());
-          solution[1](idx) = _norm*std::pow(_Z*_g(1), li[k]+0.5); // /((ldouble) _o[k].initialN());
+          solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+0.5);
+          solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+0.5);
+          if (_o[k].initialL() == 0) {
+            solution[0](idx) = std::sqrt(_g(0))*2*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
+            solution[1](idx) = std::sqrt(_g(1))*2*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
+          }
         }
         idx += 1;
       }
@@ -470,7 +541,6 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
       for (int m = -l; m < l+1; ++m) {
         for (int i = 1; i < N-1; ++i) {
           JacobiSVD<MatrixXld> dec(Fm[i+1], ComputeThinU | ComputeThinV);
-          //solution[i+1] = (Fm[i+1]).inverse()*((MatrixXd::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
           solution[i+1] = dec.solve((MatrixXld::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
         }
         idx += 1;
@@ -504,53 +574,43 @@ void HF::match(std::vector<VectorXld> &o, std::vector<int> &icl, std::vector<Vec
     }
   }
 }
-std::vector<ldouble> HF::solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<int> &icl) {
+VectorXld HF::solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<int> &icl) {
   int M = 0;
   for (int k = 0; k < _o.size(); ++k) {
     M += _o[k].L()+1;
   }
 
-  std::vector<ldouble> F(_o.size(), 0);
+  VectorXld F;
+  F.resize(_o.size());
+  F.setZero();
 
   std::vector<VectorXld> inward(_g.N());
   std::vector<VectorXld> outward(_g.N());
   std::vector<VectorXld> matched(_g.N());
 
-  int idx = 0;
-
   solveOutward(E, l, outward, Fm);
   solveInward(E, l, inward, Fm);
   match(matched, icl, inward, outward);
 
-  /*
-  for (int k = 0; k < _o.size(); ++k) {
-    for (int l = 0; l < _o[k].L()+1; ++l) {
-      for (int m = -l; m < l+1; ++m) {
-        if (m == _o[k].initialM() && l == _o[k].initialL())
-          F[k] += outward[_g.N()-1](idx);
-        idx += 1;
-      }
-    }
-  }*/
-
   // calculate mis-match vector F
+  int idx = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    //std::cout << "product icl = " << icl[k] << std::endl;
-    //std::cout << Fm[icl[k]] << std::endl;
-    //std::cout << Fm[icl[k]-1] << std::endl;
-    //std::cout << Fm[icl[k]+1] << std::endl;
-    //std::cout << matched[icl[k]] << std::endl;
-    //std::cout << matched[icl[k]-1] << std::endl; 
-    //std::cout << matched[icl[k]+1] << std::endl;
+    //for (int l = 0; l < _o[k].L()+1; ++l) {
+    //  for (int m = -l; m < l+1; ++m) {
+    //    if (m == _o[k].initialM() && l == _o[k].initialL())
+    //      F(k) += (12 - 10*Fm[icl[k]](idx))*matched[icl[k]](idx) - Fm[icl[k]-1](idx)*matched[icl[k]-1](idx) - Fm[icl[k]+1](idx)*matched[icl[k]+1](idx);
+    //    idx += 1;
+    //  }
+    //}
     VectorXld prodIcl = (MatrixXld::Identity(M,M)*12 - Fm[icl[k]]*10)*matched[icl[k]] - Fm[icl[k]-1]*matched[icl[k]-1] - Fm[icl[k]+1]*matched[icl[k]+1];
-    //F[k] += std::sqrt(prodIcl.transpose()*prodIcl);
-    for (int l = 0; l < _o[k].L()+1; ++l) {
-      for (int m = -l; m < l+1; ++m) {
-        if (m == _o[k].initialM() && l == _o[k].initialL())
-          F[k] += prodIcl[idx];
-        idx += 1;
-      }
-    }
+    F(k) += prodIcl.transpose()*prodIcl;
+    //for (int l = 0; l < _o[k].L()+1; ++l) {
+    //  for (int m = -l; m < l+1; ++m) {
+    //    if (m == _o[k].initialM() && l == _o[k].initialL())
+    //      F(k) += prodIcl[idx];
+    //    idx += 1;
+    //  }
+    //}
     //std::cout << "Orbital " << k << ": mismatch: " << F[k] << "in position " << _g(icl[k]) << "(" << icl[k] << ")" << " decomposition: " << prodIcl << std::endl;
   }
   
@@ -561,8 +621,6 @@ std::vector<ldouble> HF::solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::v
         for (int i = 0; i < _g.N(); ++i) {
           _o[k](i, l, m) = matched[i](idx);
         }
-        //if (m == _o[k].initialM() && l == _o[k].initialL())
-        //  F[k] += std::pow((12 - 10*Fm[icl[k]](idx, idx))*_o[k](icl[k], l, m) - Fm[icl[k]-1](idx, idx)*_o[k](icl[k]-1, l, m) - Fm[icl[k]+1](idx, idx)*_o[k](icl[k]+1, l, m), 2);
         idx += 1;
       }
     }

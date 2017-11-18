@@ -51,7 +51,7 @@ class HF {
     void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<ldouble> &E);
 
     ldouble step();
-    std::vector<ldouble> solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<int> &icl);
+    VectorXld solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<int> &icl);
     void addOrbital(int L, int s, int initial_n = 1, int initial_l = 0, int initial_m = 0);
 
     std::vector<ldouble> getOrbital(int no, int mo, int lo);
