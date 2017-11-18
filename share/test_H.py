@@ -13,7 +13,7 @@ Z = 1
 
 # log grid
 dx = 1e-2/Z
-N = 1200*Z
+N = 1110*Z
 rmin = 1e-4
 h = hfnum.HF(True, dx, int(N), rmin, Z)
 

@@ -39,7 +39,7 @@ print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 2):
   print "SCF it.", i
-  h.gammaSCF(0.5)
+  h.gammaSCF(0.7)
   h.solve(NiterSCF, Niter, F0stop)
 
   r = np.asarray(h.getR())

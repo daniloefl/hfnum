@@ -429,7 +429,7 @@ ldouble HF::step() {
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = -1e-3;
+    dE[k] = -1e-5;
   }
 
   std::vector<MatrixXld> Fmn;
@@ -537,8 +537,6 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
               solution[0](idx) = std::sqrt(_g(0))*2*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
               solution[1](idx) = std::sqrt(_g(1))*2*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
             }
-            //solution[0](idx) = std::pow(_g(0), li[k]+0.5);
-            //solution[1](idx) = std::pow(_g(1), li[k]+0.5);
           } else {
             solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+1);
             solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+1);
