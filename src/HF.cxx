@@ -50,11 +50,6 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
   int nStepSCF = 0;
   while (nStepSCF < NiterSCF) {
     std::cout << "SCF step " << nStepSCF << std::endl;
-    //if (nStepSCF == 1) {
-    //  _o[0].E(-3.301485557103038);
-    //  _o[1].E(-3.325613315360123);
-    //  _o[2].E(-0.6090752422026833);
-    //}
     solveForFixedPotentials(Niter, F0stop);
     nStepSCF++;
     calculateVex(_gamma_scf);
@@ -329,20 +324,28 @@ void HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
       _o[k].E(newE);
     }
 
+    //if (std::fabs(*std::max_element(_dE.begin(), _dE.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop) break;
     if (std::fabs(F) < F0stop) break;
   }
 }
 
-void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<ldouble> &E) {
+void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &Lambda, std::vector<MatrixXld> &K, std::vector<ldouble> &E) {
   int N = 0;
   for (int k = 0; k < _o.size(); ++k) {
     N += 2*_o[k].L()+1;
   }
   F.resize(_g.N());
+  Lambda.resize(_g.N());
+  K.resize(_g.N());
+
   for (int i = 0; i < _g.N(); ++i) {
     ldouble r = _g(i);
     F[i].resize(N, N);
     F[i].setZero();
+    Lambda[i].resize(N, N);
+    Lambda[i].setZero();
+    K[i].resize(N, N);
+    K[i].setZero();
     int idx1 = 0;
 
     for (int k = 0; k < _o.size(); ++k) {
@@ -359,15 +362,20 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<ldouble> &E) {
                   if (_g.isLog()) a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(l, m)][i]) - std::pow(l + 0.5, 2);
                   else a = 2*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(l, m)][i] - l*(l + 1)/std::pow(_g(i), 2));
                   F[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
+                  Lambda[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
                   //if (std::pow(a*_g.dx(), 2) > 6) {
                   //  std::cout << "Coefficient = " << a << " at i = " << i << ", r = " << r << " in (" << idx1 << ","<<idx1 <<"), which leads to (a*dx)^2 = " << std::pow(a*_g.dx(), 2) << " > 6 --> This will cause instabilities." << std::endl;
                   //}
                 }
                 ldouble vex = _vex[std::pair<int,int>(k, k2)][std::pair<int, int>(l2, m2)][i];
                 ldouble a = 0;
+
                 if (_g.isLog()) a = 2*std::pow(r, 2)*vex;
                 else a = 2*vex;
+
                 F[i](idx1,idx2) += a*std::pow(_g.dx(), 2)/12.0;
+                if (idx1 != idx2) K[i](idx1, idx2) += a;
+                else Lambda[i](idx1, idx2) += a*std::pow(_g.dx(), 2)/12.0;
                 //if (std::pow(a*_g.dx(), 2) > 6) {
                 //  std::cout << "Coefficient = " << a << " at i = " << i << ", r = " << r << " in (" << idx1 << ","<<idx2 <<"), which leads to (a*dx)^2 = " << std::pow(a*_g.dx(), 2) << " > 6 --> This will cause instabilities." << std::endl;
                 //}
@@ -380,14 +388,8 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<ldouble> &E) {
         }
       }
     }
+    Lambda[i] = Lambda[i].inverse();
   }
-  //for (int k = 0; k < _o.size(); ++k) {
-  //  std::cout << "Vd["<<k<<"] = " << _vd[k][std::pair<int, int>(0, 0)][2] << std::endl;
-  //  for (int k2 = 0; k2 < _o.size(); ++k2) {
-  //    std::cout << "Vex["<<k<<","<<k2<<"] = " << _vex[std::pair<int,int>(k,k2)][std::pair<int, int>(0, 0)][2] << std::endl;
-  //  }
-  //}
-  //std::cout << "Calculate F at 2: " << F[2] << std::endl;
 }
 
 // solve for a fixed energy and calculate _dE for the next step
@@ -424,22 +426,20 @@ ldouble HF::step() {
     }
     if (icl[k] < 0) icl[k] = 10;
   }
-  //for (int k = 0; k < _o.size(); ++k) {
-  //  icl[k] = icl[_o.size()-1];
-  //}
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = -1e-5;
+    dE[k] = -1e-3;
   }
 
   std::vector<MatrixXld> Fmn;
-  calculateFMatrix(Fmn, E);
+  std::vector<MatrixXld> Lmn;
+  std::vector<MatrixXld> Kmn;
+  calculateFMatrix(Fmn, Lmn, Kmn, E);
 
-  VectorXld Fn = solveOrbitalFixedEnergy(E, l, Fmn, icl);
+  VectorXld Fn = solveOrbitalFixedEnergy(E, l, Fmn, Lmn, Kmn, icl);
 
   MatrixXld J;
-  //J.resize(_o.size()+1, _o.size()+1);
   J.resize(_o.size(), _o.size());
   J.setZero();
   for (int k1 = 0; k1 < _o.size(); ++k1) {
@@ -449,22 +449,20 @@ ldouble HF::step() {
       EdE[k2] += dE[k2];
 
       std::vector<MatrixXld> Fmd;
-      calculateFMatrix(Fmd, EdE);
+      std::vector<MatrixXld> Lmd;
+      std::vector<MatrixXld> Kmd;
+      calculateFMatrix(Fmd, Lmd, Kmd, EdE);
 
-      VectorXld Fd = solveOrbitalFixedEnergy(EdE, l, Fmd, icl);
+      VectorXld Fd = solveOrbitalFixedEnergy(EdE, l, Fmd, Lmd, Kmd, icl);
       J(k1, k2) = (Fd[k1] - Fn[k1])/dE[k2];
     }
-    //J(_o.size(),k1) += -2*E[k1];
   }
-  //J(_o.size(),_o.size()) += 1;
   JacobiSVD<MatrixXld> decJ(J, ComputeThinU | ComputeThinV);
   VectorXld Fne;
-  //Fne.resize(_o.size()+1, 1);
   Fne.resize(_o.size(), 1);
   for (int k1 = 0; k1 < _o.size(); ++k1) {
     Fne(k1, 0) = Fn(k1, 0);
   }
-  //Fne(_o.size(), 0) = 0;
   VectorXld dEv = -decJ.solve(Fne);
 
   ldouble F = 0;
@@ -476,7 +474,7 @@ ldouble HF::step() {
   return F;
 }
 
-void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm) {
+void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Lm, std::vector<MatrixXld> &Km) {
   int N = _g.N();
   int M = 0;
   for (int k = 0; k < _o.size(); ++k) {
@@ -507,8 +505,10 @@ void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<V
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         for (int i = N-2; i > 0; --i) {
-          JacobiSVD<MatrixXld> dec(Fm[i-1], ComputeThinU | ComputeThinV);
-          solution[i-1] = dec.solve((MatrixXld::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1]));
+          //JacobiSVD<MatrixXld> dec(Fm[i-1], ComputeThinU | ComputeThinV);
+          //solution[i-1] = dec.solve((MatrixXld::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1]));
+          MatrixXld inv = (MatrixXld::Identity(M,M) + std::pow(_g.dx(), 2)/12.0*Lm[i-1]*Km[i-1] + std::pow(_g.dx(), 4)/144.0*(Lm[i-1]*Km[i-1]*Lm[i-1]*Km[i-1]))*Lm[i-1];
+          solution[i-1] = inv*((MatrixXld::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1])); 
         }
         idx += 1;
       }
@@ -516,7 +516,7 @@ void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<V
   }
 }
 
-void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm) {
+void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Lm, std::vector<MatrixXld> &Km) {
   int N = _g.N();
   int M = 0;
   for (int k = 0; k < _o.size(); ++k) {
@@ -537,6 +537,8 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
               solution[0](idx) = std::sqrt(_g(0))*2*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
               solution[1](idx) = std::sqrt(_g(1))*2*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
             }
+            //solution[0](idx) = std::pow(_g(0), li[k]+0.5);
+            //solution[1](idx) = std::pow(_g(1), li[k]+0.5);
           } else {
             solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+1);
             solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+1);
@@ -555,8 +557,10 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         for (int i = 1; i < N-1; ++i) {
-          JacobiSVD<MatrixXld> dec(Fm[i+1], ComputeThinU | ComputeThinV);
-          solution[i+1] = dec.solve((MatrixXld::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
+          //JacobiSVD<MatrixXld> dec(Fm[i+1], ComputeThinU | ComputeThinV);
+          //solution[i+1] = dec.solve((MatrixXld::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
+          MatrixXld inv = (MatrixXld::Identity(M,M) + std::pow(_g.dx(), 2)/12.0*Lm[i+1]*Km[i+1] + std::pow(_g.dx(), 4)/144.0*(Lm[i+1]*Km[i+1]*Lm[i+1]*Km[i+1]))*Lm[i+1];
+          solution[i+1] = inv*((MatrixXld::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
         }
         idx += 1;
       }
@@ -589,7 +593,7 @@ void HF::match(std::vector<VectorXld> &o, std::vector<int> &icl, std::vector<Vec
     }
   }
 }
-VectorXld HF::solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<int> &icl) {
+VectorXld HF::solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Lm, std::vector<MatrixXld> &Km, std::vector<int> &icl) {
   int M = 0;
   for (int k = 0; k < _o.size(); ++k) {
     M += _o[k].L()+1;
@@ -603,30 +607,20 @@ VectorXld HF::solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> 
   std::vector<VectorXld> outward(_g.N());
   std::vector<VectorXld> matched(_g.N());
 
-  solveOutward(E, l, outward, Fm);
-  solveInward(E, l, inward, Fm);
+  solveOutward(E, l, outward, Fm, Lm, Km);
+  solveInward(E, l, inward, Fm, Lm, Km);
   match(matched, icl, inward, outward);
 
   // calculate mis-match vector F
   int idx = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    //for (int l = 0; l < _o[k].L()+1; ++l) {
-    //  for (int m = -l; m < l+1; ++m) {
-    //    if (m == _o[k].initialM() && l == _o[k].initialL())
-    //      F(k) += (12 - 10*Fm[icl[k]](idx))*matched[icl[k]](idx) - Fm[icl[k]-1](idx)*matched[icl[k]-1](idx) - Fm[icl[k]+1](idx)*matched[icl[k]+1](idx);
-    //    idx += 1;
-    //  }
-    //}
     VectorXld prodIcl = (MatrixXld::Identity(M,M)*12 - Fm[icl[k]]*10)*matched[icl[k]] - Fm[icl[k]-1]*matched[icl[k]-1] - Fm[icl[k]+1]*matched[icl[k]+1];
-    F(k) += prodIcl.transpose()*prodIcl;
-    //for (int l = 0; l < _o[k].L()+1; ++l) {
-    //  for (int m = -l; m < l+1; ++m) {
-    //    if (m == _o[k].initialM() && l == _o[k].initialL())
-    //      F(k) += prodIcl[idx];
-    //    idx += 1;
-    //  }
-    //}
-    //std::cout << "Orbital " << k << ": mismatch: " << F[k] << "in position " << _g(icl[k]) << "(" << icl[k] << ")" << " decomposition: " << prodIcl << std::endl;
+    for (int l = 0; l < _o[k].L()+1; ++l) {
+      for (int m = -l; m < l+1; ++m) {
+        if (l == _o[k].initialL() && m == _o[k].initialM()) F(k) += prodIcl.transpose()*prodIcl;
+        idx += 1;
+      }
+    }
   }
   
   idx = 0;

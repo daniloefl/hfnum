@@ -23,8 +23,8 @@ Z = 3
 
 # log grid
 dx = 1e-2/Z
-N = 1650*Z
-rmin = 1e-6
+N = 1110*Z
+rmin = 1e-4
 h = hfnum.HF(True, dx, int(N), rmin, Z)
 
 h.addOrbital(0,  1, 1, 0, 0)
@@ -39,7 +39,7 @@ print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 2):
   print "SCF it.", i
-  h.gammaSCF(0.7)
+  h.gammaSCF(0.5)
   h.solve(NiterSCF, Niter, F0stop)
 
   r = np.asarray(h.getR())
