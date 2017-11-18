@@ -495,7 +495,7 @@ void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<V
             solution[N-2](idx) = std::exp(-std::sqrt(-2*E[k])*_g(N-2));
           } else {
             solution[N-1](idx) = 0;
-            solution[N-2](idx) = 0;//(_g(N-1) - _g(N-2));
+            solution[N-2](idx) = (_g(N-1) - _g(N-2));
           }
         }
         idx += 1;
