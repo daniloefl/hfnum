@@ -48,10 +48,10 @@ class HF {
     void solve(int NiterSCF, int Niter, ldouble F0stop);
     void solveForFixedPotentials(int Niter, ldouble F0stop);
 
-    void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &L, std::vector<MatrixXld> &K, std::vector<ldouble> &E);
+    void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E);
 
     ldouble step();
-    VectorXld solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Lm, std::vector<MatrixXld> &Km, std::vector<int> &icl);
+    VectorXld solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<int> &icl, std::vector<VectorXld> &matched);
     void addOrbital(int L, int s, int initial_n = 1, int initial_l = 0, int initial_m = 0);
 
     std::vector<ldouble> getOrbital(int no, int mo, int lo);
@@ -66,8 +66,8 @@ class HF {
     void calculateVd(ldouble gamma);
     void calculateVex(ldouble gamma);
 
-    void solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Lm, std::vector<MatrixXld> &Km);
-    void solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Lm, std::vector<MatrixXld> &Km);
+    void solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<int> &icl);
+    void solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<int> &icl);
     void match(std::vector<VectorXld> &o, std::vector<int> &icl, std::vector<VectorXld> &inward, std::vector<VectorXld> &outward);
 
     const Grid &_g;

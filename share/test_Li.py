@@ -22,16 +22,16 @@ def savePot(r, V, name, forWF, actsOn):
 Z = 3
 
 # log grid
-dx = 1e-2/Z
-N = 900*Z
-rmin = 1e-3
+dx = 1e-3/Z
+N = 14700*Z
+rmin = 1e-5
 for i in range(0, N):
   r = np.exp(np.log(rmin) + i*dx)
   V = -1.0/r
   a = 2*r*r*(-Z**2*0.5 - V) - 0.5**0.5
   if (a*dx)**2 > 6:
-    print "(a*dx)^2 = ", (a*dx)**2, " at i = ", i, " for r = ", r
-    sys.exit(-1)
+    print "Warning: (a*dx)^2 = ", (a*dx)**2, " > 6, at i = ", i, " for r = ", r, " --> can cause instabilities"
+    break
 h = hfnum.HF(True, dx, int(N), rmin, Z)
 
 h.addOrbital(0,  1, 1, 0, 0)
@@ -40,13 +40,13 @@ h.addOrbital(0,  1, 2, 0, 0)
 
 NiterSCF = 1
 Niter = 100
-F0stop = 1e-8
+F0stop = 1e-14
 r = h.getR()
 print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 20):
   print "SCF it.", i
-  h.gammaSCF(0.2)
+  h.gammaSCF(0.4)
   h.solve(NiterSCF, Niter, F0stop)
 
   r = np.asarray(h.getR())
@@ -80,7 +80,7 @@ for i in range(0, 20):
   savePot(r, vex[2][1], 'vxc', '2s1+', '1s1-')
   savePot(r, vex[2][2], 'vxc', '2s1+', '2s1+')
 
-  m = next(i for i,v in enumerate(r) if v >= 5)
+  m = next(i for i,v in enumerate(r) if v >= 10)
   f = plt.figure()
   plt.plot(r[:m], r[:m]*o[0][:m], 'r-',  linewidth = 2, label = 'r*Orbital 0 (s)')
   plt.plot(r[:m], r[:m]*o[1][:m], 'b:',  linewidth = 2, label = 'r*Orbital 1 (s)')
