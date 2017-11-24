@@ -17,8 +17,16 @@ make
 
 # Running
 
+Try getting the energy and orbital shapes for Hydrogen with:
+
 ```
-python share/test.py
+python share/test_H.py
 ```
 
+For Helium, with:
+
+
+```
+python share/test_He.py
+```
 

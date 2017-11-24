@@ -135,7 +135,7 @@ void HF::calculateVex(ldouble gamma) {
                 //} else { // not filled sub-shell, need to sum over l and m in the spherical harmonics expansion
 
                   // now actually calculate it from the expansion above
-                  int lmax = 2;
+                  int lmax = 0;
                   for (int l = 0; l < lmax+1; ++l) {
                     for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
                       ldouble beta = 0;
@@ -158,7 +158,7 @@ void HF::calculateVex(ldouble gamma) {
                         // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
                         ldouble T2 = 0;
                         T2 = std::pow(-1, vexm+mj)*std::sqrt((2*l+1)*(2*vexl+1)/(4*M_PI*(2*lj+1)))*CG(l, vexl, 0, 0, lj, 0)*CG(l, vexl, m, -vexm, lj, -mj);
-                        //if (m == 0 && l == 0) T2 = std::pow(4*M_PI, -0.5);
+                        if (m == 0 && l == 0) T2 = std::pow(4*M_PI, -0.5);
                         T += T1*T2;
                       }
                       vex[ir2] += beta*T;
@@ -249,7 +249,7 @@ void HF::calculateVd(ldouble gamma) {
                 for (int m1 = -l1; m1 < l1+1; ++m1) {
 
                   // now actually calculate it from the expansion above
-                  int lmax = 2;
+                  int lmax = 0;
                   for (int l = 0; l < lmax+1; ++l) {
                     for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
                       ldouble beta = 0;
@@ -272,6 +272,7 @@ void HF::calculateVd(ldouble gamma) {
                         // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
                         ldouble T2 = 0;
                         T2 = std::pow(-1, vdm+mj)*std::sqrt((2*l+1)*(2*vdl+1)/(4*M_PI*(2*lj+1)))*CG(l, vdl, 0, 0, lj, 0)*CG(l, vdl, m, -vdm, lj, -mj);
+                        if (l == 0 && m == 0) T2 = std::pow(4*M_PI, -0.5);
                         T += T1*T2;
                       }
                       vd[ir2] += beta*T;
@@ -391,9 +392,10 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, 
         }
       }
     }
-    for (int idxD = 0; idxD < N; ++idxD) Lambda[i](idxD, idxD) = 1.0/Lambda[i](idxD, idxD);
-    K[i] = Lambda[i]*K[i];
-    K[i] = (MatrixXld::Identity(N,N) + std::pow(_g.dx(), 2)/12.0*K[i] + std::pow(_g.dx(), 4)/144.0*(K[i]*K[i]))*Lambda[i];
+    K[i] = F[i].inverse();
+    //for (int idxD = 0; idxD < N; ++idxD) Lambda[i](idxD, idxD) = 1.0/Lambda[i](idxD, idxD);
+    //K[i] = Lambda[i]*K[i];
+    //K[i] = (MatrixXld::Identity(N,N) + std::pow(_g.dx(), 2)/12.0*K[i] + std::pow(_g.dx(), 4)/144.0*(K[i]*K[i]))*Lambda[i];
   }
 }
 
@@ -435,7 +437,7 @@ ldouble HF::step() {
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = -1e-9;
+    dE[k] = -1e-12;
   }
 
   std::vector<MatrixXld> Fmn;
@@ -554,6 +556,8 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
           if (_g.isLog()) {
             solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+0.5);
 	    solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+0.5);
+            solution[0](idx) = std::pow(_g(0), li[k]+0.5);
+	    solution[1](idx) = std::pow(_g(1), li[k]+0.5);
           } else {
             solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+1);
             solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+1);
@@ -580,7 +584,7 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
 void HF::match(std::vector<VectorXld> &o, std::vector<int> &icl, std::vector<VectorXld> &inward, std::vector<VectorXld> &outward) {
   int M = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    M += _o[k].L()+1;
+    M += 2*_o[k].L()+1;
   }
   for (int i = 0; i < _g.N(); ++i) {
     o[i].resize(M);

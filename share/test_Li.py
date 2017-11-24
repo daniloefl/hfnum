@@ -23,7 +23,7 @@ Z = 3
 
 # log grid
 dx = 1e-3/Z
-N = 14700*Z
+N = 14000*Z
 rmin = 1e-5
 for i in range(0, N):
   r = np.exp(np.log(rmin) + i*dx)
@@ -46,7 +46,7 @@ print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 20):
   print "SCF it.", i
-  h.gammaSCF(0.4)
+  h.gammaSCF(0.1)
   h.solve(NiterSCF, Niter, F0stop)
 
   r = np.asarray(h.getR())
