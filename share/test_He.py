@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 Z = 2
 #dx = 1e-1/Z
-#N = 150*Z
+#N = 170*Z
 #rmin = 1e-5
 dx = 1e-2/Z
 N = 1110*Z

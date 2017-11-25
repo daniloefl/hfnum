@@ -81,95 +81,130 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
 //
 void HF::calculateVex(ldouble gamma) {
   std::cout << "Calculating Vex." << std::endl;
+
+  std::vector<int> done;
+  std::vector<int> not_done;
+
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    int nSameShell = 0;
+    for (int kx = 0; kx < _o.size(); ++kx) {
+      if (_o[k1].initialN() == _o[kx].initialN() && _o[k1].initialL() == _o[kx].initialL())
+        nSameShell++;
+    }
+    if (nSameShell == 2*(2*_o[k1].initialL() + 1)) {
+      done.push_back(k1);
+    } else {
+      //done.push_back(k1);
+      not_done.push_back(k1);
+    }
+  }
+
+  std::map<std::pair<int,int>, std::map< std::pair<int,int>, std::vector<ldouble> > > vexsum;
+
   // we are looking to calculate Vex(orbital = o, l = vdl, m = vdm)
   // it shows up in this term of the equation:
   // {int [sum_k1 int rpsi_k1(r1)*rpsi_ko(r1) Y_k1(O)*Y_ko(O)/|r1 - r2| dr1 dO] Y*_i(Oo) Y_j(Oo) dOo} rpsi_j(r2)
   // the term Y_j rpsi_j is part of the representation orb_ko = sum_j Y_j rpsi_j(r) of orbital ko
   // Y*_i is the sph. harm. multiplied to the equation and then integrated over to single out one of the sph. harm. terms
   for (int ko = 0; ko < _o.size(); ++ko) {
+    int lj = _o[ko].initialL();
+    int mj = _o[ko].initialM();
+
+    // calculate it first with filled orbitals
+    // loop over orbitals (this is the sum over k1 above)
+    for (auto k1 : done) {
+      if (_o[k1].spin()*_o[ko].spin() < 0) continue;
+
+      std::cout << "Calculating Vex for orbital eq. " << ko << ", term from k1 = " << k1 << " (full sub-shell)" << std::endl;
+
+      int l1 = _o[k1].initialL();
+      int m1 = _o[k1].initialM();
+
+
+      std::vector<ldouble> vex(_g.N(), 0); // calculate it here first
+
+      ldouble Q = 0;
+      std::vector<ldouble> E(_g.N(), 0); // electric field
+      for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+        ldouble r2 = _g(ir2);
+        ldouble dr = 0;
+        if (ir2 < _g.N()-1) dr = _g(ir2+1) - _g(ir2);
+        Q += (_o[k1].getNorm(ir2, l1, m1, _g)*_o[ko].getNorm(ir2, lj, mj, _g))*std::pow(r2, 2)*dr;
+        E[ir2] = Q/std::pow(r2, 2);
+      }
+      vex[_g.N()-1] = Q/_g(_g.N()-1);
+      for (int ir2 = _g.N()-2; ir2 >= 0; --ir2) {
+        ldouble dr = 0;
+        if (ir2 < _g.N()-1) dr = _g(ir2+1) - _g(ir2);
+        vex[ir2] = vex[ir2+1] + E[ir2]*dr;
+      }
+
+      if (vexsum.find(std::pair<int,int>(ko, k1)) == vexsum.end()) {
+        vexsum[std::pair<int,int>(ko, k1)] = std::map<std::pair<int,int>, std::vector<ldouble> >();
+      }
+      if (vexsum[std::pair<int,int>(ko,k1)].find(std::pair<int,int>(lj, mj)) == vexsum[std::pair<int,int>(ko,k1)].end()) {
+        vexsum[std::pair<int,int>(ko, k1)][std::pair<int,int>(lj, mj)] = std::vector<ldouble>(_g.N(), 0);
+      }
+      for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+        vexsum[std::pair<int,int>(ko, k1)][std::pair<int,int>(lj, mj)][ir2] += vex[ir2];
+      }
+    }
+  }
+
+  for (int ko = 0; ko < _o.size(); ++ko) {
+    int lj = _o[ko].initialL();
+    int mj = _o[ko].initialM();
     // each sub-orbital has a different Ylomo dependency, so there is a different Vd in each case
     for (int lj = 0; lj < _o[ko].L()+1; ++lj) { // loop over l in Y_j
       for (int mj = -lj; mj < lj+1; ++mj) { // loop over m in Y_j
+        for (auto k1 : not_done) {
+          std::cout << "Calculating Vex for orbital eq. " << ko << ", term from k1 = " << k1 << " (partial sub-shell)" << std::endl;
 
-        for (int k1 = 0; k1 < _o.size(); ++k1) {
-          if (k1 == ko) continue;
+          if (vexsum.find(std::pair<int,int>(ko, k1)) == vexsum.end()) {
+            vexsum[std::pair<int,int>(ko, k1)] = std::map<std::pair<int,int>, std::vector<ldouble> >();
+          }
+          if (vexsum[std::pair<int,int>(ko,k1)].find(std::pair<int,int>(lj, mj)) == vexsum[std::pair<int,int>(ko,k1)].end()) {
+            vexsum[std::pair<int,int>(ko, k1)][std::pair<int,int>(lj, mj)] = std::vector<ldouble>(_g.N(), 0);
+          }
+          std::vector<ldouble> &vexsum_curr = vexsum[std::pair<int,int>(ko,k1)][std::pair<int,int>(lj, mj)];
+
           // each sub-orbital has a different Ylomo dependency, so there is a different Vd in each case
           for (int l1 = 0; l1 < _o[k1].L()+1; ++l1) { // loop over l in Y_j
             for (int m1 = -l1; m1 < l1+1; ++m1) { // loop over m in Y_j
 
-              for (auto &vexLm : _vex[std::pair<int,int>(ko,k1)]) { // calculate a term in square brackets above
-                int vexl = vexLm.first.first; // these are the l and m for Y*_i
-                int vexm = vexLm.first.second;
-                if (vexl != lj || vexm != mj) continue;
-                std::vector<ldouble> &currentVex = vexLm.second; // this is the r-dependent part
+              if (_o[k1].spin()*_o[ko].spin() < 0) continue;
 
-                std::vector<ldouble> vex(_g.N(), 0); // calculate it here first
-
-                // loop over orbitals (this is the sum over k1 above)
-                if (_o[k1].spin() != _o[ko].spin()) continue;
-
-                //int nSameShell = 0;
-                //for (int kx = 0; kx < _o.size(); ++kx) {
-                //  if (_o[k1].initialN() == _o[kx].initialN() && _o[k1].initialL() == _o[kx].initialL()) nSameShell += 1;
-                //}
-                //if (nSameShell == 2*_o[ko].initialL() + 1) { // filled sub-shell
-                //  for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
-                //    ldouble r2 = _g(ir2);
-                //    for (int l = abs(l1-lj); l < l1+lj+1; ++l) {
-                //      ldouble beta = 0;
-                //      for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
-                //        ldouble r1 = _g(ir1);
-                //        ldouble dr = 0;
-                //        if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
-                //        ldouble rs = r1;
-                //        ldouble rb = r2;
-                //        if (rb < rs) {
-                //          rs = r2;
-                //          rb = r1;
-                //        }
-                //        beta += _o[k1].getNorm(ir1, l1, m1, _g)*_o[ko].getNorm(ir1, lj, mj, _g)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
-                //      }
-                //      vex[ir2] += 1.0/((double) nSameShell)*((double) nSameShell)/(2.0*l + 1.0)*std::pow(CG(l1, lj, 0, 0, l, 0), 2)*beta;
-                //    }
-                //  }
-                //} else { // not filled sub-shell, need to sum over l and m in the spherical harmonics expansion
-
-                  // now actually calculate it from the expansion above
-                  int lmax = 0;
-                  for (int l = 0; l < lmax+1; ++l) {
-                    for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
-                      ldouble beta = 0;
-                      ldouble r2 = _g(ir2);
-                      for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
-                        ldouble r1 = _g(ir1);
-                        ldouble dr = 0;
-                        if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
-                        ldouble rs = r1;
-                        ldouble rb = r2;
-                        if (rb < rs) {
-                          rs = r2;
-                          rb = r1;
-                        }
-                        beta += 4*M_PI/(2.0*l + 1.0)*_o[k1].getNorm(ir1, l1, m1, _g)*_o[ko].getNorm(ir1, lj, mj, _g)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
-                      }
-                      ldouble T = 0;
-                      for (int m = -l; m < l + 1; ++m) {
-                        ldouble T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
-                        // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
-                        ldouble T2 = 0;
-                        T2 = std::pow(-1, vexm+mj)*std::sqrt((2*l+1)*(2*vexl+1)/(4*M_PI*(2*lj+1)))*CG(l, vexl, 0, 0, lj, 0)*CG(l, vexl, m, -vexm, lj, -mj);
-                        if (m == 0 && l == 0) T2 = std::pow(4*M_PI, -0.5);
-                        T += T1*T2;
-                      }
-                      vex[ir2] += beta*T;
-                    } // for each r in Vex integration
-                  } // for each l in the 1/|r1 - r2| expansion in sph. harm.
-                //} // if sub-shell is filled
-                for (int k = 0; k < _g.N(); ++k) currentVex[k] = (1-gamma)*currentVex[k] + gamma*vex[k];
-              } // for each m1 of the orbital basis expansion
+              // now actually calculate it from the expansion above
+              int lmax = 2;
+              for (int l = 0; l < lmax+1; ++l) {
+                for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+                  ldouble beta = 0;
+                  ldouble r2 = _g(ir2);
+                  for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
+                    ldouble r1 = _g(ir1);
+                    ldouble dr = 0;
+                    if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
+                    ldouble rs = r1;
+                    ldouble rb = r2;
+                    if (rb < rs) {
+                      rs = r2;
+                      rb = r1;
+                    }
+                    beta += 4*M_PI/(2.0*l + 1.0)*_o[k1].getNorm(ir1, l1, m1, _g)*_o[ko].getNorm(ir1, lj, mj, _g)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
+                  }
+                  ldouble T = 0;
+                  for (int m = -l; m < l + 1; ++m) {
+                    ldouble T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
+                    // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
+                    ldouble T2 = 0;
+                    T2 = std::sqrt((2*l+1)/(4*M_PI))*CG(l, lj, 0, 0, lj, 0)*CG(l, lj, m, -mj, lj, -mj);
+                    T += T1*T2;
+                  }
+                  vexsum_curr[ir2] += beta*T;
+                } // for each r in Vex integration
+              } // for each l in the 1/|r1 - r2| expansion in sph. harm.
 
             } // for each l1 of the orbital basis expansion
-
           } // for each orbital in the Vex sum
 
         } // for each Vd term in a unique equation coming from the multiplication by Y*_i
@@ -177,6 +212,19 @@ void HF::calculateVex(ldouble gamma) {
     } // for each l in the orbital basis expansion
 
   }
+
+  for (int ko = 0; ko < _o.size(); ++ko) {
+    for (int lj = 0; lj < _o[ko].L()+1; ++lj) { // loop over l in Y_j
+      for (int mj = -lj; mj < lj+1; ++mj) { // loop over m in Y_j
+        for (auto k1 : done) {
+          if (vexsum.find(std::pair<int,int>(ko,k1)) == vexsum.end()) continue;
+          std::vector<ldouble> &currentVex = _vex[std::pair<int,int>(ko,k1)][std::pair<int,int>(lj, mj)];
+          for (int k = 0; k < _g.N(); ++k) currentVex[k] = (1-gamma)*currentVex[k] + gamma*vexsum[std::pair<int,int>(ko,k1)][std::pair<int,int>(lj,mj)][k];
+        }
+      }
+    }
+  }
+
 }
 
 // direct potential calculation
@@ -202,6 +250,62 @@ void HF::calculateVex(ldouble gamma) {
 //
 void HF::calculateVd(ldouble gamma) {
   std::cout << "Calculating Vd." << std::endl;
+
+  std::vector<int> done;
+  std::vector<int> not_done;
+
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    int nSameShell = 0;
+    for (int kx = 0; kx < _o.size(); ++kx) {
+      if (_o[k1].initialN() == _o[kx].initialN() && _o[k1].initialL() == _o[kx].initialL())
+        nSameShell++;
+    }
+    if (nSameShell == 2*(2*_o[k1].initialL() + 1)) {
+      done.push_back(k1);
+    } else {
+      //done.push_back(k1);
+      not_done.push_back(k1);
+    }
+  }
+
+  std::map<int, std::map<std::pair<int,int>, std::vector<ldouble> > > vdsum; // calculate it here first
+
+  // calculate it first with filled orbitals
+  // loop over orbitals (this is the sum over k1 above)
+  for (auto k1 : done) {
+    int l1 = _o[k1].initialL();
+    int m1 = _o[k1].initialM();
+    std::cout << "Calculating Vd term from k1 = " << k1 << " (filled sub-shell)" << std::endl;
+
+    // temporary variable
+    std::vector<ldouble> vd(_g.N(), 0); // calculate it here first
+
+    ldouble Q = 0;
+    std::vector<ldouble> E(_g.N(), 0); // electric field
+    for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+      ldouble r2 = _g(ir2);
+      ldouble dr = 0;
+      if (ir2 < _g.N()-1) dr = _g(ir2+1) - _g(ir2);
+      Q += std::pow(_o[k1].getNorm(ir2, l1, m1, _g), 2)*std::pow(r2, 2)*dr;
+      E[ir2] = Q/std::pow(r2, 2);
+    }
+    vd[_g.N()-1] = Q/_g(_g.N()-1);
+    for (int ir2 = _g.N()-2; ir2 >= 0; --ir2) {
+      ldouble dr = _g(ir2+1) - _g(ir2);
+      vd[ir2] = vd[ir2+1] + E[ir2]*dr;
+    }
+
+    for (int ko = 0; ko < _o.size(); ++ko) {
+      int lj = _o[ko].initialL();
+      int mj = _o[ko].initialM();
+      if (vdsum.find(ko) == vdsum.end()) vdsum[ko] = std::map<std::pair<int,int>, std::vector<ldouble> >();
+      if (vdsum[ko].find(std::pair<int,int>(lj,mj)) == vdsum[ko].end()) vdsum[ko][std::pair<int,int>(lj,mj)] = std::vector<ldouble>(_g.N(), 0);
+      for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+        vdsum[ko][std::pair<int,int>(lj,mj)][ir2] += vd[ir2];
+      }
+    }
+  }
+
   // we are looking to calculate Vd(orbital = o, l = vdl, m = vdm)
   // it shows up in this term of the equation:
   // {int [sum_k1 int rpsi_k1(r1)*rpsi_k1(r1) Y_k1(O)*Y_k1(O)/|r1 - r2| dr1 dO] Y*_i(Oo) Y_j(Oo) dOo} rpsi_j(r2)
@@ -212,84 +316,57 @@ void HF::calculateVd(ldouble gamma) {
     for (int lj = 0; lj < _o[ko].L()+1; ++lj) { // loop over l in Y_j
       for (int mj = -lj; mj < lj+1; ++mj) { // loop over m in Y_j
 
-        for (auto &vdLm : _vd[ko]) { // calculate a term in square brackets above
-          int vdl = vdLm.first.first; // these are the l and m for Y*_i
-          int vdm = vdLm.first.second;
-          if (vdl != lj || vdm != mj) continue;
-          std::vector<ldouble> &currentVd = vdLm.second; // this is the r-dependent part
+        if (vdsum.find(ko) == vdsum.end()) vdsum[ko] = std::map<std::pair<int,int>, std::vector<ldouble> >();
+        if (vdsum[ko].find(std::pair<int,int>(lj,mj)) == vdsum[ko].end()) vdsum[ko][std::pair<int,int>(lj,mj)] = std::vector<ldouble>(_g.N(), 0);
 
-          std::vector<ldouble> vd(_g.N(), 0); // calculate it here first
-          // loop over orbitals (this is the sum over k1 above)
-          for (int k1 = 0; k1 < _o.size(); ++k1) {
-            if (k1 == ko) continue;
-            int nSameShell = 0;
-            for (int kx = 0; kx < _o.size(); ++kx) {
-              if (_o[k1].initialN() == _o[kx].initialN() && _o[k1].initialL() == _o[kx].initialL()) nSameShell += 1;
-            }
-            //if (nSameShell == 2*_o[ko].initialL() + 1) { // filled sub-shell
-            //  for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
-            //    ldouble beta = 0;
-            //    ldouble r2 = _g(ir2);
-            //    for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
-            //      ldouble r1 = _g(ir1);
-            //      ldouble dr = 0;
-            //      if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
-            //      ldouble rs = r1;
-            //      ldouble rb = r2;
-            //      if (rb < rs) {
-            //        rs = r2;
-            //        rb = r1;
-            //      }
-            //      beta += 1.0/((double) nSameShell)*(2.0*_o[k1].initialL() + 1.0)*std::pow(_o[k1].getNorm(ir1, lj, mj, _g), 2)/rb*std::pow(r1, 2)*dr;
-            //    }
-            //    vd[ir2] += beta;
-            //  }
-            //} else { // not filled sub-shell, need to sum over l and m in the spherical harmonics expansion
-              for (int l1 = 0; l1 < _o[k1].L()+1; ++l1) { // each orbital in the sum is actually orb_ko = sum_l1,m1 rpsi_l1,m1 Y_l1m1, so loop over this sum
-                for (int m1 = -l1; m1 < l1+1; ++m1) {
-
-                  // now actually calculate it from the expansion above
-                  int lmax = 0;
-                  for (int l = 0; l < lmax+1; ++l) {
-                    for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
-                      ldouble beta = 0;
-                      ldouble r2 = _g(ir2);
-                      for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
-                        ldouble r1 = _g(ir1);
-                        ldouble dr = 0;
-                        if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
-                        ldouble rs = r1;
-                        ldouble rb = r2;
-                        if (rb < rs) {
-                          rs = r2;
-                          rb = r1;
-                        }
-                        beta += 4*M_PI/(2.0*l + 1.0)*std::pow(_o[k1].getNorm(ir1, l1, m1, _g), 2)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
-                      }
-                      ldouble T = 0;
-                      for (int m = -l; m < l + 1; ++m) {
-                        ldouble T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
-                        // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
-                        ldouble T2 = 0;
-                        T2 = std::pow(-1, vdm+mj)*std::sqrt((2*l+1)*(2*vdl+1)/(4*M_PI*(2*lj+1)))*CG(l, vdl, 0, 0, lj, 0)*CG(l, vdl, m, -vdm, lj, -mj);
-                        if (l == 0 && m == 0) T2 = std::pow(4*M_PI, -0.5);
-                        T += T1*T2;
-                      }
-                      vd[ir2] += beta*T;
-                    } // for each r in Vd integration
-                  } // for each l in the 1/|r1 - r2| expansion in sph. harm.
-                } // for each m1 of the orbital basis expansion
-              } // for each l1 of the orbital basis expansion
-
-            //} // if sub-shell filled
-          } // for each orbital in the Vd sum
-
-          for (int k = 0; k < _g.N(); ++k) currentVd[k] = (1-gamma)*currentVd[k] + gamma*vd[k];
-
-        } // for each Vd term in a unique equation coming from the multiplication by Y*_i
+        // now with open shells
+        for (auto k1 : not_done) {
+          std::cout << "Calculating Vd term for eq. " << ko << ", due to k1 = " << k1 << " (partial sub-shell)" << std::endl;
+          for (int l1 = 0; l1 < _o[k1].L()+1; ++l1) { // each orbital in the sum is actually orb_ko = sum_l1,m1 rpsi_l1,m1 Y_l1m1, so loop over this sum
+            for (int m1 = -l1; m1 < l1+1; ++m1) {
+              // now actually calculate it from the expansion above
+              int lmax = 0;
+              for (int l = 0; l < lmax+1; ++l) {
+                for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+                  ldouble beta = 0;
+                  ldouble r2 = _g(ir2);
+                  for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
+                    ldouble r1 = _g(ir1);
+                    ldouble dr = 0;
+                    if (ir1 < _g.N()-1) dr = _g(ir1+1) - _g(ir1);
+                    ldouble rs = r1;
+                    ldouble rb = r2;
+                    if (rb < rs) {
+                      rs = r2;
+                      rb = r1;
+                    }
+                    beta += 4*M_PI/(2.0*l + 1.0)*std::pow(_o[k1].getNorm(ir1, l1, m1, _g), 2)*std::pow(rs, l)/std::pow(rb, l+1)*std::pow(r1, 2)*dr;
+                  }
+                  ldouble T = 0;
+                  for (int m = -l; m < l + 1; ++m) {
+                    ldouble T1 = std::pow(-1, m1)*std::sqrt((2*l1+1)*(2*l1+1)/(4*M_PI*(2*l+1)))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, -m1, m1, l, -(-m));
+                    // int Ylm Y*lomo(Ob) Yljmj(Ob) dOb = (-1)^mo int Ylm Ylo(-mo) Yljmj dOb = (-1)^(mo+mj) sqrt((2l+1)*(2lo+1)/(4pi*(2lj+1))) * CG(l, lo, 0, 0, lj, 0) * CG(l, lo, m, -mo, lj, -mj)
+                    ldouble T2 = 0;
+                    T2 = std::sqrt((2*l+1)/(4*M_PI))*CG(l, lj, 0, 0, lj, 0)*CG(l, lj, m, -mj, lj, -mj);
+                    T += T1*T2;
+                  }
+                  vdsum[ko][std::pair<int,int>(lj,mj)][ir2] = beta*T;
+                } // for each r in Vd integration
+              } // for each l in the 1/|r1 - r2| expansion in sph. harm.
+            } // for each m1 of the orbital basis expansion
+          } // for each l1 of the orbital basis expansion
+        } // for each orbital in the Vd sum
       } // for each m in the orbital basis expansion
     } // for each l in the orbital basis expansion
 
+  }
+
+  for (int ko = 0; ko < _o.size(); ++ko) {
+    int lj = _o[ko].initialL();
+    int mj = _o[ko].initialM();
+    std::cout << "Adding Vd term for eq. " << ko << ", (filled sub-shell)" << std::endl;
+    std::vector<ldouble> &currentVd = _vd[ko][std::pair<int,int>(lj, mj)];
+    for (int k = 0; k < _g.N(); ++k) currentVd[k] = (1-gamma)*currentVd[k] + gamma*vdsum[ko][std::pair<int,int>(lj,mj)][k];
   }
 }
 
@@ -437,7 +514,7 @@ ldouble HF::step() {
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = -1e-12;
+    dE[k] = -1e-2;
   }
 
   std::vector<MatrixXld> Fmn;

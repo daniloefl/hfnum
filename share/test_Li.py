@@ -22,8 +22,11 @@ def savePot(r, V, name, forWF, actsOn):
 Z = 3
 
 # log grid
-dx = 1e-3/Z
-N = 14000*Z
+#dx = 0.25e-3/Z
+#N = 62000*Z
+#rmin = 1e-5
+dx = 1e-2/Z
+N = 1700*Z
 rmin = 1e-5
 for i in range(0, N):
   r = np.exp(np.log(rmin) + i*dx)
@@ -46,7 +49,7 @@ print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 20):
   print "SCF it.", i
-  h.gammaSCF(0.1)
+  h.gammaSCF(0.7)
   h.solve(NiterSCF, Niter, F0stop)
 
   r = np.asarray(h.getR())
@@ -62,23 +65,23 @@ for i in range(0, 20):
   vex[2] = [h.getExchangePotential(2, 0), h.getExchangePotential(2, 1), h.getExchangePotential(2, 2)]
   H1s = 2*np.exp(-r)
 
-  savePot(r, v, 'vnuc', '', '')
+  #savePot(r, v, 'vnuc', '', '')
 
-  savePot(r, vd[0], 'vd', '1s1+', '1s1+')
-  savePot(r, vd[1], 'vd', '1s1-', '1s1-')
-  savePot(r, vd[2], 'vd', '2s1+', '2s1+')
+  #savePot(r, vd[0], 'vd', '1s1+', '1s1+')
+  #savePot(r, vd[1], 'vd', '1s1-', '1s1-')
+  #savePot(r, vd[2], 'vd', '2s1+', '2s1+')
 
-  savePot(r, vex[0][0], 'vxc', '1s1+', '1s1+')
-  savePot(r, vex[0][1], 'vxc', '1s1+', '1s1-')
-  savePot(r, vex[0][2], 'vxc', '1s1+', '2s1+')
+  #savePot(r, vex[0][0], 'vxc', '1s1+', '1s1+')
+  #savePot(r, vex[0][1], 'vxc', '1s1+', '1s1-')
+  #savePot(r, vex[0][2], 'vxc', '1s1+', '2s1+')
 
-  savePot(r, vex[1][0], 'vxc', '1s1-', '1s1+')
-  savePot(r, vex[1][1], 'vxc', '1s1-', '1s1-')
-  savePot(r, vex[1][2], 'vxc', '1s1-', '2s1+')
+  #savePot(r, vex[1][0], 'vxc', '1s1-', '1s1+')
+  #savePot(r, vex[1][1], 'vxc', '1s1-', '1s1-')
+  #savePot(r, vex[1][2], 'vxc', '1s1-', '2s1+')
 
-  savePot(r, vex[2][0], 'vxc', '2s1+', '1s1+')
-  savePot(r, vex[2][1], 'vxc', '2s1+', '1s1-')
-  savePot(r, vex[2][2], 'vxc', '2s1+', '2s1+')
+  #savePot(r, vex[2][0], 'vxc', '2s1+', '1s1+')
+  #savePot(r, vex[2][1], 'vxc', '2s1+', '1s1-')
+  #savePot(r, vex[2][2], 'vxc', '2s1+', '2s1+')
 
   m = next(i for i,v in enumerate(r) if v >= 10)
   f = plt.figure()
@@ -92,10 +95,10 @@ for i in range(0, 20):
   f = plt.figure()
   ymin = np.fabs(vd[0][0])
   plt.plot(r[:m], v[:m], 'r-', linewidth = 3, label = 'Coulomb')
-  plt.plot(r[:m], vd[0][:m], 'b--', linewidth = 3, label = 'Direct (0)')
-  plt.plot(r[:m], vex[0][0][:m], 'g:', linewidth = 3, label = 'Exchange (0,0)')
-  plt.plot(r[:m], vex[0][1][:m], 'm:', linewidth = 3, label = 'Exchange (0,1)')
-  plt.plot(r[:m], vex[0][2][:m], 'c:', linewidth = 3, label = 'Exchange (0,2)')
+  plt.plot(r[:m], vd[0][:m], 'b-', linewidth = 3, label = 'Direct (0)')
+  plt.plot(r[:m], vex[0][0][:m], 'g--', linewidth = 3, label = 'Exchange (0,0)')
+  plt.plot(r[:m], vex[0][1][:m], 'm--', linewidth = 3, label = 'Exchange (0,1)')
+  plt.plot(r[:m], vex[0][2][:m], 'c--', linewidth = 3, label = 'Exchange (0,2)')
   plt.ylim((-ymin, ymin))
   plt.legend()
   plt.show()
@@ -103,10 +106,10 @@ for i in range(0, 20):
   f = plt.figure()
   ymin = np.fabs(vd[1][0])
   plt.plot(r[:m], v[:m], 'r-', linewidth = 3, label = 'Coulomb')
-  plt.plot(r[:m], vd[1][:m], 'b--', linewidth = 3, label = 'Direct (1)')
-  plt.plot(r[:m], vex[1][0][:m], 'g:', linewidth = 3, label = 'Exchange (1,0)')
-  plt.plot(r[:m], vex[1][1][:m], 'm:', linewidth = 3, label = 'Exchange (1,1)')
-  plt.plot(r[:m], vex[1][2][:m], 'c:', linewidth = 3, label = 'Exchange (1,2)')
+  plt.plot(r[:m], vd[1][:m], 'b-', linewidth = 3, label = 'Direct (1)')
+  plt.plot(r[:m], vex[1][0][:m], 'g--', linewidth = 3, label = 'Exchange (1,0)')
+  plt.plot(r[:m], vex[1][1][:m], 'm--', linewidth = 3, label = 'Exchange (1,1)')
+  plt.plot(r[:m], vex[1][2][:m], 'c--', linewidth = 3, label = 'Exchange (1,2)')
   plt.ylim((-ymin, ymin))
   plt.legend()
   plt.show()
@@ -114,10 +117,10 @@ for i in range(0, 20):
   f = plt.figure()
   ymin = np.fabs(vd[2][0])
   plt.plot(r[:m], v[:m], 'r-', linewidth = 3, label = 'Coulomb')
-  plt.plot(r[:m], vd[2][:m], 'b--', linewidth = 3, label = 'Direct (2)')
-  plt.plot(r[:m], vex[2][0][:m], 'g:', linewidth = 3, label = 'Exchange (2,0)')
-  plt.plot(r[:m], vex[2][1][:m], 'm:', linewidth = 3, label = 'Exchange (2,1)')
-  plt.plot(r[:m], vex[2][2][:m], 'c:', linewidth = 3, label = 'Exchange (2,2)')
+  plt.plot(r[:m], vd[2][:m], 'b-', linewidth = 3, label = 'Direct (2)')
+  plt.plot(r[:m], vex[2][0][:m], 'g--', linewidth = 3, label = 'Exchange (2,0)')
+  plt.plot(r[:m], vex[2][1][:m], 'm--', linewidth = 3, label = 'Exchange (2,1)')
+  plt.plot(r[:m], vex[2][2][:m], 'c--', linewidth = 3, label = 'Exchange (2,2)')
   plt.ylim((-ymin, ymin))
   plt.legend()
   plt.show()
