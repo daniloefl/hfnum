@@ -21,6 +21,7 @@ class HFPy {
     boost::python::list getR() const;
     boost::python::list getOrbital(int no, int mo, int lo);
     void gammaSCF(double g);
+    void sparseMethod(bool sparse);
 
     boost::python::list getNucleusPotential();
     boost::python::list getDirectPotential(int k);

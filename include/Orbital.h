@@ -30,6 +30,7 @@ class Orbital {
     double &operator()(int i, int l, int m);
     const double operator()(int i, int l, int m) const;
     const double getNorm(int i, int l, int m, const Grid &g);
+    void normalise(const Grid &g);
 
   private:
 

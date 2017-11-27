@@ -23,6 +23,10 @@ void HFPy::gammaSCF(double g) {
   _h.gammaSCF(g);
 }
 
+void HFPy::sparseMethod(bool sparse) {
+  _h.sparseMethod(sparse);
+}
+
 python::list HFPy::getNucleusPotential() {
   python::list l;
   std::vector<ldouble> v = _h.getNucleusPotential();

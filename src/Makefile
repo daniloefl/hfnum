@@ -206,6 +206,33 @@ HFPy.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/HFPy.cxx.s
 .PHONY : HFPy.cxx.s
 
+LinearSystemBuilder.o: LinearSystemBuilder.cxx.o
+
+.PHONY : LinearSystemBuilder.o
+
+# target to build an object file
+LinearSystemBuilder.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/LinearSystemBuilder.cxx.o
+.PHONY : LinearSystemBuilder.cxx.o
+
+LinearSystemBuilder.i: LinearSystemBuilder.cxx.i
+
+.PHONY : LinearSystemBuilder.i
+
+# target to preprocess a source file
+LinearSystemBuilder.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/LinearSystemBuilder.cxx.i
+.PHONY : LinearSystemBuilder.cxx.i
+
+LinearSystemBuilder.s: LinearSystemBuilder.cxx.s
+
+.PHONY : LinearSystemBuilder.s
+
+# target to generate assembly for a file
+LinearSystemBuilder.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/LinearSystemBuilder.cxx.s
+.PHONY : LinearSystemBuilder.cxx.s
+
 Orbital.o: Orbital.cxx.o
 
 .PHONY : Orbital.o
@@ -305,6 +332,9 @@ help:
 	@echo "... HFPy.o"
 	@echo "... HFPy.i"
 	@echo "... HFPy.s"
+	@echo "... LinearSystemBuilder.o"
+	@echo "... LinearSystemBuilder.i"
+	@echo "... LinearSystemBuilder.s"
 	@echo "... Orbital.o"
 	@echo "... Orbital.i"
 	@echo "... Orbital.s"

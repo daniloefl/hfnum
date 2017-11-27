@@ -13,9 +13,9 @@ Z = 2
 #dx = 1e-1/Z
 #N = 170*Z
 #rmin = 1e-5
-dx = 1e-2/Z
-N = 1110*Z
-rmin = 1e-4
+dx = 0.5e-1
+N = 370
+rmin = 1e-7
 h = hfnum.HF(True, dx, int(N), rmin, Z)
 h.addOrbital(0,  1, 1, 0, 0)
 h.addOrbital(0, -1, 1, 0, 0)

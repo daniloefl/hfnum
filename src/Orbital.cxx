@@ -104,6 +104,23 @@ const double Orbital::operator()(int i, int l, int m) const {
   return _wf[i + lsum*_N + msum];
 }
 
+void Orbital::normalise(const Grid &g) {
+  getNorm(0, initialL(), initialM(), g);
+  for (int k = 0; k < _N; ++k) {
+    double r = g(k);
+    for (int l = 0; l < L()+1; ++l) {
+      int lsum = 0;
+      for (int li = 0; li < l; ++li) {
+        lsum += 2*li + 1;
+      }
+      for (int m = -l; m < l+1; ++m) {
+        int msum = (m+l)*_N;
+        _wf[k + lsum*_N + msum] = _wf_norm[k + lsum*_N + msum]*std::pow(r, 0.5);
+      }
+    }
+  }
+}
+
 const double Orbital::getNorm(int i_in, int l_in, int m_in, const Grid &g) {
   if (_torenorm) {
     double norm = 0;

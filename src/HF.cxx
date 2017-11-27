@@ -26,11 +26,16 @@ HF::HF(const Grid &g, ldouble Z)
     _potIndep[k] = 0;
   }
   _gamma_scf = 0.5;
-  _norm = 1;
+  _sparse = true;
 }
 
 HF::~HF() {
 }
+
+void HF::sparseMethod(bool sparse) {
+  _sparse = sparse;
+}
+
 
 std::vector<ldouble> HF::getOrbital(int no, int lo, int mo) {
   Orbital &o = _o[no];
@@ -53,28 +58,34 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
   icl.resize(_o.size());
   int nStepSCF = 0;
   while (nStepSCF < NiterSCF) {
-    std::cout << "Finding classical crossing." << std::endl;
-    for (int k = 0; k < _o.size(); ++k) {
-      icl[k] = -1;
+    if (!_sparse) {
 
-      int lmain = _o[k].initialL();
-      int mmain = _o[k].initialM();
-      // calculate crossing of potential at zero for lmain,mmain
-      ldouble a_m1 = 0;
-      for (int i = 3; i < _g.N()-3; ++i) {
-        ldouble r = _g(i);
-        ldouble a = 0;
-        if (_g.isLog()) a = 2*std::pow(r, 2)*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - std::pow(lmain + 0.5, 2);
-        else a = 2*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i] - lmain*(lmain+1)/std::pow(r, 2));
-        if (icl[k] < 0 && a*a_m1 < 0) {
-          icl[k] = i;
-          break;
+      std::cout << "Finding classical crossing." << std::endl;
+      for (int k = 0; k < _o.size(); ++k) {
+        icl[k] = -1;
+ 
+        int lmain = _o[k].initialL();
+        int mmain = _o[k].initialM();
+        // calculate crossing of potential at zero for lmain,mmain
+        ldouble a_m1 = 0;
+        for (int i = 3; i < _g.N()-3; ++i) {
+          ldouble r = _g(i);
+          ldouble a = 0;
+          if (_g.isLog()) a = 2*std::pow(r, 2)*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - std::pow(lmain + 0.5, 2);
+          else a = 2*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i] - lmain*(lmain+1)/std::pow(r, 2));
+          if (icl[k] < 0 && a*a_m1 < 0) {
+            icl[k] = i;
+            break;
+          }
+          a_m1 = a;
         }
-        a_m1 = a;
+        if (icl[k] < 0) icl[k] = 10;
       }
-      if (icl[k] < 0) icl[k] = 10;
+    }
+
+    for (int k = 0; k < _o.size(); ++k) {
       _nodes[k] = 0;
-      _Emin[k] = -_Z*_Z;
+      _Emin[k] = -_Z*_Z*0.5;
       _Emax[k] = 0;
     }
 
@@ -418,27 +429,38 @@ std::vector<ldouble> HF::getExchangePotential(int k, int k2) {
 }
 
 void HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
-  ldouble gamma = 0.5; // move in the direction of the negative slope with this velocity per step
+  ldouble gamma = 1; // move in the direction of the negative slope with this velocity per step
 
   for (int k = 0; k < _o.size(); ++k) {
     _o[k].E(-_Z*_Z*0.5/std::pow(_o[k].initialN(), 2));
+
+    for (int l = 0; l < _o[k].L()+1; ++l) {
+      for (int m = -l; m < l+1; ++m) {
+        for (int ir = 0; ir < _g.N(); ++ir) { // for each radial point
+          _o[k](ir, l, m) = std::pow(_Z*_g(ir)/((ldouble) _o[k].initialN()), l+0.5)*std::exp(-_Z*_g(ir)/((ldouble) _o[k].initialN()));
+        }
+      }
+    }
   }
+
 
   ldouble F = 0;
   int nStep = 0;
   while (nStep < Niter) {
+    gamma = 1.0*(1 - std::exp(-(nStep+1)/10.0));
     // compute sum of squares of F(x_old)
     nStep += 1;
-    F = step();
-
-    // limit maximum energy step in a single direction to be 0.1*gamma
-    ldouble gscale = 1;
+    if (_sparse) {
+      F = stepSparse(gamma);
+    } else {
+      F = step(gamma);
+    }
 
     // change orbital energies
     std::cout << "Orbital energies at step " << nStep << ", with constraint = " << std::setw(16) << F << "." << std::endl;
     std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "next energy (H)" << " " << std::setw(16) << "Min. (H)" << " " << std::setw(16) << "Max. (H)" << " " << std::setw(5) << "nodes" << std::endl;
     for (int k = 0; k < _o.size(); ++k) {
-      ldouble stepdE = gscale*gamma*_dE[k];
+      ldouble stepdE = _dE[k];
       //if (F == 10.0) stepdE = _dE[k];
       //if (_o[k].E()+stepdE > 0) stepdE = 0.01; // crazy jumps in unphysical regions .. stop them
       ldouble newE = (_o[k].E()+stepdE);
@@ -518,7 +540,7 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, 
 }
 
 // solve for a fixed energy and calculate _dE for the next step
-ldouble HF::step() {
+ldouble HF::step(ldouble gamma) {
   // TODO: Ignore off-diagonal entries due to vxc now ... will add iteratively later
   // https://ocw.mit.edu/courses/mathematics/18-409-topics-in-theoretical-computer-science-an-algorithmists-toolkit-fall-2009/lecture-notes/MIT18_409F09_scribe21.pdf
   int N = 0;
@@ -589,10 +611,49 @@ ldouble HF::step() {
   ldouble F = 0;
   for (int k = 0; k < _o.size(); ++k) {
     F += Fn(k);
-    _dE[k] = dEv(k);
+    _dE[k] = gamma*dEv(k);
     std::cout << "Orbital " << k << ", Fnominal = " << Fn[k] << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
   }
 
+  return F;
+}
+
+// solve for a fixed energy and calculate _dE for the next step
+ldouble HF::stepSparse(ldouble gamma) {
+  // 1) build sparse matrix _A
+  // 2) build sparse matrix _b
+  _lsb.prepareMatrices(_A, _b0, _o, _pot, _vd, _vex, _g);
+  //std::cout << _A << std::endl;
+  //std::cout << _b0 << std::endl;
+  // 3) solve sparse system
+  //ConjugateGradient<SMatrixXld, Upper> solver;
+  SparseQR<SMatrixXld, COLAMDOrdering<int> > solver;
+  solver.compute(_A);
+  _b.resize(_b0.rows(), 1);
+  _b = solver.solve(_b0);
+  //std::cout << "b:" << _b << std::endl;
+  
+  // 4) change results in _o[k]
+  _lsb.propagate(_b, _o, _dE, _g, gamma);
+  // 5) change results in _dE[k]
+
+  // count nodes for monitoring
+  for (int k = 0; k < _o.size(); ++k) {
+    _nodes[k] = 0;
+    for (int l = 0; l < _o[k].L()+1; ++l) {
+      for (int m = -l; m < l+1; ++m) {
+        for (int i = 0; i < _g.N(); ++i) {
+          if (l == _o[k].initialL() && m == _o[k].initialM() && i > 2 && _g(i) < _Z*_Z && _o[k](i, l, m)*_o[k](i-1, l, m) < 0) {
+            _nodes[k] += 1;
+          }
+        }
+      }
+    }
+  }
+
+  // 6) calculate F = sum _b[k]^2
+  ldouble F = 0;
+  for (int k = 0; k < _b.rows(); ++k) F += std::pow(_b(k), 2);
   return F;
 }
 
@@ -612,10 +673,6 @@ void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<V
         if (l == _o[k].initialL() && m == _o[k].initialM()) {
           solution[N-1](idx) = std::exp(-std::sqrt(2*std::fabs(E[k]))*_g(N-1));
           solution[N-2](idx) = std::exp(-std::sqrt(2*std::fabs(E[k]))*_g(N-2));
-          if ((_o[k].initialN() - _o[k].initialL() - 1) % 2 == 1) {
-            solution[N-1](idx) *= -1;
-            solution[N-2](idx) *= -1;
-          }
         }
         idx += 1;
       }
@@ -640,7 +697,7 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
   int N = _g.N();
   int M = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    M += _o[k].L()+1;
+    M += 2*_o[k].L()+1;
   }
   for (int i = 0; i < N; ++i) {
     solution[i].resize(M);
@@ -651,11 +708,15 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
       for (int m = -l; m < l+1; ++m) {
         if (l == _o[k].initialL() && m == _o[k].initialM()) {
           if (_g.isLog()) {
-            solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+0.5);
-	    solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+0.5);
+            solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+0.5)*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
+            solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+0.5)*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
           } else {
             solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+1);
             solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+1);
+          }
+          if ((_o[k].initialN() - _o[k].initialL() - 1) % 2 == 1) {
+            solution[0](idx) *= -1;
+            solution[1](idx) *= -1;
           }
         }
         idx += 1;
