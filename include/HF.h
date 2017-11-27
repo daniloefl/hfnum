@@ -51,7 +51,7 @@ class HF {
     void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E);
 
     ldouble step();
-    VectorXld solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<int> &icl, std::vector<VectorXld> &matched);
+    VectorXld solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched);
     void addOrbital(int L, int s, int initial_n = 1, int initial_l = 0, int initial_m = 0);
 
     std::vector<ldouble> getOrbital(int no, int mo, int lo);
@@ -66,9 +66,9 @@ class HF {
     void calculateVd(ldouble gamma);
     void calculateVex(ldouble gamma);
 
-    void solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<int> &icl);
-    void solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<int> &icl);
-    void match(std::vector<VectorXld> &o, std::vector<int> &icl, std::vector<VectorXld> &inward, std::vector<VectorXld> &outward);
+    void solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km);
+    void solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km);
+    void match(std::vector<VectorXld> &o, std::vector<VectorXld> &inward, std::vector<VectorXld> &outward);
 
     const Grid &_g;
     ldouble _Z;
@@ -84,6 +84,14 @@ class HF {
     ldouble _gamma_scf;
 
     ldouble _norm;
+
+    std::map<int, Vd>   _vdsum;             // vd
+    std::map<std::pair<int, int>, Vex>  _vexsum; // vex
+    std::vector<int> icl;
+
+    std::vector<ldouble> _Emax;
+    std::vector<ldouble> _Emin;
+    std::vector<int> _nodes;
 };
 
 #endif
