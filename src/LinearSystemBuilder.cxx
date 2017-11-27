@@ -19,8 +19,8 @@ void LinearSystemBuilder::prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vec
   }
   int Norb = o.size();
 
-  A.resize(S+Norb+1, S+Norb+1);
-  b0.resize(S+Norb+1);
+  A.resize(S+Norb, S+Norb);
+  b0.resize(S+Norb);
   A.setZero();
   b0.setZero();
 
@@ -47,7 +47,7 @@ void LinearSystemBuilder::prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vec
             for (int l2 = 0; l2 < o[k2].initialL()+1; ++l2) {
               for (int m2 = -l2; m2 < l2+1; ++m2) {
                 idxMatrix2 = g.N()*idx2 + i;
-                a = 2*std::pow(g(i), 2)*vex[std::pair<int,int>(k1,k2)][std::pair<int,int>(l1, m1)][i];
+                a = -2*std::pow(g(i), 2)*vex[std::pair<int,int>(k1,k2)][std::pair<int,int>(l1, m1)][i];
                 TLA.push_back(Tr(idxMatrix1, idxMatrix2, 10.0*a*std::pow(g.dx(), 2)/12.0));
                 b0(idxMatrix1) += 10.0*(a*std::pow(g.dx(), 2)/12.0*o[k2](i, l2, m2));
                 idx2++;
@@ -66,7 +66,7 @@ void LinearSystemBuilder::prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vec
               for (int l2 = 0; l2 < o[k2].initialL()+1; ++l2) {
                 for (int m2 = -l2; m2 < l2+1; ++m2) {
                   idxMatrix2 = g.N()*idx2 + i;
-                  a = 2*std::pow(g(i-1), 2)*vex[std::pair<int,int>(k1,k2)][std::pair<int,int>(l1, m1)][i-1];
+                  a = -2*std::pow(g(i-1), 2)*vex[std::pair<int,int>(k1,k2)][std::pair<int,int>(l1, m1)][i-1];
                   TLA.push_back(Tr(idxMatrix1, idxMatrix2-1, a*std::pow(g.dx(), 2)/12.0));
                   b0(idxMatrix1) += a*std::pow(g.dx(), 2)/12.0*o[k2](i-1, l2, m2);
                   idx2++;
@@ -86,7 +86,7 @@ void LinearSystemBuilder::prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vec
               for (int l2 = 0; l2 < o[k2].initialL()+1; ++l2) {
                 for (int m2 = -l2; m2 < l2+1; ++m2) {
                   idxMatrix2 = g.N()*idx2 + i;
-                  a = 2*std::pow(g(i+1), 2)*vex[std::pair<int,int>(k1,k2)][std::pair<int,int>(l1, m1)][i+1];
+                  a = -2*std::pow(g(i+1), 2)*vex[std::pair<int,int>(k1,k2)][std::pair<int,int>(l1, m1)][i+1];
                   TLA.push_back(Tr(idxMatrix1, idxMatrix2+1, a*std::pow(g.dx(), 2)/12.0));
                   b0(idxMatrix1) += a*std::pow(g.dx(), 2)/12.0*o[k2](i+1, l2, m2);
                   idx2++;
@@ -107,10 +107,10 @@ void LinearSystemBuilder::prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vec
         idx1++;
       }
     }
-    TLA.push_back(Tr(S+Norb, S+k1, -2.0*o[k1].E()));
+    //TLA.push_back(Tr(S+Norb, S+k1, -2.0*o[k1].E()));
     b0(S+k1) += -1;
   }
-  TLA.push_back(Tr(S+Norb, S+Norb, 1.0));
+  //TLA.push_back(Tr(S+Norb, S+Norb, 1.0));
 
   A.setFromTriplets(TLA.begin(), TLA.end());
 }
