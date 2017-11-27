@@ -56,6 +56,21 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
   _Emax.resize(_o.size());
   _Emin.resize(_o.size());
   icl.resize(_o.size());
+
+  // initialise energies and first solution guess
+  for (int k = 0; k < _o.size(); ++k) {
+    _o[k].E(-_Z*_Z*0.5/std::pow(_o[k].initialN(), 2));
+
+    for (int l = 0; l < _o[k].L()+1; ++l) {
+      for (int m = -l; m < l+1; ++m) {
+        for (int ir = 0; ir < _g.N(); ++ir) { // for each radial point
+          _o[k](ir, l, m) = std::pow(_Z*_g(ir)/((ldouble) _o[k].initialN()), l+0.5)*std::exp(-_Z*_g(ir)/((ldouble) _o[k].initialN()));
+        }
+      }
+    }
+  }
+
+
   int nStepSCF = 0;
   while (nStepSCF < NiterSCF) {
     if (!_sparse) {
@@ -430,18 +445,6 @@ std::vector<ldouble> HF::getExchangePotential(int k, int k2) {
 
 void HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   ldouble gamma = 1; // move in the direction of the negative slope with this velocity per step
-
-  for (int k = 0; k < _o.size(); ++k) {
-    _o[k].E(-_Z*_Z*0.5/std::pow(_o[k].initialN(), 2));
-
-    for (int l = 0; l < _o[k].L()+1; ++l) {
-      for (int m = -l; m < l+1; ++m) {
-        for (int ir = 0; ir < _g.N(); ++ir) { // for each radial point
-          _o[k](ir, l, m) = std::pow(_Z*_g(ir)/((ldouble) _o[k].initialN()), l+0.5)*std::exp(-_Z*_g(ir)/((ldouble) _o[k].initialN()));
-        }
-      }
-    }
-  }
 
 
   ldouble F = 0;
