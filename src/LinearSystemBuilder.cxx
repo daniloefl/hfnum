@@ -43,7 +43,7 @@ void LinearSystemBuilder::prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vec
             TLA.push_back(Tr(idxMatrix1, S+k1, -10.0*2*std::pow(g(i), 2)*std::pow(g.dx(), 2)/12.0*o[k1](i, l1, m1)));
             b0(idxMatrix1) += (12.0 - 10.0*(1 + a*std::pow(g.dx(), 2)/12.0))*o[k1](i, l1, m1);
           } else {
-            a = 2*(o[k1].E() - pot[i] - vd[k1][std::pair<int,int>(l1, m1)][i]) - std::pow(l1 + 0.5, 2);
+            a = 2*(o[k1].E() - pot[i] - vd[k1][std::pair<int,int>(l1, m1)][i]) - (l1+1)*l1/std::pow(g(i), 2);
             TLA.push_back(Tr(idxMatrix1, idxMatrix1, (12.0 - 10.0*(1 + a*std::pow(g.dx(), 2)/12.0))));
             TLA.push_back(Tr(idxMatrix1, S+k1, -10.0*2*std::pow(g.dx(), 2)/12.0*o[k1](i, l1, m1)));
             b0(idxMatrix1) += (12.0 - 10.0*(1 + a*std::pow(g.dx(), 2)/12.0))*o[k1](i, l1, m1);
@@ -75,7 +75,7 @@ void LinearSystemBuilder::prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vec
               TLA.push_back(Tr(idxMatrix1, S+k1, -2*std::pow(g(i-1), 2)*std::pow(g.dx(), 2)/12.0*o[k1](i-1, l1, m1)));
               b0(idxMatrix1) += -(1 + a*std::pow(g.dx(), 2)/12.0)*o[k1](i-1, l1, m1);
             } else {
-              ldouble a = 2*(o[k1].E() - pot[i-1] - vd[k1][std::pair<int,int>(l1, m1)][i-1]) - std::pow(l1 + 0.5, 2);
+              ldouble a = 2*(o[k1].E() - pot[i-1] - vd[k1][std::pair<int,int>(l1, m1)][i-1]) - (l1+1)*l1/std::pow(g(i), 2);
               TLA.push_back(Tr(idxMatrix1, idxMatrix1-1, -(1 + a*std::pow(g.dx(), 2)/12.0)));
               TLA.push_back(Tr(idxMatrix1, S+k1, -2*std::pow(g.dx(), 2)/12.0*o[k1](i-1, l1, m1)));
               b0(idxMatrix1) += -(1 + a*std::pow(g.dx(), 2)/12.0)*o[k1](i-1, l1, m1);
@@ -108,7 +108,7 @@ void LinearSystemBuilder::prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vec
               TLA.push_back(Tr(idxMatrix1, S+k1, -2*std::pow(g(i+1), 2)*std::pow(g.dx(), 2)/12.0*o[k1](i+1, l1, m1)));
               b0(idxMatrix1) += -(1 + a*std::pow(g.dx(), 2)/12.0)*o[k1](i+1, l1, m1);
             } else {
-              ldouble a = 2*(o[k1].E() - pot[i+1] - vd[k1][std::pair<int,int>(l1, m1)][i+1]) - std::pow(l1 + 0.5, 2);
+              ldouble a = 2*(o[k1].E() - pot[i+1] - vd[k1][std::pair<int,int>(l1, m1)][i+1]) - (l1+1)*l1/std::pow(g(i), 2);
               TLA.push_back(Tr(idxMatrix1, idxMatrix1+1, -(1 + a*std::pow(g.dx(), 2)/12.0)));
               TLA.push_back(Tr(idxMatrix1, S+k1, -2*std::pow(g.dx(), 2)/12.0*o[k1](i+1, l1, m1)));
               b0(idxMatrix1) += -(1 + a*std::pow(g.dx(), 2)/12.0)*o[k1](i+1, l1, m1);
