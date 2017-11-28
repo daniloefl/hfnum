@@ -616,11 +616,22 @@ ldouble HF::stepSparse(ldouble gamma) {
   //std::cout << _A << std::endl;
   //std::cout << _b0 << std::endl;
   // 3) solve sparse system
-  //ConjugateGradient<SMatrixXld, Upper> solver;
-  SparseQR<SMatrixXld, COLAMDOrdering<int> > solver;
-  solver.compute(_A);
   _b.resize(_b0.rows(), 1);
+  ConjugateGradient<SMatrixXld, Upper> solver;
+  //SparseQR<SMatrixXld, COLAMDOrdering<int> > solver;
+  solver.compute(_A);
   _b = solver.solve(_b0);
+
+  //SMatrixXld L(_b.rows(), _b.rows());
+  //for (int idxD = 0; idxD < _b.rows(); ++idxD) L.coeffRef(idxD, idxD) = _A.coeffRef(idxD, idxD);
+  //SMatrixXld K = _A - L;
+  //for (int idxD = 0; idxD < _b.rows(); ++idxD) L.coeffRef(idxD, idxD) = 1.0/L.coeffRef(idxD, idxD);
+  //K = L*K;
+  //SMatrixXld I(_b.rows(), _b.rows());
+  //I.setIdentity();
+  //K = (I + K + (K*K))*L;
+  //_b = K*_b0;
+
   //std::cout << "b:" << _b << std::endl;
   
   // 4) change results in _o[k]

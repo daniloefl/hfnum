@@ -26,8 +26,8 @@ Z = 3
 #N = 62000*Z
 #rmin = 1e-5
 dx = 0.5e-1
-N = 390
-rmin = 1e-7
+N = 470
+rmin = 1e-9
 for i in range(0, N):
   r = np.exp(np.log(rmin) + i*dx)
   V = -1.0/r
@@ -50,7 +50,7 @@ print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 20):
   print "SCF it.", i
-  h.gammaSCF(0.7)
+  h.gammaSCF(0.4)
   h.solve(NiterSCF, Niter, F0stop)
 
   r = np.asarray(h.getR())
