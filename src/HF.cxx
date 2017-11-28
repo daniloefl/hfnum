@@ -666,8 +666,8 @@ void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<V
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         if (l == _o[k].initialL() && m == _o[k].initialM()) {
-          solution[N-1](idx) = std::exp(-std::sqrt(2*std::fabs(E[k]))*_g(N-1));
-          solution[N-2](idx) = std::exp(-std::sqrt(2*std::fabs(E[k]))*_g(N-2));
+          solution[N-1](idx) = _o[k](N-1, l, m); //std::exp(-std::sqrt(2*std::fabs(E[k]))*_g(N-1));
+          solution[N-2](idx) = _o[k](N-2, l, m); //std::exp(-std::sqrt(2*std::fabs(E[k]))*_g(N-2));
         }
         idx += 1;
       }
@@ -703,16 +703,16 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
       for (int m = -l; m < l+1; ++m) {
         if (l == _o[k].initialL() && m == _o[k].initialM()) {
           if (_g.isLog()) {
-            solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+0.5)*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
-            solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+0.5)*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
+            solution[0](idx) = _o[k](0, l, m); //std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+0.5)*std::exp(-_Z*_g(0)/((ldouble) _o[k].initialN()));
+            solution[1](idx) = _o[k](1, l, m); //std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+0.5)*std::exp(-_Z*_g(1)/((ldouble) _o[k].initialN()));
           } else {
-            solution[0](idx) = std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+1);
-            solution[1](idx) = std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+1);
+            solution[0](idx) = _o[k](0, l, m); //std::pow(_Z*_g(0)/((ldouble) _o[k].initialN()), li[k]+1);
+            solution[1](idx) = _o[k](1, l, m); //std::pow(_Z*_g(1)/((ldouble) _o[k].initialN()), li[k]+1);
           }
-          if ((_o[k].initialN() - _o[k].initialL() - 1) % 2 == 1) {
-            solution[0](idx) *= -1;
-            solution[1](idx) *= -1;
-          }
+          //if ((_o[k].initialN() - _o[k].initialL() - 1) % 2 == 1) {
+          //  solution[0](idx) *= -1;
+          //  solution[1](idx) *= -1;
+          //}
         }
         idx += 1;
       }
