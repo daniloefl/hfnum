@@ -115,7 +115,8 @@ void Orbital::normalise(const Grid &g) {
       }
       for (int m = -l; m < l+1; ++m) {
         int msum = (m+l)*_N;
-        _wf[k + lsum*_N + msum] = _wf_norm[k + lsum*_N + msum]*std::pow(r, 0.5);
+        _wf[k + lsum*_N + msum] = _wf_norm[k + lsum*_N + msum];
+        if (g.isLog()) _wf[k + lsum*_N + msum] *= std::pow(r, 0.5);
       }
     }
   }

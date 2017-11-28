@@ -57,19 +57,6 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
   _Emin.resize(_o.size());
   icl.resize(_o.size());
 
-  // initialise energies and first solution guess
-  for (int k = 0; k < _o.size(); ++k) {
-    _o[k].E(-_Z*_Z*0.5/std::pow(_o[k].initialN(), 2));
-
-    for (int l = 0; l < _o[k].L()+1; ++l) {
-      for (int m = -l; m < l+1; ++m) {
-        for (int ir = 0; ir < _g.N(); ++ir) { // for each radial point
-          _o[k](ir, l, m) = std::pow(_Z*_g(ir)/((ldouble) _o[k].initialN()), l+0.5)*std::exp(-_Z*_g(ir)/((ldouble) _o[k].initialN()));
-        }
-      }
-    }
-  }
-
 
   int nStepSCF = 0;
   while (nStepSCF < NiterSCF) {
@@ -87,7 +74,7 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
           ldouble r = _g(i);
           ldouble a = 0;
           if (_g.isLog()) a = 2*std::pow(r, 2)*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - std::pow(lmain + 0.5, 2);
-          else a = 2*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i] - lmain*(lmain+1)/std::pow(r, 2));
+          else a = 2*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - lmain*(lmain+1)/std::pow(r, 2);
           if (icl[k] < 0 && a*a_m1 < 0) {
             icl[k] = i;
             break;
@@ -652,6 +639,11 @@ ldouble HF::stepSparse(ldouble gamma) {
         }
       }
     }
+    //if (_nodes[k] < _o[k].initialN() - _o[k].initialL() - 1) {
+    //  _dE[k] = std::fabs(_Z*_Z*0.5/std::pow(_o[k].initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k].initialN()+1, 2));
+    //} else if (_nodes[k] > _o[k].initialN() - _o[k].initialL() - 1) {
+    //  _dE[k] = -std::fabs(_Z*_Z*0.5/std::pow(_o[k].initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k].initialN()+1, 2));
+    //}
   }
 
   // 6) calculate F = sum _b[k]^2
@@ -804,15 +796,14 @@ VectorXld HF::solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> 
 
 void HF::addOrbital(int L, int s, int initial_n, int initial_l, int initial_m) {
   _o.push_back(Orbital(_g.N(), s, L, initial_n, initial_l, initial_m));
-  // initialise energies
+  // initialise energies and first solution guess
   for (int k = 0; k < _o.size(); ++k) {
     _o[k].E(-_Z*_Z*0.5/std::pow(_o[k].initialN(), 2));
+
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
-        ldouble v = 0;
-        if (l == _o[k].initialL() && m == _o[k].initialM()) v = 1;
         for (int ir = 0; ir < _g.N(); ++ir) { // for each radial point
-          _o[k](ir, l, m) = v;
+          _o[k](ir, l, m) = std::pow(_Z*_g(ir)/((ldouble) _o[k].initialN()), l+0.5)*std::exp(-_Z*_g(ir)/((ldouble) _o[k].initialN()));
         }
       }
     }
