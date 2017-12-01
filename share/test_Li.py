@@ -25,9 +25,9 @@ Z = 3
 #dx = 0.25e-3/Z
 #N = 62000*Z
 #rmin = 1e-5
-dx = 0.5e-1
-N = 470
-rmin = 1e-9
+dx = 1e-1/Z
+N = 255*Z
+rmin = 1e-10
 for i in range(0, N):
   r = np.exp(np.log(rmin) + i*dx)
   V = -1.0/r
@@ -40,17 +40,17 @@ h = hfnum.HF(True, dx, int(N), rmin, Z)
 h.addOrbital(0,  1, 1, 0, 0)
 h.addOrbital(0, -1, 1, 0, 0)
 h.addOrbital(0,  1, 2, 0, 0)
-#h.sparseMethod(False)
+h.sparseMethod(False)
 
 NiterSCF = 1
-Niter = 1000
-F0stop = 1e-10
+Niter = 200
+F0stop = 1e-5
 r = h.getR()
 print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 20):
   print "SCF it.", i
-  h.gammaSCF(0.4)
+  h.gammaSCF(0.7)
   h.solve(NiterSCF, Niter, F0stop)
 
   r = np.asarray(h.getR())
@@ -84,7 +84,7 @@ for i in range(0, 20):
   #savePot(r, vex[2][1], 'vxc', '2s1+', '1s1-')
   #savePot(r, vex[2][2], 'vxc', '2s1+', '2s1+')
 
-  m = -1 #next(i for i,v in enumerate(r) if v >= 10)
+  m = next(i for i,v in enumerate(r) if v >= 10)
   f = plt.figure()
   plt.plot(r[:m], r[:m]*o[0][:m], 'r-',  linewidth = 2, label = 'r*Orbital 0 (s)')
   plt.plot(r[:m], r[:m]*o[1][:m], 'b:',  linewidth = 2, label = 'r*Orbital 1 (s)')

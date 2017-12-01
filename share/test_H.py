@@ -12,10 +12,14 @@ import matplotlib.pyplot as plt
 Z = 1
 
 # log grid
-dx = 1e-1/Z
-N = 150*Z
-rmin = 1e-4
+#dx = 1e-1/Z
+#N = 150*Z
+#rmin = 1e-4
+dx = 1e-2
+N = 2550
+rmin = 1e-10
 h = hfnum.HF(True, dx, int(N), rmin, Z)
+h.sparseMethod(False)
 
 # linear grid
 #dx = 1e-4/Z
@@ -27,7 +31,7 @@ h.addOrbital(0,  1, 1, 0, 0)
 
 NiterSCF = 1
 Niter = 100
-F0stop = 1e-12
+F0stop = 1e-5
 #F0stop = 1e-6
 r = h.getR()
 print "Last r:", r[-1]

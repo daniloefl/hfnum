@@ -5,10 +5,11 @@ It currently can use linear or logarithmic Grids, but only logarithmic Grids hav
 It can also either assume initial conditions and perform the equation integration , or it can build an NxN matrix and solve a sparse
 matrix system using the matrix Numerov method.
 
-Although the iterative method, which assumes initial conditions works well for the Hydrogen and Helium, it fails in Lithium, where an exchange potential
-appears for the first time. The sparse matrix Numerov method is slower but works in Lithium, since it does not implement initial conditions assumptions.
+The iterative method assumes some initial conditions and tries to identify the correct initial conditions using the method
+proposed by Gordon and explained in:
+http://aip.scitation.org/doi/pdf/10.1063/1.436421
 
-A solution must be found for the iterative method, so that it can make a smarter guess for the initial conditions.
+The sparse matrix Numerov method is slower but works by simultaneously looking for the eigenenergies and initial conditions and it is more straightforward to understand.
 
 The software is a Python library, where the calculations are done in C++, but the configuration of the parameters is done in Python.
 Example Python configurations for the Hydrogen, Helium, Lithium and Beryllium can be seen in the share directory.
@@ -26,20 +27,25 @@ import numpy as np
 # this is the library we need
 import hfnum
 
-# atomic number:
+# atomic number
 Z = 3
 
 # log grid
-# r = exp(log(rmin) + dx*i), where  i = 0..N-1
+# r = exp(log(rmin) + dx * i), where i = 0..N-1
 # change the Grid parameters below
-dx = 0.5e-1       # Grid step
-N = 390           # number of points
-rmin = 1e-7       # first point in the Grid
+dx = 1e-1/Z       # Grid step
+N = 255*Z         # number of points
+rmin = 1e-10      # first point in the Grid
 
 # initialise library with the Grid parameters
 # the first parameter tells it whether one should use the logarithmic Grid
 # the linear Grid works poorly, so it is recommended to keep this always in True
 h = hfnum.HF(True, dx, int(N), rmin, Z)
+
+# use this to use the faster method, which iteratively looks for the energy
+# without solving the equations using the NxN grid of points
+# the default is to use the sparse method, which is much slower
+h.sparseMethod(False)
 
 # call addOrbital as many times as needed to
 # add an orbital
@@ -58,8 +64,8 @@ NiterSCF = 20
 # number of maximum iterations to loop over when scanning for the correct eigenenergy
 Niter = 1000
 
-# stop criteria on minimization quantity (1e-10 is recommended
-F0stop = 1e-10
+# stop criteria on the energy
+F0stop = 1e-5
 
 # set velocity with which the self-consistent potentials are changed
 # 0.7 works well, but other numbers can be tried in case of divergence
@@ -98,6 +104,8 @@ before calling `solve`:
 ```
 h.sparseMethod(False)     #  to de-activate the sparse matrix Numerov method
 ```
+
+Setting this to False is recommended, as the sparse method is quite slow.
 
 # Installing packages necessary for compilation
 

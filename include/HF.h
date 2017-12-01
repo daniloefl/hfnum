@@ -41,14 +41,14 @@ class HF {
     void solve(int NiterSCF, int Niter, ldouble F0stop);
 
     // fix self-consistent potentials and call step or stepSparse to solve Schroedinger eq.
-    void solveForFixedPotentials(int Niter, ldouble F0stop);
+    ldouble solveForFixedPotentials(int Niter, ldouble F0stop);
 
     // methods to solve equation for a fixed potential
     // This uses the Hydrogen initial conditions for the solution
     // Does not seem to work for Li or Be
     // Sparse method in stepSparse is more general
     ldouble step(ldouble gamma);
-    VectorXld solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched);
+    ldouble solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched);
     void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E);
 
     // build NxN matrix to solve all equations of the Numerov method for each point simultaneously
@@ -79,10 +79,10 @@ class HF {
     void calculateVex(ldouble gamma);
 
     // solve equation with fixed potentials and energy assuming initial condition at infinity
-    void solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km);
+    void solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, int k_init);
 
     // solve equation with fixed potentials and energy assuming initial condition at r=0
-    void solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km);
+    void solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, int k_init);
 
     // match solutions of solveInward and solveOutward at the position given by icl
     void match(std::vector<VectorXld> &o, std::vector<VectorXld> &inward, std::vector<VectorXld> &outward);

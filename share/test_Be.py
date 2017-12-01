@@ -15,9 +15,12 @@ Z = 4
 #dx = 0.25e-3/Z
 #N = 62000*Z
 #rmin = 1e-5
-dx = 1e-2/Z
-N = 1600*Z
-rmin = 1e-5
+#dx = 1e-2/Z
+#N = 1600*Z
+#rmin = 1e-5
+dx = 1e-1/Z
+N = 255*Z
+rmin = 1e-10
 for i in range(0, N):
   r = np.exp(np.log(rmin) + i*dx)
   V = -1.0/r
@@ -26,6 +29,7 @@ for i in range(0, N):
     print "Warning: (a*dx)^2 = ", (a*dx)**2, " > 6, at i = ", i, " for r = ", r, " --> can cause instabilities"
     break
 h = hfnum.HF(True, dx, int(N), rmin, Z)
+h.sparseMethod(False)
 
 h.addOrbital(0,  1, 1, 0, 0)
 h.addOrbital(0, -1, 1, 0, 0)
@@ -34,7 +38,7 @@ h.addOrbital(0, -1, 2, 0, 0)
 
 NiterSCF = 1
 Niter = 1000
-F0stop = 1e-10
+F0stop = 1e-5
 r = h.getR()
 print "Last r:", r[-1]
 print "First r:", r[0:5]
