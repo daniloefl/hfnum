@@ -20,10 +20,8 @@
 HF::HF(const Grid &g, ldouble Z)
   : _g(g), _Z(Z) {
   _pot.resize(_g.N());
-  _potIndep.resize(_g.N());
   for (int k = 0; k < _g.N(); ++k) {
     _pot[k] = -_Z/_g(k);
-    _potIndep[k] = 0;
   }
   _gamma_scf = 0.5;
   _sparse = true;
@@ -707,7 +705,7 @@ void HF::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<V
   for (int k = 0; k < _o.size(); ++k) {
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
-        for (int i = N-2; i >= icl[0]-1; --i) {
+        for (int i = N-2; i >= icl[k]-1; --i) {
           //JacobiSVD<MatrixXld> dec(Fm[i-1], ComputeThinU | ComputeThinV);
           //solution[i-1] = dec.solve((MatrixXld::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1]));
           solution[i-1] = Km[i-1]*((MatrixXld::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1])); 
@@ -753,7 +751,7 @@ void HF::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector
   for (int k = 0; k < _o.size(); ++k) {
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
-        for (int i = 1; i <= icl[0]+1; ++i) {
+        for (int i = 1; i <= icl[k]+1; ++i) {
           //JacobiSVD<MatrixXld> dec(Fm[i+1], ComputeThinU | ComputeThinV);
           //solution[i+1] = dec.solve((MatrixXld::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
           solution[i+1] = Km[i+1]*((MatrixXld::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
@@ -774,11 +772,11 @@ void HF::match(std::vector<VectorXld> &o, std::vector<VectorXld> &inward, std::v
 
   int idx = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    ldouble ratio = outward[icl[0]](k)/inward[icl[0]](k);
+    ldouble ratio = outward[icl[k]](k)/inward[icl[k]](k);
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         for (int i = 0; i < _g.N(); ++i) {
-          if (i < icl[0]) {
+          if (i < icl[k]) {
             o[i](idx) = outward[i](idx);
           } else {
             o[i](idx) = ratio*inward[i](idx);
@@ -814,7 +812,7 @@ ldouble HF::solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l
   MatrixXld Dc(_o.size(), _o.size());
   MatrixXld Dd(_o.size(), _o.size());
   for (int k = 0; k < _o.size(); ++k) {
-    int icl0 = icl[0];
+    int icl0 = icl[k];
     ldouble dr1 = _g(icl0) - _g(icl0-1);
     ldouble dr2 = _g(icl0+1) - _g(icl0);
     for (int l = 0; l < _o[k].L()+1; ++l) {
@@ -856,12 +854,12 @@ ldouble HF::solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l
     for (int l = 0; l < _o[k].L()+1; ++l) {
       for (int m = -l; m < l+1; ++m) {
         for (int i = 0; i < _g.N(); ++i) {
-          if (i <= icl[0]+1) {
+          if (i <= icl[k]+1) {
             for (int ks = 0; ks < _o.size(); ++ks) {
               fix_outward[i](idx) += outward[ks][i](idx)*left(ks);
             }
           }
-          if (i >= icl[0]-1) {
+          if (i >= icl[k]-1) {
             for (int ks = 0; ks < _o.size(); ++ks) {
               fix_inward[i](idx) += inward[ks][i](idx)*r(ks);
             }

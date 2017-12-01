@@ -99,9 +99,6 @@ class HF {
     // effective potential
     std::vector<ldouble> _pot;
 
-    // only Coulomb potential
-    std::vector<ldouble> _potIndep;
-
     // Direct potential
     std::map<int, Vd>   _vd;
 
