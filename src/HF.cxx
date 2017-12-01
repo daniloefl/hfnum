@@ -446,9 +446,8 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
       F = step(gamma);
     }
 
-
     /*
-    if (!_sparse && nStep % 20 == 0) {
+    if (!_sparse) {
       bool wrongNode = false;
       for (int k = 0; k < _o.size(); ++k) {
         if (_nodes[k] > _o[k].initialN() - _o[k].initialL() - 1) {
@@ -589,7 +588,7 @@ ldouble HF::step(ldouble gamma) {
       for (int m = -l; m < l+1; ++m) {
         for (int i = 0; i < _g.N(); ++i) {
           _o[k](i, l, m) = matched[i](idx);
-          if (l == _o[k].initialL() && m == _o[k].initialM() && i >= 10 && _g(i) < std::pow(_o.size(),2) && matched[i](idx)*matched[i-1](idx) <= 0) {
+          if (l == _o[k].initialL() && m == _o[k].initialM() && i >= 10 && _g(i) < std::pow(_o.size(),2) && i < _g.N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
             _nodes[k] += 1;
           }
         }

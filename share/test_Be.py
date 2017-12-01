@@ -38,7 +38,7 @@ h.addOrbital(0, -1, 2, 0, 0)
 
 NiterSCF = 1
 Niter = 1000
-F0stop = 1e-5
+F0stop = 1e-12
 r = h.getR()
 print "Last r:", r[-1]
 print "First r:", r[0:5]
@@ -67,7 +67,7 @@ for i in range(0, 20):
   plt.plot(r[:m], r[:m]*o[0][:m], 'r-',  linewidth = 2, label = 'r*Orbital 0 (s)')
   plt.plot(r[:m], r[:m]*o[1][:m], 'b:',  linewidth = 2, label = 'r*Orbital 1 (s)')
   plt.plot(r[:m], r[:m]*o[2][:m], 'm:',  linewidth = 2, label = 'r*Orbital 2 (s)')
-  plt.plot(r[:m], r[:m]*o[3][:m], 'v:',  linewidth = 2, label = 'r*Orbital 3 (s)')
+  plt.plot(r[:m], r[:m]*o[3][:m], 'k:',  linewidth = 2, label = 'r*Orbital 3 (s)')
   plt.plot(r[:m], r[:m]*H1s[:m], 'g--', linewidth = 2, label = 'r*Hydrogen 1s')
   plt.legend()
   plt.show()
@@ -79,7 +79,7 @@ for i in range(0, 20):
   plt.plot(r[:m], vex[0][0][:m], 'g--', linewidth = 3, label = 'Exchange (0,0)')
   plt.plot(r[:m], vex[0][1][:m], 'm--', linewidth = 3, label = 'Exchange (0,1)')
   plt.plot(r[:m], vex[0][2][:m], 'c--', linewidth = 3, label = 'Exchange (0,2)')
-  plt.plot(r[:m], vex[0][3][:m], 'v--', linewidth = 3, label = 'Exchange (0,3)')
+  plt.plot(r[:m], vex[0][3][:m], 'k--', linewidth = 3, label = 'Exchange (0,3)')
   plt.ylim((-ymin, ymin))
   plt.legend()
   plt.show()
@@ -91,7 +91,7 @@ for i in range(0, 20):
   plt.plot(r[:m], vex[1][0][:m], 'g--', linewidth = 3, label = 'Exchange (1,0)')
   plt.plot(r[:m], vex[1][1][:m], 'm--', linewidth = 3, label = 'Exchange (1,1)')
   plt.plot(r[:m], vex[1][2][:m], 'c--', linewidth = 3, label = 'Exchange (1,2)')
-  plt.plot(r[:m], vex[1][3][:m], 'v--', linewidth = 3, label = 'Exchange (1,3)')
+  plt.plot(r[:m], vex[1][3][:m], 'k--', linewidth = 3, label = 'Exchange (1,3)')
   plt.ylim((-ymin, ymin))
   plt.legend()
   plt.show()
@@ -103,7 +103,7 @@ for i in range(0, 20):
   plt.plot(r[:m], vex[2][0][:m], 'g--', linewidth = 3, label = 'Exchange (2,0)')
   plt.plot(r[:m], vex[2][1][:m], 'm--', linewidth = 3, label = 'Exchange (2,1)')
   plt.plot(r[:m], vex[2][2][:m], 'c--', linewidth = 3, label = 'Exchange (2,2)')
-  plt.plot(r[:m], vex[2][3][:m], 'v--', linewidth = 3, label = 'Exchange (2,3)')
+  plt.plot(r[:m], vex[2][3][:m], 'k--', linewidth = 3, label = 'Exchange (2,3)')
   plt.ylim((-ymin, ymin))
   plt.legend()
   plt.show()
@@ -115,7 +115,7 @@ for i in range(0, 20):
   plt.plot(r[:m], vex[3][0][:m], 'g--', linewidth = 3, label = 'Exchange (3,0)')
   plt.plot(r[:m], vex[3][1][:m], 'm--', linewidth = 3, label = 'Exchange (3,1)')
   plt.plot(r[:m], vex[3][2][:m], 'c--', linewidth = 3, label = 'Exchange (3,2)')
-  plt.plot(r[:m], vex[3][3][:m], 'v--', linewidth = 3, label = 'Exchange (3,3)')
+  plt.plot(r[:m], vex[3][3][:m], 'k--', linewidth = 3, label = 'Exchange (3,3)')
   plt.ylim((-ymin, ymin))
   plt.legend()
   plt.show()

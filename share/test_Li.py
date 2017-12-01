@@ -9,24 +9,14 @@ import hfnum
 import seaborn
 import matplotlib.pyplot as plt
 
-def savePot(r, V, name, forWF, actsOn):
-  fout = open('pot_%s_%s_%s.dat' % (name, forWF, actsOn), 'w')
-  fout.write("# name   %s\n" %(name))
-  fout.write("# type   %s\n" %("exchange"))
-  fout.write("# forWF  %s\n" %(forWF))
-  fout.write("# actsOn %s\n" %(actsOn))
-  for ib in range(0, len(r)):
-    fout.write("%.16f     %.16f\n" % (r[ib], V[ib]))
-  fout.close()
-
 Z = 3
 
 # log grid
 #dx = 0.25e-3/Z
 #N = 62000*Z
 #rmin = 1e-5
-dx = 1e-1/Z
-N = 300*Z
+dx = 0.5e-1/Z
+N = 600*Z
 rmin = 1e-12
 for i in range(0, N):
   r = np.exp(np.log(rmin) + i*dx)
@@ -44,7 +34,7 @@ h.sparseMethod(False)
 
 NiterSCF = 1
 Niter = 200
-F0stop = 1e-5
+F0stop = 1e-12
 r = h.getR()
 print "Last r:", r[-1]
 print "First r:", r[0:5]
@@ -65,24 +55,6 @@ for i in range(0, 20):
   vd[2] = h.getDirectPotential(2)
   vex[2] = [h.getExchangePotential(2, 0), h.getExchangePotential(2, 1), h.getExchangePotential(2, 2)]
   H1s = 2*np.exp(-r)
-
-  #savePot(r, v, 'vnuc', '', '')
-
-  #savePot(r, vd[0], 'vd', '1s1+', '1s1+')
-  #savePot(r, vd[1], 'vd', '1s1-', '1s1-')
-  #savePot(r, vd[2], 'vd', '2s1+', '2s1+')
-
-  #savePot(r, vex[0][0], 'vxc', '1s1+', '1s1+')
-  #savePot(r, vex[0][1], 'vxc', '1s1+', '1s1-')
-  #savePot(r, vex[0][2], 'vxc', '1s1+', '2s1+')
-
-  #savePot(r, vex[1][0], 'vxc', '1s1-', '1s1+')
-  #savePot(r, vex[1][1], 'vxc', '1s1-', '1s1-')
-  #savePot(r, vex[1][2], 'vxc', '1s1-', '2s1+')
-
-  #savePot(r, vex[2][0], 'vxc', '2s1+', '1s1+')
-  #savePot(r, vex[2][1], 'vxc', '2s1+', '1s1-')
-  #savePot(r, vex[2][2], 'vxc', '2s1+', '2s1+')
 
   m = next(i for i,v in enumerate(r) if v >= 10)
   f = plt.figure()
