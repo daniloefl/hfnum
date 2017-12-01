@@ -13,6 +13,8 @@ The sparse matrix Numerov method is slower but works by simultaneously looking f
 
 The software is a Python library, where the calculations are done in C++, but the configuration of the parameters is done in Python.
 Example Python configurations for the Hydrogen, Helium, Lithium and Beryllium can be seen in the share directory.
+A configuration for Borum is available, but there is a bug if l > 0, preventing the code from working properly in this case.
+
 The basic configuration works as follows:
 
 ```
@@ -139,5 +141,11 @@ For Lithium, with:
 
 ```
 python share/test_Li.py
+```
+
+For Beryllium, with:
+
+```
+python share/test_Be.py
 ```
 
