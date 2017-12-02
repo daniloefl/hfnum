@@ -61,10 +61,7 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
 
 void IterativeRenormalisedSolver::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &R) {
   int N = _g.N();
-  int M = 0;
-  for (int k = 0; k < _o.size(); ++k) {
-    M += 2*_o[k].L()+1;
-  }
+  int M = _om.N();
   R.resize(N);
   for (int i = 0; i < N; ++i) {
     R[i].resize(M, M);
