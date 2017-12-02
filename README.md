@@ -2,14 +2,14 @@
 
 Hartree-Fock calculation in C++ using a numerical Grid. Based on hfpython repository.
 It currently can use linear or logarithmic Grids, but only logarithmic Grids have been observed to work with acceptable precision.
-It can also either assume initial conditions and perform the equation integration , or it can build an NxN matrix and solve a sparse
-matrix system using the matrix Numerov method.
 
-The iterative method assumes some initial conditions and tries to identify the correct initial conditions using the method
-proposed by Gordon and explained in:
-http://aip.scitation.org/doi/pdf/10.1063/1.436421
-
-The sparse matrix Numerov method is slower but works by simultaneously looking for the eigenenergies and initial conditions and it is more straightforward to understand.
+Three methods are available to solve the differential equation:
+  * method 0: Sparse Numerov Matrix method
+    * Creates one numerical equation per differential equation and Grid point and puts them all in an NxN sparse matrix. Extra equations are created to force the normalisation of the eigenfunctions to be 1. Since the normalisation condition is non-linear, the system is resolved using the Newton-Raphson method, by calculating the Jacobian matrix of partial derivatives and changing the energy and function values according to -X inverse(Jacobian), where X is the column-vector of wavefunction values and energies. This method is extremely slow, but it is simple and assumes only that the wave function first and last values are zero.
+  * method 1: Iterative Numerov Method using Gordon's method to guess initial conditions
+    * The system can be solved (up to a normalisation) using Numerov equation to get the third point based on the two points before it. However, we need two initial conditions and choosing the wrong initial conditions (particularly in non-symmetric systems, such as atoms with more than 2 electrons) can lead to divergence. Gordon's solution tries a set of linearly independent solutions and uses a clever method to discover the correct initial conditions. It is described here: http://aip.scitation.org/doi/pdf/10.1063/1.436421
+  * method 2: Iterative renormalised method
+    * This method is an extension of the method proposed by Gordon. The method is only re-written in a different way using the ratio of solutions normalised by the differential equation coefficients. This procedure avoids overflows, which happen in method 1. It is recommended and it is explained here: http://aip.scitation.org/doi/pdf/10.1063/1.436421
 
 The software is a Python library, where the calculations are done in C++, but the configuration of the parameters is done in Python.
 Example Python configurations for the Hydrogen, Helium, Lithium and Beryllium can be seen in the share directory.
@@ -46,8 +46,7 @@ h = hfnum.HF(True, dx, int(N), rmin, Z)
 
 # use this to use the faster method, which iteratively looks for the energy
 # without solving the equations using the NxN grid of points
-# the default is to use the sparse method, which is much slower
-h.sparseMethod(False)
+h.method(2)
 
 # call addOrbital as many times as needed to
 # add an orbital
@@ -99,15 +98,6 @@ vex[2] = [h.getExchangePotential(2, 0), h.getExchangePotential(2, 1), h.getExcha
 
 # one can now plot all the above as needed
 ```
-
-To switch from the sparse matrix Numerov method and the iterative method, one can use this configuration option
-before calling `solve`:
-
-```
-h.sparseMethod(False)     #  to de-activate the sparse matrix Numerov method
-```
-
-Setting this to False is recommended, as the sparse method is quite slow.
 
 # Installing packages necessary for compilation
 

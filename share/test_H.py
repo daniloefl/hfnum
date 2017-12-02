@@ -19,7 +19,7 @@ dx = 1e-2
 N = 2550
 rmin = 1e-10
 h = hfnum.HF(True, dx, int(N), rmin, Z)
-h.sparseMethod(False)
+h.method(2)
 
 # linear grid
 #dx = 1e-4/Z
@@ -45,6 +45,8 @@ for i in range(0, 2):
   o = [np.asarray(h.getOrbital(0, 0, 0))]
   v = h.getNucleusPotential()
   H1s = 2*np.exp(-r)
+
+  print o[0]
 
   m = next(i for i,v in enumerate(r) if v >= 5)
   f = plt.figure()

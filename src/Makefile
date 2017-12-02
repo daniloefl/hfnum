@@ -206,6 +206,60 @@ HFPy.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/HFPy.cxx.s
 .PHONY : HFPy.cxx.s
 
+IterativeGordonSolver.o: IterativeGordonSolver.cxx.o
+
+.PHONY : IterativeGordonSolver.o
+
+# target to build an object file
+IterativeGordonSolver.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/IterativeGordonSolver.cxx.o
+.PHONY : IterativeGordonSolver.cxx.o
+
+IterativeGordonSolver.i: IterativeGordonSolver.cxx.i
+
+.PHONY : IterativeGordonSolver.i
+
+# target to preprocess a source file
+IterativeGordonSolver.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/IterativeGordonSolver.cxx.i
+.PHONY : IterativeGordonSolver.cxx.i
+
+IterativeGordonSolver.s: IterativeGordonSolver.cxx.s
+
+.PHONY : IterativeGordonSolver.s
+
+# target to generate assembly for a file
+IterativeGordonSolver.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/IterativeGordonSolver.cxx.s
+.PHONY : IterativeGordonSolver.cxx.s
+
+IterativeRenormalisedSolver.o: IterativeRenormalisedSolver.cxx.o
+
+.PHONY : IterativeRenormalisedSolver.o
+
+# target to build an object file
+IterativeRenormalisedSolver.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/IterativeRenormalisedSolver.cxx.o
+.PHONY : IterativeRenormalisedSolver.cxx.o
+
+IterativeRenormalisedSolver.i: IterativeRenormalisedSolver.cxx.i
+
+.PHONY : IterativeRenormalisedSolver.i
+
+# target to preprocess a source file
+IterativeRenormalisedSolver.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/IterativeRenormalisedSolver.cxx.i
+.PHONY : IterativeRenormalisedSolver.cxx.i
+
+IterativeRenormalisedSolver.s: IterativeRenormalisedSolver.cxx.s
+
+.PHONY : IterativeRenormalisedSolver.s
+
+# target to generate assembly for a file
+IterativeRenormalisedSolver.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/IterativeRenormalisedSolver.cxx.s
+.PHONY : IterativeRenormalisedSolver.cxx.s
+
 LinearSystemBuilder.o: LinearSystemBuilder.cxx.o
 
 .PHONY : LinearSystemBuilder.o
@@ -332,6 +386,12 @@ help:
 	@echo "... HFPy.o"
 	@echo "... HFPy.i"
 	@echo "... HFPy.s"
+	@echo "... IterativeGordonSolver.o"
+	@echo "... IterativeGordonSolver.i"
+	@echo "... IterativeGordonSolver.s"
+	@echo "... IterativeRenormalisedSolver.o"
+	@echo "... IterativeRenormalisedSolver.i"
+	@echo "... IterativeRenormalisedSolver.s"
 	@echo "... LinearSystemBuilder.o"
 	@echo "... LinearSystemBuilder.i"
 	@echo "... LinearSystemBuilder.s"

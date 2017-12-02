@@ -8,6 +8,8 @@
 
 #include "utils.h"
 #include "LinearSystemBuilder.h"
+#include "IterativeRenormalisedSolver.h"
+#include "IterativeGordonSolver.h"
 
 
 // Objective: solve deriv(deriv(orbitals)) + g*orbitals = s using Newton-Raphson
@@ -47,14 +49,19 @@ class HF {
     // This uses the Hydrogen initial conditions for the solution
     // Does not seem to work for Li or Be
     // Sparse method in stepSparse is more general
-    ldouble step(ldouble gamma);
+    ldouble stepGordon(ldouble gamma);
+
+    ldouble stepRenormalised(ldouble gamma);
+
     ldouble solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched);
+
+    // calculate F matrix and its inverse K
+    // this contains the coefficients
     void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E);
 
     // build NxN matrix to solve all equations of the Numerov method for each point simultaneously
     // includes an extra equation to control the orbital normalisations, which is non-linear
     ldouble stepSparse(ldouble gamma);
-
 
     // add orbital
     void addOrbital(int L, int s, int initial_n = 1, int initial_l = 0, int initial_m = 0);
@@ -63,7 +70,7 @@ class HF {
     void gammaSCF(ldouble g);
 
     // change whether to use sparse method
-    void sparseMethod(bool sparse);
+    void method(int m);
 
     // getters
     std::vector<ldouble> getOrbital(int no, int mo, int lo);
@@ -79,10 +86,10 @@ class HF {
     void calculateVex(ldouble gamma);
 
     // solve equation with fixed potentials and energy assuming initial condition at infinity
-    void solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, int k_init);
+    void solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &R);
 
     // solve equation with fixed potentials and energy assuming initial condition at r=0
-    void solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<VectorXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, int k_init);
+    void solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &solution, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &R);
 
     // match solutions of solveInward and solveOutward at the position given by icl
     void match(std::vector<VectorXld> &o, std::vector<VectorXld> &inward, std::vector<VectorXld> &outward);
@@ -130,7 +137,7 @@ class HF {
     std::vector<int> _nodes;
 
     // whether the method for solving the equation should be sparse
-    bool _sparse;
+    int _method;
 
     // for the matrix Numerov method using sparse matrices
     // A is the Jacobian of the non-linear system
@@ -140,8 +147,9 @@ class HF {
     // b0 is the column vector of last solutions for the iteration
     VectorXld _b0;
 
-
     LinearSystemBuilder _lsb;
+    IterativeRenormalisedSolver _irs;
+    IterativeGordonSolver _igs;
 };
 
 #endif

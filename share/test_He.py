@@ -22,7 +22,7 @@ rmin = 1e-10
 h = hfnum.HF(True, dx, int(N), rmin, Z)
 h.addOrbital(0,  1, 1, 0, 0)
 h.addOrbital(0, -1, 1, 0, 0)
-h.sparseMethod(False)
+h.method(2)
 
 NiterSCF = 1
 Niter = 100
