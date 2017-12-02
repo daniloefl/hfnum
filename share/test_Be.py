@@ -19,7 +19,7 @@ Z = 4
 #N = 1600*Z
 #rmin = 1e-5
 dx = 1e-1/Z
-N = 300*Z
+N = 320*Z
 rmin = 1e-12
 for i in range(0, N):
   r = np.exp(np.log(rmin) + i*dx)
@@ -29,7 +29,7 @@ for i in range(0, N):
     print "Warning: (a*dx)^2 = ", (a*dx)**2, " > 6, at i = ", i, " for r = ", r, " --> can cause instabilities"
     break
 h = hfnum.HF(True, dx, int(N), rmin, Z)
-h.sparseMethod(False)
+h.method(2)
 
 h.addOrbital(0,  1, 1, 0, 0)
 h.addOrbital(0, -1, 1, 0, 0)
