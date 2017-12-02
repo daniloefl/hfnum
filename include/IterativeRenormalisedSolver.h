@@ -8,10 +8,11 @@
 #include "Grid.h"
 #include "utils.h"
 #include <vector>
+#include "OrbitalMapper.h"
 
 class IterativeRenormalisedSolver {
   public:
-    IterativeRenormalisedSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i);
+    IterativeRenormalisedSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i, OrbitalMapper &om);
     virtual ~IterativeRenormalisedSolver();
 
     ldouble solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fmn, std::vector<MatrixXld> &Kmn, std::vector<VectorXld> &matched);
@@ -24,6 +25,7 @@ class IterativeRenormalisedSolver {
     const Grid &_g;
     std::vector<Orbital> &_o;
     std::vector<int> &icl;
+    OrbitalMapper &_om;
 };
 
 #endif

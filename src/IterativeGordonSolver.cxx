@@ -4,9 +4,10 @@
 #include "Orbital.h"
 #include "Grid.h"
 #include "utils.h"
+#include "OrbitalMapper.h"
 
-IterativeGordonSolver::IterativeGordonSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i)
-  : _g(g), _o(o), icl(i) {
+IterativeGordonSolver::IterativeGordonSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i, OrbitalMapper &om)
+  : _g(g), _o(o), icl(i), _om(om) {
 }
 
 IterativeGordonSolver::~IterativeGordonSolver() {
@@ -14,10 +15,7 @@ IterativeGordonSolver::~IterativeGordonSolver() {
 
 
 ldouble IterativeGordonSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched) {
-  int M = 0;
-  for (int k = 0; k < _o.size(); ++k) {
-    M += 2*_o[k].L()+1;
-  }
+  int M = _om.N();
 
   std::vector< std::vector<VectorXld> > inward(_o.size());
   std::vector< std::vector<VectorXld> > outward(_o.size());

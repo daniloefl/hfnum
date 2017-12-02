@@ -6,8 +6,8 @@
 #include "Grid.h"
 #include "utils.h"
 
-IterativeRenormalisedSolver::IterativeRenormalisedSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i)
-  : _g(g), _o(o), icl(i) {
+IterativeRenormalisedSolver::IterativeRenormalisedSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i, OrbitalMapper &om)
+  : _g(g), _o(o), icl(i), _om(om) {
 }
 
 IterativeRenormalisedSolver::~IterativeRenormalisedSolver() {
@@ -15,10 +15,7 @@ IterativeRenormalisedSolver::~IterativeRenormalisedSolver() {
 
 
 ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched) {
-  int M = 0;
-  for (int k = 0; k < _o.size(); ++k) {
-    M += 2*_o[k].L()+1;
-  }
+  int M = _om.N();
 
   std::vector<MatrixXld> Ri(_g.N());
   std::vector<MatrixXld> Ro(_g.N());

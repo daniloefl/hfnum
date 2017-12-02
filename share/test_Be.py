@@ -38,7 +38,7 @@ h.addOrbital(0, -1, 2, 0, 0)
 
 NiterSCF = 1
 Niter = 1000
-F0stop = 1e-12
+F0stop = 1e-5
 r = h.getR()
 print "Last r:", r[-1]
 print "First r:", r[0:5]

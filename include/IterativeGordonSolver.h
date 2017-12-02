@@ -8,10 +8,11 @@
 #include "Grid.h"
 #include "utils.h"
 #include <vector>
+#include "OrbitalMapper.h"
 
 class IterativeGordonSolver {
   public:
-    IterativeGordonSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i);
+    IterativeGordonSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i, OrbitalMapper &om);
     virtual ~IterativeGordonSolver();
 
     ldouble solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fmn, std::vector<MatrixXld> &Kmn, std::vector<VectorXld> &matched);
@@ -23,6 +24,7 @@ class IterativeGordonSolver {
     const Grid &_g;
     std::vector<Orbital> &_o;
     std::vector<int> &icl;
+    OrbitalMapper &_om;
 };
 
 #endif

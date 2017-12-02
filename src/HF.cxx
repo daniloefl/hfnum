@@ -18,7 +18,7 @@
 #include <Eigen/Dense>
 
 HF::HF(const Grid &g, ldouble Z)
-  : _g(g), _Z(Z), _irs(_g, _o, icl), _igs(_g, _o, icl) {
+  : _g(g), _Z(Z), _om(_g, _o), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
   _pot.resize(_g.N());
   for (int k = 0; k < _g.N(); ++k) {
     _pot[k] = -_Z/_g(k);
@@ -473,10 +473,7 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
 
 void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E) {
   std::vector<MatrixXld> Lambda(_g.N());
-  int N = 0;
-  for (int k = 0; k < _o.size(); ++k) {
-    N += 2*_o[k].L()+1;
-  }
+  int N = _om.N();
   F.resize(_g.N());
   K.resize(_g.N());
 
@@ -488,46 +485,34 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, 
     Lambda[i].setZero();
     K[i].resize(N, N);
     K[i].setZero();
-    int idx1 = 0;
 
-    for (int k = 0; k < _o.size(); ++k) {
-      for (int l = 0; l < _o[k].L()+1; ++l) {
-        for (int m = -l; m < l+1; ++m) {
+    for (int idx1 = 0; idx1 < N; ++idx1) {
+      int k1 = _om.orbital(idx1);
+      int l1 = _om.l(idx1);
+      int m1 = _om.m(idx1);
 
-          int idx2 = 0;
-          for (int k2 = 0; k2 < _o.size(); ++k2) {
-            for (int l2 = 0; l2 < _o[k2].L()+1; ++l2) {
-              for (int m2 = -l2; m2 < l2+1; ++m2) {
+      for (int idx2 = 0; idx2 < N; ++idx2) {
+        int k2 = _om.orbital(idx2);
+        int l2 = _om.l(idx2);
+        int m2 = _om.m(idx2);
 
-                if (idx1 == idx2) {
-                  ldouble a = 0;
-                  if (_g.isLog()) a = 2*std::pow(r, 2)*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(l, m)][i]) - std::pow(l + 0.5, 2);
-                  else a = 2*(E[k] - _pot[i] - _vd[k][std::pair<int, int>(l, m)][i] - l*(l + 1)/std::pow(_g(i), 2));
-                  F[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
-                  Lambda[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
-                  //if (std::pow(a*_g.dx(), 2) > 6) {
-                  //  std::cout << "Coefficient = " << a << " at i = " << i << ", r = " << r << " in (" << idx1 << ","<<idx1 <<"), which leads to (a*dx)^2 = " << std::pow(a*_g.dx(), 2) << " > 6 --> This will cause instabilities." << std::endl;
-                  //}
-                }
-                ldouble vex = _vex[std::pair<int,int>(k, k2)][std::pair<int, int>(l2, m2)][i];
-                ldouble a = 0;
+        if (idx1 == idx2) {
+          ldouble a = 0;
+          if (_g.isLog()) a = 2*std::pow(r, 2)*(E[k1] - _pot[i] - _vd[k1][std::pair<int, int>(l1, m1)][i]) - std::pow(l1 + 0.5, 2);
+          else a = 2*(E[k1] - _pot[i] - _vd[k1][std::pair<int, int>(l1, m1)][i] - l1*(l1 + 1)/std::pow(_g(i), 2));
 
-                if (_g.isLog()) a = 2*std::pow(r, 2)*vex;
-                else a = 2*vex;
-
-                F[i](idx1,idx2) += a*std::pow(_g.dx(), 2)/12.0;
-                if (idx1 != idx2) K[i](idx1, idx2) += a;
-                else Lambda[i](idx1, idx2) += a*std::pow(_g.dx(), 2)/12.0;
-                //if (std::pow(a*_g.dx(), 2) > 6) {
-                //  std::cout << "Coefficient = " << a << " at i = " << i << ", r = " << r << " in (" << idx1 << ","<<idx2 <<"), which leads to (a*dx)^2 = " << std::pow(a*_g.dx(), 2) << " > 6 --> This will cause instabilities." << std::endl;
-                //}
-                idx2 += 1;
-
-              }
-            }
-          }
-          idx1 += 1;
+          F[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
+          Lambda[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
         }
+        ldouble vex = _vex[std::pair<int,int>(k1, k2)][std::pair<int, int>(l2, m2)][i];
+        ldouble a = 0;
+
+        if (_g.isLog()) a = 2*std::pow(r, 2)*vex;
+        else a = 2*vex;
+
+        F[i](idx1,idx2) += a*std::pow(_g.dx(), 2)/12.0;
+        if (idx1 != idx2) K[i](idx1, idx2) += a;
+        else Lambda[i](idx1, idx2) += a*std::pow(_g.dx(), 2)/12.0;
       }
     }
     //K[i] = F[i].inverse();
@@ -561,18 +546,15 @@ ldouble HF::stepGordon(ldouble gamma) {
 
   ldouble Fn = _igs.solve(E, l, Fmn, Kmn, matched);
 
-  int idx = 0;
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
-    for (int l = 0; l < _o[k].L()+1; ++l) {
-      for (int m = -l; m < l+1; ++m) {
-        for (int i = 0; i < _g.N(); ++i) {
-          _o[k](i, l, m) = matched[i](idx);
-          if (l == _o[k].initialL() && m == _o[k].initialM() && i >= 10 && _g(i) < std::pow(_o.size(),2) && i < _g.N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
-            _nodes[k] += 1;
-          }
-        }
-        idx += 1;
+    int l = _o[k].initialL();
+    int m = _o[k].initialM();
+    int idx = _om.index(k, l, m);
+    for (int i = 0; i < _g.N(); ++i) {
+      _o[k](i, l, m) = matched[i](idx);
+      if (i >= 10 && _g(i) < std::pow(_o.size(),2) && i < _g.N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
+        _nodes[k] += 1;
       }
     }
   }
@@ -608,11 +590,7 @@ ldouble HF::stepGordon(ldouble gamma) {
 
 // solve for a fixed energy and calculate _dE for the next step
 ldouble HF::stepRenormalised(ldouble gamma) {
-  //
-  int N = 0;
-  for (int k = 0; k < _o.size(); ++k) {
-    N += 2*_o[k].L()+1;
-  }
+  int N = _om.N();
 
   std::vector<ldouble> E(_o.size(), 0);
   std::vector<int> l(_o.size(), 0);
@@ -631,18 +609,15 @@ ldouble HF::stepRenormalised(ldouble gamma) {
 
   ldouble Fn = _irs.solve(E, l, Fmn, Kmn, matched);
 
-  int idx = 0;
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
-    for (int l = 0; l < _o[k].L()+1; ++l) {
-      for (int m = -l; m < l+1; ++m) {
-        for (int i = 0; i < _g.N(); ++i) {
-          _o[k](i, l, m) = matched[i](idx);
-          if (l == _o[k].initialL() && m == _o[k].initialM() && i >= 10 && _g(i) < std::pow(_o.size(),2) && i < _g.N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
-            _nodes[k] += 1;
-          }
-        }
-        idx += 1;
+    int l = _o[k].initialL();
+    int m = _o[k].initialM();
+    int idx = _om.index(k, l, m);
+    for (int i = 0; i < _g.N(); ++i) {
+      _o[k](i, l, m) = matched[i](idx);
+      if (i >= 10 && _g(i) < std::pow(_o.size(),2) && i < _g.N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
+        _nodes[k] += 1;
       }
     }
   }
@@ -708,13 +683,11 @@ ldouble HF::stepSparse(ldouble gamma) {
   // count nodes for monitoring
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
-    for (int l = 0; l < _o[k].L()+1; ++l) {
-      for (int m = -l; m < l+1; ++m) {
-        for (int i = 0; i < _g.N(); ++i) {
-          if (l == _o[k].initialL() && m == _o[k].initialM() && i > 2 && _g(i) < _Z*_Z && _o[k](i, l, m)*_o[k](i-1, l, m) < 0) {
-            _nodes[k] += 1;
-          }
-        }
+    int l = _o[k].initialL();
+    int m = _o[k].initialM();
+    for (int i = 0; i < _g.N(); ++i) {
+      if (i >= 10 && _g(i) < std::pow(_o.size(),2) && i < _g.N() - 4 && _o[k](i, l, m)*_o[k](i-1, l, m) <= 0) {
+        _nodes[k] += 1;
       }
     }
     //if (_nodes[k] < _o[k].initialN() - _o[k].initialL() - 1) {

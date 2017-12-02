@@ -314,6 +314,33 @@ Orbital.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/Orbital.cxx.s
 .PHONY : Orbital.cxx.s
 
+OrbitalMapper.o: OrbitalMapper.cxx.o
+
+.PHONY : OrbitalMapper.o
+
+# target to build an object file
+OrbitalMapper.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/OrbitalMapper.cxx.o
+.PHONY : OrbitalMapper.cxx.o
+
+OrbitalMapper.i: OrbitalMapper.cxx.i
+
+.PHONY : OrbitalMapper.i
+
+# target to preprocess a source file
+OrbitalMapper.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/OrbitalMapper.cxx.i
+.PHONY : OrbitalMapper.cxx.i
+
+OrbitalMapper.s: OrbitalMapper.cxx.s
+
+.PHONY : OrbitalMapper.s
+
+# target to generate assembly for a file
+OrbitalMapper.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/OrbitalMapper.cxx.s
+.PHONY : OrbitalMapper.cxx.s
+
 hfnum.o: hfnum.cxx.o
 
 .PHONY : hfnum.o
@@ -398,6 +425,9 @@ help:
 	@echo "... Orbital.o"
 	@echo "... Orbital.i"
 	@echo "... Orbital.s"
+	@echo "... OrbitalMapper.o"
+	@echo "... OrbitalMapper.i"
+	@echo "... OrbitalMapper.s"
 	@echo "... hfnum.o"
 	@echo "... hfnum.i"
 	@echo "... hfnum.s"

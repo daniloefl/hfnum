@@ -34,7 +34,7 @@ h.method(2)
 
 NiterSCF = 1
 Niter = 200
-F0stop = 1e-12
+F0stop = 1e-5
 r = h.getR()
 print "Last r:", r[-1]
 print "First r:", r[0:5]

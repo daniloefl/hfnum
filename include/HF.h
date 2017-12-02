@@ -10,6 +10,7 @@
 #include "LinearSystemBuilder.h"
 #include "IterativeRenormalisedSolver.h"
 #include "IterativeGordonSolver.h"
+#include "OrbitalMapper.h"
 
 
 // Objective: solve deriv(deriv(orbitals)) + g*orbitals = s using Newton-Raphson
@@ -150,6 +151,7 @@ class HF {
     LinearSystemBuilder _lsb;
     IterativeRenormalisedSolver _irs;
     IterativeGordonSolver _igs;
+    OrbitalMapper _om;
 };
 
 #endif
