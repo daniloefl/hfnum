@@ -16,7 +16,7 @@ Z = 3
 #N = 62000*Z
 #rmin = 1e-5
 dx = 0.5e-1/Z
-N = 700*Z
+N = 650*Z
 rmin = 1e-12
 for i in range(0, N):
   r = np.exp(np.log(rmin) + i*dx)
@@ -29,7 +29,7 @@ h = hfnum.HF(True, dx, int(N), rmin, Z)
 
 h.addOrbital(0,  1, 1, 0, 0)
 h.addOrbital(0, -1, 1, 0, 0)
-h.addOrbital(0,  1, 2, 0, 0)
+h.addOrbital(1,  1, 2, 0, 0)
 h.method(2)
 
 NiterSCF = 1

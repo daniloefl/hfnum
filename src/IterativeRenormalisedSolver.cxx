@@ -28,22 +28,18 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
 
   ldouble F = (Ro[icl[0]] - Ri[icl[0]+1].inverse()).determinant();
   MatrixXld Mm = Ro[icl[0]] - Ri[icl[0]+1].inverse();
+  VectorXld fm(M);
+  fm.setZero();
   JacobiSVD<MatrixXld> dec_Mm(Mm, ComputeThinU | ComputeThinV);
-  int idx_SV = 0;
-  ldouble smallest_SV = 1e10;
+  ldouble limit_SV = 1e-2;
   for (int idx = 0; idx < M; ++idx) {
-    if (std::fabs(dec_Mm.singularValues()(idx)) < smallest_SV) {
-      smallest_SV = std::fabs(dec_Mm.singularValues()(idx));
-      idx_SV = idx;
+    if (std::fabs(dec_Mm.singularValues()(idx)) < limit_SV) {
+      fm += dec_Mm.matrixV().block(0, idx, M, 1)/dec_Mm.singularValues()(idx);
     }
   }
   //std::cout << "Mm:" << std::endl << Mm << std::endl;
   //std::cout << "Mm SV:" << std::endl << dec_Mm.singularValues() << std::endl;
-  //std::cout << "Mm smallest SV:" << smallest_SV << " idx: " << idx_SV << std::endl;
   //std::cout << "Mm right-singular vectors:" << std::endl << dec_Mm.matrixV() << std::endl;
-  VectorXld fm(M);
-  fm.setZero();
-  fm = dec_Mm.matrixV().block(0, idx_SV, M, 1)/smallest_SV;
   //std::cout << "fm:" << std::endl << fm << std::endl;
 
   fix_outward[icl[0]] = fm;
