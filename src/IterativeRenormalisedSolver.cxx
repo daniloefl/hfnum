@@ -27,11 +27,11 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   solveInward(E, l, Fm, Km, Ri);
 
   ldouble F = (Ro[icl[0]] - Ri[icl[0]+1].inverse()).determinant();
-  //MatrixXld M = Ro[icl[0]] - Ri[icl[0]+1].inverse();
+  MatrixXld Mm = Ro[icl[0]] - Ri[icl[0]+1].inverse();
+  //std::cout << "Mm " << Mm << std::endl;
   VectorXld fm(M);
-  for (int k = 0; k < M; ++k) fm(k) = 1.0;
-
-  int idx = 0;
+  fm.setZero();
+  for (int idx = 0; idx < M; ++idx) fm(idx) = 1e10;
 
   fix_outward[icl[0]] = fm;
   for (int i = icl[0]-1; i >= 0; --i) {
@@ -81,10 +81,31 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
     R[i].resize(M, M);
   }
   R[0].setZero();
-  for (int k = 0; k < _o.size(); ++k) {
-    R[0] = Fm[1]*Fm[0].inverse();
+  MatrixXld psi0(M,M);
+  MatrixXld psi1(M,M);
+  psi0.setZero();
+  psi1.setZero();
+  for (int idx2 = 0; idx2 < M; ++idx2) {
+    for (int idx = 0; idx < M; ++idx) {
+      int k = _om.orbital(idx);
+      int l = _om.l(idx);
+      int m = _om.m(idx);
+      psi0(idx, idx) = 1e-2;
+      psi1(idx, idx) = 1e-1;
+      if (l == _o[k].initialL() && m == _o[k].initialM() && idx == idx2) psi1(idx, idx2) *= 10;
+    }
   }
-
+  R[0] = Fm[1]*psi1*(Fm[0]*psi0).inverse();
+  /*
+  for (int idx = 0; idx < M; ++idx) {
+    int k = _om.orbital(idx);
+    int l = _om.l(idx);
+    int m = _om.m(idx);
+    if (l == 0)
+      R[0](idx, idx) = 6/_g.dx() - 5 + (1 - E[k])*_g.dx();
+    if (l == 1)
+      R[0](idx, idx) = - 5 + 1.5*_g.dx();
+  }*/
   for (int i = 1; i <= icl[0]+1; ++i) {
     R[i] = Km[i]*(MatrixXld::Identity(M, M)*12 - Fm[i]*10);
     if (R[i-1].determinant() != 0) R[i] -= R[i-1].inverse();
