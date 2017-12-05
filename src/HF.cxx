@@ -439,10 +439,14 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     strMethod = "Iterative Renormalised Numerov (http://aip.scitation.org/doi/pdf/10.1063/1.436421)";
   }
 
+  if (_method == 2) {
+    _irs.setFirst();
+  }
+
   ldouble F = 0;
   int nStep = 0;
   while (nStep < Niter) {
-    gamma = 1.0*(1 - std::exp(-(nStep+1)/20.0));
+    gamma = 0.5*(1 - std::exp(-(nStep+1)/20.0));
     // compute sum of squares of F(x_old)
     nStep += 1;
     if (_method == 0) {
@@ -597,7 +601,7 @@ ldouble HF::stepRenormalised(ldouble gamma) {
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = -1e-3;
+    dE[k] = 1e-3;
     E[k] = _o[k].E();
     l[k] = _o[k].initialL();
   }
@@ -622,28 +626,62 @@ ldouble HF::stepRenormalised(ldouble gamma) {
     }
   }
 
-  VectorXld J(_o.size());
-  J.setZero();
-  for (int k2 = 0; k2 < _o.size(); ++k2) {
+  VectorXld grad(_o.size());
+  grad.setZero();
+  for (int k = 0; k < _o.size(); ++k) {
     std::vector<ldouble> EdE = E;
-    EdE[k2] += dE[k2];
+    EdE[k] += dE[k];
 
     std::vector<MatrixXld> Fmd;
     std::vector<MatrixXld> Kmd;
     calculateFMatrix(Fmd, Kmd, EdE);
 
     ldouble Fd = _irs.solve(EdE, l, Fmd, Kmd, matched);
-    J(k2) = (Fd - Fn)/dE[k2];
-
+    grad(k) = (Fd - Fn)/dE[k];
   }
 
+  /*
+  // calculate Hessian(F) * dX = - grad(F)
+  // this does not work if looking for an asymptotic minimum!
+  // H(k1, k2) = [ (F(E+dE2+dE1) - F(E+dE2))/dE1 - (F(E+dE1) - F(E))/dE1 ]/dE2
+  MatrixXld H(_o.size(), _o.size());
+  H.setZero();
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    ldouble der1 = grad(k1); // derivative at F(E) w.r.t. E1
+    // move E(k2) by delta E(k2) and calculate derivative there
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      std::vector<ldouble> EdE = E;
+      EdE[k2] += dE[k2]; // move to this other point
+
+      std::vector<MatrixXld> Fmd;
+      std::vector<MatrixXld> Kmd;
+      calculateFMatrix(Fmd, Kmd, EdE);
+      ldouble Fd21 = _irs.solve(EdE, l, Fmd, Kmd, matched); // nominal at E(k2)+dE(k2)
+
+      EdE[k1] += dE[k1]; // variation due to E(k1)
+
+      calculateFMatrix(Fmd, Kmd, EdE);
+      ldouble Fd22 = _irs.solve(EdE, l, Fmd, Kmd, matched);
+
+      ldouble der2 = (Fd22 - Fd21)/(dE[k1]); // derivative at E(k2)+dE(k2)
+
+      H(k1, k2) = (der2 - der1)/dE[k2];
+    }
+  }
+  std::cout << "Hessian: " << std::endl << H << std::endl;
+  std::cout << "grad: " << std::endl << grad << std::endl;
+  VectorXld dX(_o.size());
+  dX.setZero();
+  JacobiSVD<MatrixXld> decH(H, ComputeThinU | ComputeThinV);
+  if (H.determinant() != 0) {
+    dX = decH.solve(-grad);
+  }
+  */
   ldouble F = Fn;
   for (int k = 0; k < _o.size(); ++k) {
-    if (J(k) != 0) {
-      _dE[k] = -gamma*Fn/J(k);
-    } else {
-      _dE[k] = dE[k];
-    }
+    //_dE[k] = gamma*dX(k); // to use the curvature for extrema finding
+    _dE[k] = -gamma*Fn/grad(k); // for root finding
+    if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);
     std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
   }
 

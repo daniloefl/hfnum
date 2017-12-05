@@ -15,8 +15,8 @@ Z = 3
 #dx = 0.25e-3/Z
 #N = 62000*Z
 #rmin = 1e-5
-dx = 0.5e-1/Z
-N = 650*Z
+dx = 1e-1/Z
+N = 300*Z
 rmin = 1e-12
 for i in range(0, N):
   r = np.exp(np.log(rmin) + i*dx)

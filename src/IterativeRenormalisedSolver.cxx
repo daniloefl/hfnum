@@ -8,14 +8,22 @@
 
 IterativeRenormalisedSolver::IterativeRenormalisedSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i, OrbitalMapper &om)
   : _g(g), _o(o), icl(i), _om(om) {
+  kl = 0;
+  first = true;
+  shiftF = 0;
 }
 
 IterativeRenormalisedSolver::~IterativeRenormalisedSolver() {
 }
 
+void IterativeRenormalisedSolver::setFirst() {
+  first = true;
+  shiftF = 0;
+}
 
 ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched) {
   int M = _om.N();
+  kl = 0;
 
   std::vector<MatrixXld> Ri(_g.N());
   std::vector<MatrixXld> Ro(_g.N());
@@ -26,14 +34,29 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   solveOutward(E, l, Fm, Km, Ro);
   solveInward(E, l, Fm, Km, Ri);
 
-  ldouble F = (Ro[icl[0]] - Ri[icl[0]+1].inverse()).determinant();
-  MatrixXld Mm = Ro[icl[0]] - Ri[icl[0]+1].inverse();
+  // originally the paper proposes to use the determinant
+  // however, if there is perfect agreement in some orbitals
+  // (for example, some orbitals are zero, due to useless added spherical harmonics components)
+  // then the determinant is dragged to zero
+  // this happens because the determinant is the product of the singular values and
+  // some of the singular values are zero simply because the full solution is zero
+  ldouble F = std::fabs((Ro[icl[kl]] - Ri[icl[kl]+1].inverse()).determinant());
+  //if (first) {
+  //  first = false;
+  //  shiftF = 1.0/F; // use first calculation to shift F to zero and avoid numerical errors in the next iteration
+  //}
+  //F *= shiftF;
+
+  MatrixXld Mm = Ro[icl[kl]] - Ri[icl[kl]+1].inverse();
   VectorXld fm(M);
   fm.setZero();
   JacobiSVD<MatrixXld> dec_Mm(Mm, ComputeThinU | ComputeThinV);
-  ldouble limit_SV = 1e-2;
   for (int idx = 0; idx < M; ++idx) {
-    if (std::fabs(dec_Mm.singularValues()(idx)) < limit_SV) {
+    int k = _om.orbital(idx);
+    int l = _om.l(idx);
+    int m = _om.m(idx);
+    bool isPrimary = (l == _o[k].initialL() && m == _o[k].initialM());
+    if (dec_Mm.singularValues()(idx) != 0) {
       fm += dec_Mm.matrixV().block(0, idx, M, 1)/dec_Mm.singularValues()(idx);
     }
   }
@@ -42,13 +65,25 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   //std::cout << "Mm right-singular vectors:" << std::endl << dec_Mm.matrixV() << std::endl;
   //std::cout << "fm:" << std::endl << fm << std::endl;
 
-  fix_outward[icl[0]] = fm;
-  for (int i = icl[0]-1; i >= 0; --i) {
+  // this is the determinant, but scale it so that we avoid numerical errors
+  //ldouble F = 0;
+  //for (int idx = 0; idx < M; ++idx) {
+  //  F += std::log(dec_Mm.singularValues()(idx));
+  //}
+  //if (first) {
+  //  first = false;
+  //  shiftF = -F; // use first calculation to shift F to zero and avoid numerical errors in the next iteration
+  //}
+  //F += shiftF;
+  //F = std::exp(F); // if this is commented out, the minimum is at - infinity, so F must be globally minimised and the minimum cannot be approximated with a paraboloid
+
+  fix_outward[icl[kl]] = fm;
+  for (int i = icl[kl]-1; i >= 0; --i) {
     fix_outward[i] = Ro[i].inverse()*fix_outward[i+1];
   }
 
-  fix_inward[icl[0]] = fm;
-  for (int i = icl[0]+1; i < _g.N(); ++i) {
+  fix_inward[icl[kl]] = fm;
+  for (int i = icl[kl]+1; i < _g.N(); ++i) {
     if (i == _g.N()-1) {
       fix_inward[i].resize(M, 1);
       fix_inward[i].setZero();
@@ -57,15 +92,15 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
     }
   }
 
-  for (int i = icl[0]; i >= 0; --i) {
+  for (int i = icl[kl]; i >= 0; --i) {
     fix_outward[i] = Fm[i].inverse()*fix_outward[i];
   }
-  for (int i = icl[0]; i < _g.N(); ++i) {
+  for (int i = icl[kl]; i < _g.N(); ++i) {
     fix_inward[i] = Fm[i].inverse()*fix_inward[i];
   }
   match(matched, fix_inward, fix_outward);
 
-  return std::fabs(F);
+  return F; //std::fabs(F);
 }
 
 void IterativeRenormalisedSolver::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &R) {
@@ -76,7 +111,7 @@ void IterativeRenormalisedSolver::solveInward(std::vector<ldouble> &E, std::vect
     R[i].resize(M, M);
   }
   R[N-1].setZero();
-  for (int i = N-1; i >= icl[0]-1; --i) {
+  for (int i = N-1; i >= icl[kl]-1; --i) {
     R[i-1] = Km[i-1]*(MatrixXld::Identity(M, M)*12 - Fm[i-1]*10);
     if (i < N-1 && R[i].determinant() != 0) R[i-1] -= R[i].inverse();
   }
@@ -115,7 +150,7 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
     if (l == 1)
       R[0](idx, idx) = - 5 + 1.5*_g.dx();
   }*/
-  for (int i = 1; i <= icl[0]+1; ++i) {
+  for (int i = 1; i <= icl[kl]+1; ++i) {
     R[i] = Km[i]*(MatrixXld::Identity(M, M)*12 - Fm[i]*10);
     if (R[i-1].determinant() != 0) R[i] -= R[i-1].inverse();
   }
@@ -130,9 +165,9 @@ void IterativeRenormalisedSolver::match(std::vector<VectorXld> &o, std::vector<V
     int k = _om.orbital(idx);
     int l = _om.l(idx);
     int m = _om.m(idx);
-    ldouble ratio = outward[icl[0]](idx)/inward[icl[0]](idx);
+    ldouble ratio = outward[icl[kl]](idx)/inward[icl[kl]](idx);
     for (int i = 0; i < _g.N(); ++i) {
-      if (i < icl[0]) {
+      if (i < icl[kl]) {
         o[i](idx) = outward[i](idx);
       } else {
         o[i](idx) = ratio*inward[i](idx);
