@@ -46,6 +46,7 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   //  shiftF = 1.0/F; // use first calculation to shift F to zero and avoid numerical errors in the next iteration
   //}
   //F *= shiftF;
+  //F = std::log(F);
 
   MatrixXld Mm = Ro[icl[kl]] - Ri[icl[kl]+1].inverse();
   VectorXld fm(M);
@@ -68,7 +69,7 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   // this is the determinant, but scale it so that we avoid numerical errors
   //ldouble F = 0;
   //for (int idx = 0; idx < M; ++idx) {
-  //  F += std::log(dec_Mm.singularValues()(idx));
+  //  F += std::log(std::fabs(dec_Mm.singularValues()(idx)));
   //}
   //if (first) {
   //  first = false;
