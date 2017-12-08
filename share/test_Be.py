@@ -31,10 +31,10 @@ for i in range(0, N):
 h = hfnum.HF(True, dx, int(N), rmin, Z)
 h.method(2)
 
-h.addOrbital(0,  1, 1, 0, 0)
-h.addOrbital(0, -1, 1, 0, 0)
-h.addOrbital(0,  1, 2, 0, 0)
-h.addOrbital(0, -1, 2, 0, 0)
+h.addOrbital( 1, 1, 0, 0)
+h.addOrbital(-1, 1, 0, 0)
+h.addOrbital( 1, 2, 0, 0)
+h.addOrbital(-1, 2, 0, 0)
 
 NiterSCF = 1
 Niter = 1000

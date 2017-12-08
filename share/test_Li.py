@@ -27,9 +27,9 @@ for i in range(0, N):
     break
 h = hfnum.HF(True, dx, int(N), rmin, Z)
 
-h.addOrbital(0,  1, 1, 0, 0)
-h.addOrbital(0, -1, 1, 0, 0)
-h.addOrbital(0,  1, 2, 0, 0)
+h.addOrbital( 1, 1, 0, 0)
+h.addOrbital(-1, 1, 0, 0)
+h.addOrbital( 1, 2, 0, 0)
 h.method(2)
 
 NiterSCF = 1

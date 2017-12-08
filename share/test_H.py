@@ -24,8 +24,7 @@ h.method(2)
 #rmin = 1e-4
 #h = hfnum.HF(False, dx, int(N), rmin, Z)
 
-h.addOrbital(0,  1, 1, 0, 0)
-#h.addOrbital(0,  1, 1, 0, 0)
+h.addOrbital(1, 1, 0, 0)
 
 NiterSCF = 1
 Niter = 100

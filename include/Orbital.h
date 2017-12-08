@@ -1,20 +1,26 @@
 #ifndef ORBITAL_H
 #define ORBITAL_H
 
+#include <map>
+#include <vector>
+
 class Grid;
+
+typedef std::pair<int, int> lm;
 
 class Orbital {
   public:
-    Orbital(int N = 150, int s = 1, int L = 1, int initial_n = 1, int initial_l = 0, int initial_m = 0);
+    Orbital(int N = 150, int s = 1, int initial_n = 1, int initial_l = 0, int initial_m = 0);
     Orbital(const Orbital &o);
     virtual ~Orbital();
 
     Orbital &operator =(const Orbital &o);
 
+    void addSphHarm(int l, int m);
+    const std::vector<lm> &getSphHarm() const;
+
     void N(int N);
-    void L(int L);
     int N() const;
-    int L() const;
     int length() const;
 
     int initialN() const;
@@ -39,7 +45,6 @@ class Orbital {
     int _s;
 
     int _N;
-    int _L;
     double *_wf;
 
     int _initial_n;
@@ -47,6 +52,8 @@ class Orbital {
     int _initial_m;
 
     double _E;
+
+    std::vector<lm> _sphHarm;
 
     bool _torenorm;
     double *_wf_norm;

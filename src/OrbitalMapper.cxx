@@ -17,25 +17,23 @@ int OrbitalMapper::sparseIndex(int k, int l, int m, int i) {
 }
 
 int OrbitalMapper::sparseN() {
-  return (index(_o.size(), _o[_o.size()-1].L(), _o[_o.size()-1].L())+1)*_g.N();
+  int idx = 0;
+  for (int ki = 0; ki < _o.size(); ++ki) {
+    idx += _o[ki].getSphHarm().size();
+  }
+  return (idx+1)*_g.N();
 }
 
 int OrbitalMapper::index(int k, int l, int m) {
   int idx = 0;
   for (int ki = 0; ki < k; ++ki) {
-    for (int li = 0; li < _o[ki].L()+1; ++li) {
-      for (int mi = -li; mi < li+1; ++mi) {
-        idx++;
-      }
-    }
+    idx += _o[ki].getSphHarm().size();
   }
-  for (int li = 0; li < l; ++li) {
-    for (int mi = -li; mi < li+1; ++mi) {
-      idx++;
+  for (int ii = 0; ii < _o[k].getSphHarm().size(); ++ii) {
+    if (_o[k].getSphHarm()[ii] == lm(l, m)) {
+      break;
     }
-  }
-  for (int mi = -l; mi < m; ++mi) {
-    idx++;
+    idx += 1;
   }
   return idx;
 }
@@ -43,23 +41,21 @@ int OrbitalMapper::index(int k, int l, int m) {
 int OrbitalMapper::N() {
   int idx = 0;
   for (int ki = 0; ki < _o.size(); ++ki) {
-    for (int li = 0; li < _o[ki].L()+1; ++li) {
-      for (int mi = -li; mi < li+1; ++mi) {
-        idx++;
-      }
-    }
+    idx += _o[ki].getSphHarm().size();
   }
   return idx;
 }
 
 int OrbitalMapper::orbital(int i) {
   int idx = 0;
-  for (int ki = 0; ki < _o.size(); ++ki) {
-    for (int li = 0; li < _o[ki].L()+1; ++li) {
-      for (int mi = -li; mi < li+1; ++mi) {
-        if (i == idx) return ki;
-        idx++;
+  int ki = 0;
+  int ii = 0;
+  for (ki = 0; ki < _o.size(); ++ki) {
+    for (ii = 0; ii < _o[ki].getSphHarm().size(); ++ii) {
+      if (idx == i) {
+        return ki;
       }
+      idx += 1;
     }
   }
   return -1;
@@ -68,12 +64,14 @@ int OrbitalMapper::orbital(int i) {
 // get quantum number l from general index
 int OrbitalMapper::l(int i) {
   int idx = 0;
-  for (int ki = 0; ki < _o.size(); ++ki) {
-    for (int li = 0; li < _o[ki].L()+1; ++li) {
-      for (int mi = -li; mi < li+1; ++mi) {
-        if (i == idx) return li;
-        idx++;
+  int ki = 0;
+  int ii = 0;
+  for (ki = 0; ki < _o.size(); ++ki) {
+    for (ii = 0; ii < _o[ki].getSphHarm().size(); ++ii) {
+      if (idx == i) {
+        return _o[ki].getSphHarm()[ii].first;
       }
+      idx += 1;
     }
   }
   return -1;
@@ -82,13 +80,16 @@ int OrbitalMapper::l(int i) {
 // get quantum number m from general index
 int OrbitalMapper::m(int i) {
   int idx = 0;
-  for (int ki = 0; ki < _o.size(); ++ki) {
-    for (int li = 0; li < _o[ki].L()+1; ++li) {
-      for (int mi = -li; mi < li+1; ++mi) {
-        if (i == idx) return mi;
-        idx++;
+  int ki = 0;
+  int ii = 0;
+  for (ki = 0; ki < _o.size(); ++ki) {
+    for (ii = 0; ii < _o[ki].getSphHarm().size(); ++ii) {
+      if (idx == i) {
+        return _o[ki].getSphHarm()[ii].second;
       }
+      idx += 1;
     }
   }
   return -1;
 }
+

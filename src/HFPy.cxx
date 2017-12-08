@@ -51,8 +51,8 @@ void HFPy::solve(int NiterSCF, int Niter, double F0stop) {
   _h.solve(NiterSCF, Niter, F0stop);
 }
 
-void HFPy::addOrbital(int L, int s, int initial_n, int initial_l, int initial_m) {
-  _h.addOrbital(L, s, initial_n, initial_l, initial_m);
+void HFPy::addOrbital(int s, int initial_n, int initial_l, int initial_m) {
+  _h.addOrbital(s, initial_n, initial_l, initial_m);
 }
 
 python::list HFPy::getR() const {

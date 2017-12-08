@@ -65,7 +65,7 @@ class HF {
     ldouble stepSparse(ldouble gamma);
 
     // add orbital
-    void addOrbital(int L, int s, int initial_n = 1, int initial_l = 0, int initial_m = 0);
+    void addOrbital(int s, int initial_n = 1, int initial_l = 0, int initial_m = 0);
 
     // change SCF speed
     void gammaSCF(ldouble g);

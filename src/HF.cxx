@@ -253,12 +253,12 @@ void HF::calculateVex(ldouble gamma) {
   */
 
   for (int ko = 0; ko < _o.size(); ++ko) {
-    for (int lj = 0; lj < _o[ko].L()+1; ++lj) { // loop over l in Y_j
-      for (int mj = -lj; mj < lj+1; ++mj) { // loop over m in Y_j
-        for (auto k1 : done) {
-          std::vector<ldouble> &currentVex = _vex[std::pair<int,int>(ko,k1)][std::pair<int,int>(lj, mj)];
-          for (int k = 0; k < _g.N(); ++k) currentVex[k] = (1-gamma)*currentVex[k] + gamma*_vexsum[std::pair<int,int>(ko,k1)][std::pair<int,int>(lj,mj)][k];
-        }
+    for (int idx = 0; idx < _o[ko].getSphHarm().size(); ++idx) {
+      int lj = _o[ko].getSphHarm()[idx].first;
+      int mj = _o[ko].getSphHarm()[idx].second;
+      for (auto k1 : done) {
+        std::vector<ldouble> &currentVex = _vex[std::pair<int,int>(ko,k1)][std::pair<int,int>(lj, mj)];
+        for (int k = 0; k < _g.N(); ++k) currentVex[k] = (1-gamma)*currentVex[k] + gamma*_vexsum[std::pair<int,int>(ko,k1)][std::pair<int,int>(lj,mj)][k];
       }
     }
   }
@@ -526,7 +526,7 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, 
 ldouble HF::stepGordon(ldouble gamma) {
   int N = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    N += 2*_o[k].L()+1;
+    N += _o[k].getSphHarm().size();
   }
 
   std::vector<ldouble> E(_o.size(), 0);
@@ -680,9 +680,9 @@ ldouble HF::stepRenormalised(ldouble gamma) {
       //_dE[k] = -gamma*Fn/grad(k); // for root finding
       _dE[k] = Fn/grad(k); // for root finding
       if (_dE[k] < 0) {
-        _dE[k] = -std::pow(std::fabs(_dE[k]), 1.0/(_o[k].L()*2 + 1));
+        _dE[k] = -std::pow(std::fabs(_dE[k]), 1.0/((ldouble) _o[k].getSphHarm().size()));
       } else {
-        _dE[k] = std::pow(std::fabs(_dE[k]), 1.0/(_o[k].L()*2 + 1));
+        _dE[k] = std::pow(std::fabs(_dE[k]), 1.0/((ldouble) _o[k].getSphHarm().size()));
       }
       _dE[k] *= -gamma;
     } else {
@@ -749,17 +749,17 @@ ldouble HF::stepSparse(ldouble gamma) {
   return F;
 }
 
-void HF::addOrbital(int L, int s, int initial_n, int initial_l, int initial_m) {
-  _o.push_back(Orbital(_g.N(), s, L, initial_n, initial_l, initial_m));
+void HF::addOrbital(int s, int initial_n, int initial_l, int initial_m) {
+  _o.push_back(Orbital(_g.N(), s, initial_n, initial_l, initial_m));
   // initialise energies and first solution guess
   for (int k = 0; k < _o.size(); ++k) {
     _o[k].E(-_Z*_Z*0.5/std::pow(_o[k].initialN(), 2));
 
-    for (int l = 0; l < _o[k].L()+1; ++l) {
-      for (int m = -l; m < l+1; ++m) {
-        for (int ir = 0; ir < _g.N(); ++ir) { // for each radial point
-          _o[k](ir, l, m) = std::pow(_Z*_g(ir)/((ldouble) _o[k].initialN()), l+0.5)*std::exp(-_Z*_g(ir)/((ldouble) _o[k].initialN()));
-        }
+    for (int idx = 0; idx < _o[k].getSphHarm().size(); ++idx) {
+      int l = _o[k].getSphHarm()[idx].first;
+      int m = _o[k].getSphHarm()[idx].second;
+      for (int ir = 0; ir < _g.N(); ++ir) { // for each radial point
+        _o[k](ir, l, m) = std::pow(_Z*_g(ir)/((ldouble) _o[k].initialN()), l+0.5)*std::exp(-_Z*_g(ir)/((ldouble) _o[k].initialN()));
       }
     }
   }
