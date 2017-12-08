@@ -9,16 +9,9 @@
 IterativeRenormalisedSolver::IterativeRenormalisedSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i, OrbitalMapper &om)
   : _g(g), _o(o), icl(i), _om(om) {
   kl = 0;
-  first = true;
-  shiftF = 0;
 }
 
 IterativeRenormalisedSolver::~IterativeRenormalisedSolver() {
-}
-
-void IterativeRenormalisedSolver::setFirst() {
-  first = true;
-  shiftF = 0;
 }
 
 ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched) {
@@ -40,13 +33,25 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   // then the determinant is dragged to zero
   // this happens because the determinant is the product of the singular values and
   // some of the singular values are zero simply because the full solution is zero
-  ldouble F = std::fabs((Ro[icl[kl]] - Ri[icl[kl]+1].inverse()).determinant());
-  //if (first) {
-  //  first = false;
-  //  shiftF = 1.0/F; // use first calculation to shift F to zero and avoid numerical errors in the next iteration
-  //}
-  //F *= shiftF;
-  //F = std::log(F);
+  //ldouble F = std::fabs((Ro[icl[kl]] - Ri[icl[kl]+1].inverse()).determinant());
+  //A - B^-1 = B^-1 (B A - I)
+  //det(A - B^-1) = 0 => det(BA - I) = 0
+  MatrixXld A = Ro[icl[kl]];
+  MatrixXld B = Ri[icl[kl]+1];
+  ldouble F = (B*A - MatrixXld::Identity(M,M)).determinant();
+  /*
+  //JacobiSVD<MatrixXld> dec_BA(B*A - MatrixXld::Identity(M,M), ComputeThinU | ComputeThinV);
+  JacobiSVD<MatrixXld> dec_BA(B*A, ComputeThinU | ComputeThinV);
+  std::vector<ldouble> svd;
+  for (int idx = 0; idx < M; ++idx) {
+    ldouble s = dec_BA.singularValues()(idx);
+    //if (s < 0) s = -s;
+    svd.push_back(s);
+  }
+  ldouble F = 11;
+  for (int idx = 0; idx < M; ++idx) {
+    F *= (svd[idx] - 1);
+  }*/
 
   MatrixXld Mm = Ro[icl[kl]] - Ri[icl[kl]+1].inverse();
   VectorXld fm(M);

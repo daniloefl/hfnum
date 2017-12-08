@@ -439,10 +439,6 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     strMethod = "Iterative Renormalised Numerov (http://aip.scitation.org/doi/pdf/10.1063/1.436421)";
   }
 
-  if (_method == 2) {
-    _irs.setFirst();
-  }
-
   ldouble F = 0;
   int nStep = 0;
   while (nStep < Niter) {
@@ -601,7 +597,7 @@ ldouble HF::stepRenormalised(ldouble gamma) {
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = 1e-3;
+    dE[k] = 1e-4;
     E[k] = _o[k].E();
     l[k] = _o[k].initialL();
   }
@@ -680,7 +676,19 @@ ldouble HF::stepRenormalised(ldouble gamma) {
   ldouble F = Fn;
   for (int k = 0; k < _o.size(); ++k) {
     //_dE[k] = gamma*dX(k); // to use the curvature for extrema finding
-    _dE[k] = -gamma*Fn/grad(k); // for root finding
+    if (grad(k) != 0) {
+      //_dE[k] = -gamma*Fn/grad(k); // for root finding
+      _dE[k] = Fn/grad(k); // for root finding
+      if (_dE[k] < 0) {
+        _dE[k] = -std::pow(std::fabs(_dE[k]), 1.0/(_o[k].L()*2 + 1));
+      } else {
+        _dE[k] = std::pow(std::fabs(_dE[k]), 1.0/(_o[k].L()*2 + 1));
+      }
+      _dE[k] *= -gamma;
+    } else {
+      _dE[k] = 0;
+    }
+    //_dE[k] = -gamma*grad(k); // for root finding
     if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);
     std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
   }
