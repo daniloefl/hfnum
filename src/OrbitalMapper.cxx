@@ -3,6 +3,7 @@
 #include <vector>
 #include "Grid.h"
 #include "Orbital.h"
+#include <iostream>
 
 OrbitalMapper::OrbitalMapper(const Grid &g, std::vector<Orbital> &o)
   : _g(g), _o(o) {

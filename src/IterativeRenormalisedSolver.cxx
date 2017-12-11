@@ -16,7 +16,7 @@ IterativeRenormalisedSolver::~IterativeRenormalisedSolver() {
 
 ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched) {
   int M = _om.N();
-  kl = 0;
+  kl = icl.size()-1;
 
   std::vector<MatrixXld> Ri(_g.N());
   std::vector<MatrixXld> Ro(_g.N());

@@ -60,10 +60,10 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
 
   int nStepSCF = 0;
   while (nStepSCF < NiterSCF) {
-    std::cout << "Finding classical crossing." << std::endl;
     for (int k = 0; k < _o.size(); ++k) {
       icl[k] = -1;
 
+      ldouble lmain_eq = _o[k].initialL();
       int lmain = _o[k].initialL();
       int mmain = _o[k].initialM();
       // calculate crossing of potential at zero for lmain,mmain
@@ -71,8 +71,8 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
       for (int i = 3; i < _g.N()-3; ++i) {
         ldouble r = _g(i);
         ldouble a = 0;
-        if (_g.isLog()) a = 2*std::pow(r, 2)*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - std::pow(lmain + 0.5, 2);
-        else a = 2*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - lmain*(lmain+1)/std::pow(r, 2);
+        if (_g.isLog()) a = 2*std::pow(r, 2)*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - std::pow(lmain_eq + 0.5, 2);
+        else a = 2*(_o[k].E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
         if (icl[k] < 0 && a*a_m1 < 0) {
           icl[k] = i;
           break;
@@ -80,6 +80,7 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
         a_m1 = a;
       }
       if (icl[k] < 0) icl[k] = 10;
+      std::cout << "Found classical crossing for orbital " << k << " at " << icl[k] << std::endl;
     }
 
     for (int k = 0; k < _o.size(); ++k) {
@@ -489,17 +490,19 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, 
     for (int idx1 = 0; idx1 < N; ++idx1) {
       int k1 = _om.orbital(idx1);
       int l1 = _om.l(idx1);
+      ldouble l1_eq = _om.l(idx1);
       int m1 = _om.m(idx1);
 
       for (int idx2 = 0; idx2 < N; ++idx2) {
         int k2 = _om.orbital(idx2);
         int l2 = _om.l(idx2);
+        ldouble l2_eq = _om.l(idx2);
         int m2 = _om.m(idx2);
 
         if (idx1 == idx2) {
           ldouble a = 0;
-          if (_g.isLog()) a = 2*std::pow(r, 2)*(E[k1] - _pot[i] - _vd[k1][std::pair<int, int>(l1, m1)][i]) - std::pow(l1 + 0.5, 2);
-          else a = 2*(E[k1] - _pot[i] - _vd[k1][std::pair<int, int>(l1, m1)][i] - l1*(l1 + 1)/std::pow(_g(i), 2));
+          if (_g.isLog()) a = 2*std::pow(r, 2)*(E[k1] - _pot[i] - _vd[k1][std::pair<int, int>(l1, m1)][i]) - std::pow(l1_eq + 0.5, 2);
+          else a = 2*(E[k1] - _pot[i] - _vd[k1][std::pair<int, int>(l1, m1)][i] - l1_eq*(l1_eq + 1)/std::pow(_g(i), 2));
 
           F[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
           Lambda[i](idx1,idx1) += 1 + a*std::pow(_g.dx(), 2)/12.0;
@@ -616,7 +619,7 @@ ldouble HF::stepRenormalised(ldouble gamma) {
     int idx = _om.index(k, l, m);
     for (int i = 0; i < _g.N(); ++i) {
       _o[k](i, l, m) = matched[i](idx);
-      if (i >= 10 && _g(i) < std::pow(_o.size(),2) && i < _g.N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
+      if (i >= 10 && i < _g.N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
         _nodes[k] += 1;
       }
     }
