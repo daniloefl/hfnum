@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 Z = 1
 
 # log grid
-dx = 1e-1
-N = 310
-rmin = 1e-12
+dx = 1e-2
+N = 1600
+rmin = 1e-5
 h = hfnum.HF(True, dx, int(N), rmin, Z)
 h.method(2)
 
@@ -28,8 +28,7 @@ h.addOrbital(1, 1, 0, 0)
 
 NiterSCF = 1
 Niter = 100
-F0stop = 1e-5
-#F0stop = 1e-6
+F0stop = 1e-6
 r = h.getR()
 print "Last r:", r[-1]
 print "First r:", r[0:5]
