@@ -43,7 +43,7 @@ for i in range(0, 20):
   h.solve(NiterSCF, Niter, F0stop)
 
   r = np.asarray(h.getR())
-  o = [np.asarray(h.getOrbital(0, 0, 0)), np.asarray(h.getOrbital(1, 0, 0)), np.asarray(h.getOrbital(2, 0, 0)), np.asarray(h.getOrbital(3, 0, 0)), np.asarray(h.getOrbital(4, 0, 0))]
+  o = [np.asarray(h.getOrbital(0, 0, 0)), np.asarray(h.getOrbital(1, 0, 0)), np.asarray(h.getOrbital(2, 0, 0)), np.asarray(h.getOrbital(3, 0, 0)), np.asarray(h.getOrbital(4, 1, 0))]
   v = h.getNucleusPotential()
   vex = {}
   vd = {}
