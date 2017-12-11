@@ -18,7 +18,7 @@
 #include <Eigen/Dense>
 
 HF::HF(const Grid &g, ldouble Z)
-  : _g(g), _Z(Z), _om(_g, _o), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
+  : _g(g), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
   _pot.resize(_g.N());
   for (int k = 0; k < _g.N(); ++k) {
     _pot[k] = -_Z/_g(k);
@@ -515,10 +515,10 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, 
         else Lambda[i](idx1, idx2) += a*std::pow(_g.dx(), 2)/12.0;
       }
     }
-    //K[i] = F[i].inverse();
-    for (int idxD = 0; idxD < N; ++idxD) Lambda[i](idxD, idxD) = 1.0/Lambda[i](idxD, idxD);
-    K[i] = Lambda[i]*K[i];
-    K[i] = (MatrixXld::Identity(N,N) + std::pow(_g.dx(), 2)/12.0*K[i] + std::pow(_g.dx(), 4)/144.0*(K[i]*K[i]))*Lambda[i];
+    K[i] = F[i].inverse();
+    //for (int idxD = 0; idxD < N; ++idxD) Lambda[i](idxD, idxD) = 1.0/Lambda[i](idxD, idxD);
+    //K[i] = Lambda[i]*K[i];
+    //K[i] = (MatrixXld::Identity(N,N) + std::pow(_g.dx(), 2)/12.0*K[i] + std::pow(_g.dx(), 4)/144.0*(K[i]*K[i]))*Lambda[i];
   }
 }
 
@@ -700,7 +700,7 @@ ldouble HF::stepRenormalised(ldouble gamma) {
 ldouble HF::stepSparse(ldouble gamma) {
   // 1) build sparse matrix _A
   // 2) build sparse matrix _b
-  _lsb.prepareMatrices(_A, _b0, _o, _pot, _vd, _vex, _g);
+  _lsb.prepareMatrices(_A, _b0, _pot, _vd, _vex);
   //std::cout << _A << std::endl;
   //std::cout << _b0 << std::endl;
   // 3) solve sparse system
@@ -723,7 +723,7 @@ ldouble HF::stepSparse(ldouble gamma) {
   //std::cout << "b:" << _b << std::endl;
   
   // 4) change results in _o[k]
-  _lsb.propagate(_b, _o, _dE, _g, gamma);
+  _lsb.propagate(_b, _dE, gamma);
   // 5) change results in _dE[k]
 
   // count nodes for monitoring
