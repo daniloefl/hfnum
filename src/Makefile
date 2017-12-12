@@ -179,33 +179,6 @@ HF.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/HF.cxx.s
 .PHONY : HF.cxx.s
 
-HFPy.o: HFPy.cxx.o
-
-.PHONY : HFPy.o
-
-# target to build an object file
-HFPy.cxx.o:
-	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/HFPy.cxx.o
-.PHONY : HFPy.cxx.o
-
-HFPy.i: HFPy.cxx.i
-
-.PHONY : HFPy.i
-
-# target to preprocess a source file
-HFPy.cxx.i:
-	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/HFPy.cxx.i
-.PHONY : HFPy.cxx.i
-
-HFPy.s: HFPy.cxx.s
-
-.PHONY : HFPy.s
-
-# target to generate assembly for a file
-HFPy.cxx.s:
-	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/HFPy.cxx.s
-.PHONY : HFPy.cxx.s
-
 IterativeGordonSolver.o: IterativeGordonSolver.cxx.o
 
 .PHONY : IterativeGordonSolver.o
@@ -410,9 +383,6 @@ help:
 	@echo "... HF.o"
 	@echo "... HF.i"
 	@echo "... HF.s"
-	@echo "... HFPy.o"
-	@echo "... HFPy.i"
-	@echo "... HFPy.s"
 	@echo "... IterativeGordonSolver.o"
 	@echo "... IterativeGordonSolver.i"
 	@echo "... IterativeGordonSolver.s"

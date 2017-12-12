@@ -7,7 +7,7 @@
 
 class OrbitalMapper {
   public:
-    OrbitalMapper(const Grid &g, std::vector<Orbital> &o);
+    OrbitalMapper(const Grid &g, std::vector<Orbital *> &o);
     virtual ~OrbitalMapper();
 
     // convert orbital index, quantum number l and m and the grid index i into a general index
@@ -34,7 +34,7 @@ class OrbitalMapper {
 
   private:
     const Grid &_g;
-    std::vector<Orbital> &_o;
+    std::vector<Orbital *> &_o;
 };
 
 #endif

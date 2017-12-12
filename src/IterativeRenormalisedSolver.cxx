@@ -6,7 +6,7 @@
 #include "Grid.h"
 #include "utils.h"
 
-IterativeRenormalisedSolver::IterativeRenormalisedSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i, OrbitalMapper &om)
+IterativeRenormalisedSolver::IterativeRenormalisedSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om)
   : _g(g), _o(o), icl(i), _om(om) {
   kl = 0;
 }
@@ -61,7 +61,7 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
     int k = _om.orbital(idx);
     int l = _om.l(idx);
     int m = _om.m(idx);
-    bool isPrimary = (l == _o[k].initialL() && m == _o[k].initialM());
+    bool isPrimary = (l == _o[k]->initialL() && m == _o[k]->initialM());
     if (dec_Mm.singularValues()(idx) != 0) {
       fm += dec_Mm.matrixV().block(0, idx, M, 1)/dec_Mm.singularValues()(idx);
     }
@@ -142,7 +142,7 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
       int m = _om.m(idx);
       psi0(idx, idx) = 1e-2;
       psi1(idx, idx) = 1e-1;
-      if (l == _o[k].initialL() && m == _o[k].initialM() && idx == idx2) psi1(idx, idx2) *= 10;
+      if (l == _o[k]->initialL() && m == _o[k]->initialM() && idx == idx2) psi1(idx, idx2) *= 10;
     }
   }
   R[0] = Fm[1]*psi1*(Fm[0]*psi0).inverse();

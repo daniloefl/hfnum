@@ -15,26 +15,25 @@ Z = 5
 dx = 1e-1/Z
 N = 300*Z
 rmin = 1e-12
-for i in range(0, N):
-  r = np.exp(np.log(rmin) + i*dx)
-  V = -1.0/r
-  a = 2*r*r*(-Z**2*0.5 - V) - 0.5**0.5
-  if (a*dx)**2 > 6:
-    print "Warning: (a*dx)^2 = ", (a*dx)**2, " > 6, at i = ", i, " for r = ", r, " --> can cause instabilities"
-    break
-h = hfnum.HF(True, dx, int(N), rmin, Z)
+g = hfnum.Grid(True, dx, int(N), rmin)
+h = hfnum.HF(g, Z)
 h.method(2)
 
-h.addOrbital( 1, 1, 0, 0)
-h.addOrbital(-1, 1, 0, 0)
-h.addOrbital( 1, 2, 0, 0)
-h.addOrbital(-1, 2, 0, 0)
-h.addOrbital( 1, 2, 1, 0)
+orb0 = hfnum.Orbital( 1, 1, 0, 0)
+orb1 = hfnum.Orbital(-1, 1, 0, 0)
+orb2 = hfnum.Orbital( 1, 2, 0, 0)
+orb3 = hfnum.Orbital(-1, 2, 0, 0)
+orb4 = hfnum.Orbital( 1, 2, 1, 0)
+h.addOrbital(orb0)
+h.addOrbital(orb1)
+h.addOrbital(orb2)
+h.addOrbital(orb3)
+h.addOrbital(orb4)
 
 NiterSCF = 1
 Niter = 1000
 F0stop = 1e-5
-r = h.getR()
+r = np.asarray(g.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 20):
@@ -42,8 +41,7 @@ for i in range(0, 20):
   h.gammaSCF(0.7)
   h.solve(NiterSCF, Niter, F0stop)
 
-  r = np.asarray(h.getR())
-  o = [np.asarray(h.getOrbital(0, 0, 0)), np.asarray(h.getOrbital(1, 0, 0)), np.asarray(h.getOrbital(2, 0, 0)), np.asarray(h.getOrbital(3, 0, 0)), np.asarray(h.getOrbital(4, 1, 0))]
+  o = [np.asarray(orb0.get(0, 0)), np.asarray(orb1.get(0, 0)), np.asarray(orb2.get(0, 0)), np.asarray(orb3.get(0, 0)), np.asarray(orb4.get(1, 0))]
   v = h.getNucleusPotential()
   vex = {}
   vd = {}

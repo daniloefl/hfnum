@@ -10,24 +10,22 @@ import seaborn
 import matplotlib.pyplot as plt
 
 Z = 2
-#dx = 1e-1/Z
-#N = 170*Z
-#rmin = 1e-5
-#dx = 1e-2
-#N = 1300
-#rmin = 1e-4
 dx = 1e-2
 N = 2550
 rmin = 1e-10
-h = hfnum.HF(True, dx, int(N), rmin, Z)
-h.addOrbital( 1, 1, 0, 0)
-h.addOrbital(-1, 1, 0, 0)
+g = hfnum.Grid(True, dx, int(N), rmin)
+h = hfnum.HF(g, Z)
+orb0 = hfnum.Orbital( 1, 1, 0, 0)
+orb1 = hfnum.Orbital(-1, 1, 0, 0)
 h.method(2)
+h.addOrbital(orb0)
+h.addOrbital(orb1)
 
 NiterSCF = 1
 Niter = 100
 F0stop = 1e-5
-r = h.getR()
+r = g.getR()
+r = np.asarray(r)
 print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 10):
@@ -35,8 +33,7 @@ for i in range(0, 10):
   h.gammaSCF(0.7)
   h.solve(NiterSCF, Niter, F0stop)
 
-  r = np.asarray(h.getR())
-  o = [np.asarray(h.getOrbital(0, 0, 0)), np.asarray(h.getOrbital(1, 0, 0))]
+  o = [np.asarray(orb0.get(0, 0)), np.asarray(orb1.get(0, 0))]
   v = h.getNucleusPotential()
   vex = {}
   vd = {}

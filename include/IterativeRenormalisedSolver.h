@@ -12,7 +12,7 @@
 
 class IterativeRenormalisedSolver {
   public:
-    IterativeRenormalisedSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i, OrbitalMapper &om);
+    IterativeRenormalisedSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om);
     virtual ~IterativeRenormalisedSolver();
 
     ldouble solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fmn, std::vector<MatrixXld> &Kmn, std::vector<VectorXld> &matched);
@@ -22,7 +22,7 @@ class IterativeRenormalisedSolver {
 
   private:
     const Grid &_g;
-    std::vector<Orbital> &_o;
+    std::vector<Orbital *> &_o;
     std::vector<int> &icl;
     OrbitalMapper &_om;
 

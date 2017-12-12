@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "OrbitalMapper.h"
 
-IterativeGordonSolver::IterativeGordonSolver(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i, OrbitalMapper &om)
+IterativeGordonSolver::IterativeGordonSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om)
   : _g(g), _o(o), icl(i), _om(om) {
 }
 
@@ -129,7 +129,7 @@ void IterativeGordonSolver::solveOutward(std::vector<ldouble> &E, std::vector<in
     int m = _om.m(idx);
     solution[0](idx) = 0;
     solution[1](idx) = 1;
-    if ((_o[k].initialN() - _o[k].initialL() - 1) % 2 == 1) {
+    if ((_o[k]->initialN() - _o[k]->initialL() - 1) % 2 == 1) {
       solution[0](idx) *= -1;
       solution[1](idx) *= -1;
     }

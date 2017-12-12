@@ -42,22 +42,28 @@ rmin = 1e-10      # first point in the Grid
 # initialise library with the Grid parameters
 # the first parameter tells it whether one should use the logarithmic Grid
 # the linear Grid works poorly, so it is recommended to keep this always in True
-h = hfnum.HF(True, dx, int(N), rmin, Z)
+g = hfnum.Grid(True, dx, int(N), rmin)
+
+# this is the main solver
+h = hfnum.HF(g, Z)
 
 # use this to use the faster method, which iteratively looks for the energy
 # without solving the equations using the NxN grid of points
 h.method(2)
 
-# call addOrbital as many times as needed to
-# add an orbital
+# create an Orbital as many times as needed
 # the syntax is the following:
-# h.addOrbital(Lmax, spin, n l, m)
+# myVar = hfnum.Orbital(spin, n l, m)
 # n, l and m are the orbital's quantum numbers to set initial conditions of integration
 # spin can be +1 or -1
-# Lmax indicates how many spherical harmonics are used in this orbital's representation
-h.addOrbital(0,  1, 1, 0, 0)
-h.addOrbital(0, -1, 1, 0, 0)
-h.addOrbital(0,  1, 2, 0, 0)
+orb0 = hfnum.Orbital( 1, 1, 0, 0)
+orb1 = hfnum.Orbital(-1, 1, 0, 0)
+orb2 = hfnum.Orbital( 1, 2, 0, 0)
+
+# now add it to the calculator
+h.addOrbital(orb0)
+h.addOrbital(orb1)
+h.addOrbital(orb2)
 
 # number of self-consistent iterations
 NiterSCF = 20
@@ -78,10 +84,10 @@ h.gammaSCF(0.7)
 h.solve(NiterSCF, Niter, F0stop)
 
 # get list with r values for plotting later
-r = np.asarray(h.getR())
+r = np.asarray(g.getR())
 
 # get orbitals shape
-o = [np.asarray(h.getOrbital(0, 0, 0)), np.asarray(h.getOrbital(1, 0, 0)), np.asarray(h.getOrbital(2, 0, 0))]
+o = [np.asarray(orb0.get(0, 0)), np.asarray(orb1.get(0, 0)), np.asarray(orb2.get(0, 0))]
 
 # get Coulomb attraction potential (just -Z/r)
 v = h.getNucleusPotential()

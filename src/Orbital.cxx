@@ -3,8 +3,8 @@
 #include "Grid.h"
 #include <cmath>
 
-Orbital::Orbital(int N, int s, int initial_n, int initial_l, int initial_m)
- : _N(N), _s(s), _initial_n(initial_n), _initial_l(initial_l), _initial_m(initial_m) {
+Orbital::Orbital(int s, int initial_n, int initial_l, int initial_m)
+ : _N(2), _s(s), _initial_n(initial_n), _initial_l(initial_l), _initial_m(initial_m) {
   _sphHarm.push_back(lm(initial_l, initial_m));
   load();
   _torenorm = true;
@@ -90,7 +90,13 @@ Orbital &Orbital::operator =(const Orbital &o) {
   return *this;
 }
 
-void Orbital::N(int N) { _N = N; }
+void Orbital::N(int N) {
+  _N = N;
+  delete [] _wf;
+  delete [] _wf_norm;
+  load();
+  _torenorm = true;
+}
 
 int Orbital::N() const { return _N; }
 
@@ -124,6 +130,19 @@ void Orbital::normalise(const Grid &g) {
       if (g.isLog()) _wf[k + idx*_N] *= std::pow(r, 0.5);
     }
   }
+}
+
+python::list Orbital::getNormPython(int lo, int mo) {
+  python::list l;
+  if (_torenorm) return l;
+  int idx = 0;
+  for (; idx < _sphHarm.size(); ++idx) {
+    if (_sphHarm[idx].first == lo && _sphHarm[idx].second == mo) {
+      break;
+    }
+  }
+  for (int k = 0; k < _N; ++k) l.append(_wf_norm[k + idx*_N]);
+  return l;
 }
 
 const double Orbital::getNorm(int i_in, int l_in, int m_in, const Grid &g) {

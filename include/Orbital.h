@@ -4,13 +4,20 @@
 #include <map>
 #include <vector>
 
+#include <boost/range/irange.hpp>
+#include <boost/python/exec.hpp>
+#include <boost/python/extract.hpp>
+
+#include <Python.h>
+using namespace boost;
+
 class Grid;
 
 typedef std::pair<int, int> lm;
 
 class Orbital {
   public:
-    Orbital(int N = 150, int s = 1, int initial_n = 1, int initial_l = 0, int initial_m = 0);
+    Orbital(int s = 1, int initial_n = 1, int initial_l = 0, int initial_m = 0);
     Orbital(const Orbital &o);
     virtual ~Orbital();
 
@@ -36,6 +43,7 @@ class Orbital {
     double &operator()(int i, int l, int m);
     const double operator()(int i, int l, int m) const;
     const double getNorm(int i, int l, int m, const Grid &g);
+    python::list getNormPython(int lo, int mo);
     void normalise(const Grid &g);
 
   private:

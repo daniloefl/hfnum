@@ -12,6 +12,8 @@
 #include "IterativeGordonSolver.h"
 #include "OrbitalMapper.h"
 
+#include <Python.h>
+using namespace boost;
 
 // Objective: solve deriv(deriv(orbitals)) + g*orbitals = s using Newton-Raphson
 // The orbitals are discretised in a Grid
@@ -37,6 +39,7 @@
 class HF {
   public:
     HF(const Grid &g, ldouble Z);
+    HF(python::object o, ldouble Z);
     virtual ~HF();
 
     // main method to solve system
@@ -65,7 +68,7 @@ class HF {
     ldouble stepSparse(ldouble gamma);
 
     // add orbital
-    void addOrbital(int s, int initial_n = 1, int initial_l = 0, int initial_m = 0);
+    void addOrbital(Orbital *o);
 
     // change SCF speed
     void gammaSCF(ldouble g);
@@ -79,6 +82,14 @@ class HF {
     std::vector<ldouble> getNucleusPotential();
     std::vector<ldouble> getDirectPotential(int k);
     std::vector<ldouble> getExchangePotential(int k, int k2);
+
+    boost::python::list getNucleusPotentialPython();
+    boost::python::list getDirectPotentialPython(int k);
+    boost::python::list getExchangePotentialPython(int k, int k2);
+
+    void addOrbitalPython(boost::python::object o);
+    boost::python::list getR() const;
+    boost::python::list getOrbitalPython(int no, int mo, int lo);
 
 
   private:
@@ -102,7 +113,7 @@ class HF {
     ldouble _Z;
 
     // vector of orbitals
-    std::vector<Orbital> _o;
+    std::vector<Orbital *> _o;
 
     // effective potential
     std::vector<ldouble> _pot;

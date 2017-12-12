@@ -11,7 +11,7 @@
 
 class LinearSystemBuilder {
   public:
-    LinearSystemBuilder(const Grid &g, std::vector<Orbital> &o, std::vector<int> &i, OrbitalMapper &om);
+    LinearSystemBuilder(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om);
     virtual ~LinearSystemBuilder();
 
     void prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vector<ldouble> &pot, std::map<int, Vd> &vd, std::map<std::pair<int, int>, Vex> &vex);
@@ -19,7 +19,7 @@ class LinearSystemBuilder {
 
   private:
     const Grid &_g;
-    std::vector<Orbital> &_o;
+    std::vector<Orbital *> &_o;
     std::vector<int> &icl;
     OrbitalMapper &_om;
 };
