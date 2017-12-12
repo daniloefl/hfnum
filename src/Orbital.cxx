@@ -183,6 +183,10 @@ double Orbital::E() const {
   return _E;
 }
 
+double Orbital::EPython() const {
+  return _E;
+}
+
 void Orbital::load() {
   _wf = new double [_sphHarm.size()*_N];
   _wf_norm = new double [_sphHarm.size()*_N];

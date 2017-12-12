@@ -40,6 +40,8 @@ class Orbital {
     void E(double E_in);
     double E() const;
 
+    double EPython() const;
+
     double &operator()(int i, int l, int m);
     const double operator()(int i, int l, int m) const;
     const double getNorm(int i, int l, int m, const Grid &g);
