@@ -24,8 +24,8 @@ void Orbital::addSphHarm(int l, int m) {
     wf_norm_new[idx] = _wf_norm[idx];
   }
   for (int idx = _N*(_sphHarm.size()-1); idx < _N*_sphHarm.size(); ++idx) {
-    wf_new = 0;
-    wf_norm_new = 0;
+    wf_new[idx] = 0;
+    wf_norm_new[idx] = 0;
   }
   delete [] _wf;
   delete [] _wf_norm;

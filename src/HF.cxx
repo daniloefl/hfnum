@@ -719,11 +719,6 @@ ldouble HF::stepRenormalised(ldouble gamma) {
     if (grad(k) != 0) {
       //_dE[k] = -gamma*Fn/grad(k); // for root finding
       _dE[k] = Fn/grad(k); // for root finding
-      if (_dE[k] < 0) {
-        _dE[k] = -std::pow(std::fabs(_dE[k]), 1.0/((ldouble) _o[k]->getSphHarm().size()));
-      } else {
-        _dE[k] = std::pow(std::fabs(_dE[k]), 1.0/((ldouble) _o[k]->getSphHarm().size()));
-      }
       _dE[k] *= -gamma;
     } else {
       _dE[k] = 0;
