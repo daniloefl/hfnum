@@ -1,3 +1,11 @@
+/*
+ * \class OrbitalMapper
+ *
+ * \ingroup hfnum
+ *
+ * \brief Class that maps the orbital list to indices used to solve equations.
+ */
+
 #ifndef ORBITALMAPPER_H
 #define ORBITALMAPPER_H
 
@@ -7,33 +15,57 @@
 
 class OrbitalMapper {
   public:
+
+    /// \brief Constructor.
+    /// \param g Grid object.
+    /// \param o List of orbitals.
     OrbitalMapper(const Grid &g, std::vector<Orbital *> &o);
+
+    /// \brief Destructor
     virtual ~OrbitalMapper();
 
-    // convert orbital index, quantum number l and m and the grid index i into a general index
+    /// \brief Convert orbital index, quantum number l and m and the grid index i into a general index
+    /// \param k Orbital index.
+    /// \param l l.
+    /// \param m m.
+    /// \param i Grid index.
     int sparseIndex(int k, int l, int m, int i);
 
-    // number of indices for a sparse matrix
+    /// \brief Getter for number of indices for a sparse matrix
+    /// \return Number of indices for a sparse matrix.
     int sparseN();
 
-    // convert orbital index, quantum number l and m in a general index, assuming no indices are needed for the Grid
+    /// \brief Convert orbital index, quantum number l and m in a general index, assuming no indices are needed for the Grid
+    /// \param k Orbital index.
+    /// \param l l.
+    /// \param m m.
+    /// \return Index.
     int index(int k, int l, int m);
 
-    // number of indices
+    /// \brief Number of non-sparse indices
+    /// \return Number of indices
     int N();
 
-    // get orbital index from general index
+    /// \brief Get orbital index from general index
+    /// \param idx Index in matrix.
+    /// \return Orbital index.
     int orbital(int idx);
 
-    // get quantum number l from general index
+    /// \brief Get quantum number l from general index
+    /// \param idx Index in matrix.
+    /// \return Quantum number l.
     int l(int idx);
 
-    // get quantum number m from general index
+    /// \brief Get quantum number m from general index
+    /// \param idx Index in matrix.
+    /// \return Quantum number m.
     int m(int idx);
     
 
   private:
+    /// Grid
     const Grid &_g;
+    /// Orbital list.
     std::vector<Orbital *> &_o;
 };
 

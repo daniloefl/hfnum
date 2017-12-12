@@ -25,5 +25,15 @@ include_directories(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 
 include_directories (AFTER include)
 
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/doxygen.txt)
+    add_custom_target(
+      doc
+      doxygen ${doxyfile}
+    )
+endif()
+
+
 subdirs(src)
 

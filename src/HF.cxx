@@ -89,19 +89,6 @@ void HF::addOrbitalPython(python::object o) {
   addOrbital(orb);
 }
 
-python::list HF::getR() const {
-  python::list l;
-  for (int k = 0; k < _g.N(); ++k) l.append(_g(k));
-  return l;
-}
-
-python::list HF::getOrbitalPython(int no, int lo, int mo) {
-  std::vector<ldouble> o = getOrbital(no, lo, mo);
-  python::list l;
-  for (int k = 0; k < o.size(); ++k) l.append(o[k]);
-  return l;
-}
-
 
 void HF::gammaSCF(ldouble g) {
   _gamma_scf = g;
