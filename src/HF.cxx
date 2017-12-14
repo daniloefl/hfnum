@@ -478,34 +478,53 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   }
 
   ldouble F = 0;
-  int nStep = 0;
-  while (nStep < Niter) {
-    gamma = 0.5*(1 - std::exp(-(nStep+1)/20.0));
-    // compute sum of squares of F(x_old)
-    nStep += 1;
-    if (_method == 0) {
-      F = stepSparse(gamma);
-    } else if (_method == 1) {
-      F = stepGordon(gamma);
-    } else if (_method == 2) {
-      F = stepRenormalised(gamma);
+  bool allNodesOk = false;
+  do {
+    int nStep = 0;
+    while (nStep < Niter) {
+      gamma = 0.5*(1 - std::exp(-(nStep+1)/20.0));
+      // compute sum of squares of F(x_old)
+      nStep += 1;
+      if (_method == 0) {
+        F = stepSparse(gamma);
+      } else if (_method == 1) {
+        F = stepGordon(gamma);
+      } else if (_method == 2) {
+        F = stepRenormalised(gamma);
+      }
+
+      // change orbital energies
+      std::cout << "Orbital energies at step " << nStep << ", with constraint = " << std::setw(16) << F << ", method = " << strMethod << "." << std::endl;
+      std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "next energy (H)" << " " << std::setw(16) << "Min. (H)" << " " << std::setw(16) << "Max. (H)" << " " << std::setw(5) << "nodes" << std::endl;
+      for (int k = 0; k < _o.size(); ++k) {
+        ldouble stepdE = _dE[k];
+        ldouble newE = (_o[k]->E()+stepdE);
+        //if (newE > _Emax[k]) newE = 0.5*(_Emax[k] + _Emin[k]);
+        //if (newE < _Emin[k]) newE = 0.5*(_Emax[k] + _Emin[k]);
+        std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << newE << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
+        _o[k]->E(newE);
+      }
+
+      if (std::fabs(*std::max_element(_dE.begin(), _dE.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop) break;
+      //if (std::fabs(F) < F0stop) break;
     }
 
-    // change orbital energies
-    std::cout << "Orbital energies at step " << nStep << ", with constraint = " << std::setw(16) << F << ", method = " << strMethod << "." << std::endl;
-    std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "next energy (H)" << " " << std::setw(16) << "Min. (H)" << " " << std::setw(16) << "Max. (H)" << " " << std::setw(5) << "nodes" << std::endl;
+    allNodesOk = true;
     for (int k = 0; k < _o.size(); ++k) {
-      ldouble stepdE = _dE[k];
-      ldouble newE = (_o[k]->E()+stepdE);
-      //if (newE > _Emax[k]) newE = 0.5*(_Emax[k] + _Emin[k]);
-      //if (newE < _Emin[k]) newE = 0.5*(_Emax[k] + _Emin[k]);
-      std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << newE << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
-      _o[k]->E(newE);
+      if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
+        allNodesOk = false;
+        std::cout << "Found too many nodes in orbital " << k << ": I will try again starting at a lower energy." << std::endl;
+        _Emax[k] = _o[k]->E();
+        _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
+      } else if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
+        allNodesOk = false;
+        std::cout << "Found too few nodes in orbital " << k << ": I will try again starting at a higher energy." << std::endl;
+        _Emin[k] = _o[k]->E();
+        _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
+      }
     }
 
-    if (std::fabs(*std::max_element(_dE.begin(), _dE.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop) break;
-    //if (std::fabs(F) < F0stop) break;
-  }
+  } while (!allNodesOk);
   return F;
 }
 
@@ -637,7 +656,7 @@ ldouble HF::stepRenormalised(ldouble gamma) {
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = 1e-4;
+    dE[k] = 1e-3;
     E[k] = _o[k]->E();
     l[k] = _o[k]->initialL();
   }
@@ -657,7 +676,11 @@ ldouble HF::stepRenormalised(ldouble gamma) {
     for (int i = 0; i < _g.N(); ++i) {
       (*_o[k])(i, l, m) = matched[i](idx);
       if (i >= 10 && i < _g.N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
-        _nodes[k] += 1;
+        //ldouble deriv = (matched[i](idx) - matched[i-1](idx))/(_g(i) - _g(i-1));
+        //if (std::fabs(deriv) > 1e-2) {
+          _nodes[k] += 1;
+          std::cout << "Orbital " << k << ": Found node at i=" << i << ", r = " << _g(i) << std::endl;
+        //}
       }
     }
   }
@@ -713,6 +736,9 @@ ldouble HF::stepRenormalised(ldouble gamma) {
     dX = decH.solve(-grad);
   }
   */
+
+
+
   ldouble F = Fn;
   for (int k = 0; k < _o.size(); ++k) {
     //_dE[k] = gamma*dX(k); // to use the curvature for extrema finding
@@ -724,7 +750,7 @@ ldouble HF::stepRenormalised(ldouble gamma) {
       _dE[k] = 0;
     }
     //_dE[k] = -gamma*grad(k); // for root finding
-    if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);
+    //if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);
     std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
   }
 
