@@ -82,6 +82,10 @@ class Orbital {
     /// \param E_in Energy.
     void E(ldouble E_in);
 
+    /// \brief Setter for energy.
+    /// \param E_in Energy.
+    void setEPython(ldouble E_in);
+
     /// \brief Getter for energy.
     /// \return Energy.
     ldouble E() const;

@@ -196,6 +196,10 @@ void Orbital::E(ldouble E_in) {
   _E = E_in;
 }
 
+void Orbital::setEPython(ldouble E_in) {
+  _E = E_in;
+}
+
 ldouble Orbital::E() const {
   return _E;
 }

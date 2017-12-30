@@ -147,8 +147,7 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
       _nodes[k] = 0;
       _Emin[k] = -_Z*_Z;
       _Emax[k] = 0;
-      //_o[k]->E(-_Z*_Z/((ldouble) _o[k]->initialN())*0.2);
-      _o[k]->E(-_Z*_Z/((ldouble) _o[k]->initialN())*0.5);
+      //_o[k]->E(-_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2));
     }
 
     std::cout << "SCF step " << nStepSCF << std::endl;
@@ -592,7 +591,7 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   do {
     int nStep = 0;
     while (nStep < Niter) {
-      gamma = 0.25*(1 - std::exp(-(nStep+1)/20.0));
+      gamma = 0.5; // *(1 - std::exp(-(nStep+1)/20.0));
       // compute sum of squares of F(x_old)
       nStep += 1;
       if (_method == 0) {
