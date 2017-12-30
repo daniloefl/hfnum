@@ -223,7 +223,7 @@ void HF::calculateVex(ldouble gamma) {
     // calculate it first with filled orbitals, dividing by the number of orbitals
     // this is exact if all 2(2*l+1) orbitals in this level are filled
     for (auto k2 : avg) {
-      if (k1 == k2) continue;
+      //if (k1 == k2) continue;
       if (_o[k1]->spin()*_o[k2]->spin() < 0) continue;
 
       int l2 = _o[k2]->initialL();
@@ -438,8 +438,6 @@ void HF::calculateVd(ldouble gamma) {
 
     // temporary variable
     std::vector<ldouble> vd(_g.N(), 0); // calculate it here first
-
-    vd[_g.N()-1] = 0;
     for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
       ldouble r1 = _g(ir1);
       ldouble rmax = r1;
@@ -454,7 +452,7 @@ void HF::calculateVd(ldouble gamma) {
     }
 
     for (int ko = 0; ko < _o.size(); ++ko) {
-      if (ko == k1) continue;
+      //if (ko == k1) continue;
       int lj = _o[ko]->initialL();
       int mj = _o[ko]->initialM();
       for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
