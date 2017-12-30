@@ -38,7 +38,7 @@ print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 20):
   print "SCF it.", i
-  h.gammaSCF(0.7)
+  h.gammaSCF(0.3)
   h.solve(NiterSCF, Niter, F0stop)
 
   o = [np.asarray(orb0.getCentral()), np.asarray(orb1.getCentral()), np.asarray(orb2.getCentral()), np.asarray(orb3.getCentral()), np.asarray(orb4.getCentral())]

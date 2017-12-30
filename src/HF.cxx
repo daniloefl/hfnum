@@ -129,8 +129,10 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
       for (int i = 3; i < _g.N()-3; ++i) {
         ldouble r = _g(i);
         ldouble a = 0;
-        if (_g.isLog()) a = 2*std::pow(r, 2)*(_o[k]->E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - std::pow(lmain_eq + 0.5, 2);
-        else a = 2*(_o[k]->E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i] + _vex[std::pair<int,int>(k,k)][std::pair<int,int>(lmain, mmain)][i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
+        //if (_g.isLog()) a = 2*std::pow(r, 2)*(_o[k]->E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i]) - std::pow(lmain_eq + 0.5, 2);
+        //else a = 2*(_o[k]->E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
+        if (_g.isLog()) a = 2*std::pow(r, 2)*(_o[k]->E() - _pot[i]) - std::pow(lmain_eq + 0.5, 2);
+        else a = 2*(_o[k]->E() - _pot[i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
         if (icl[k] < 0 && a*a_m1 < 0) {
           icl[k] = i;
           break;
@@ -231,8 +233,6 @@ void HF::calculateVex(ldouble gamma) {
 
       int l1 = _o[k1]->initialL();
       int m1 = _o[k1]->initialM();
-      if (m1 != mj) continue;
-
 
       std::vector<ldouble> vex(_g.N(), 0); // calculate it here first
 
