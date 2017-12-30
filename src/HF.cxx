@@ -227,10 +227,11 @@ void HF::calculateVex(ldouble gamma) {
       if (ko == k1) continue;
       if (_o[k1]->spin()*_o[ko]->spin() < 0) continue;
 
-      std::cout << "Calculating Vex for orbital eq. " << ko << ", term from k1 = " << k1 << " (full sub-shell)" << std::endl;
+      std::cout << "Calculating Vex for orbital eq. " << ko << ", term from k1 = " << k1 << " (assuming central potential)" << std::endl;
 
       int l1 = _o[k1]->initialL();
       int m1 = _o[k1]->initialM();
+      if (m1 != mj) continue;
 
 
       std::vector<ldouble> vex(_g.N(), 0); // calculate it here first
@@ -252,7 +253,7 @@ void HF::calculateVex(ldouble gamma) {
       }
 
       for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
-        _vexsum[std::pair<int,int>(ko, k1)][std::pair<int,int>(lj, mj)][ir2] += vex[ir2];
+        _vexsum[std::pair<int,int>(ko, k1)][std::pair<int,int>(l1, m1)][ir2] += vex[ir2];
       }
     }
   }
@@ -264,7 +265,7 @@ void HF::calculateVex(ldouble gamma) {
       int lo = _o[ko]->getSphHarm()[idx].first;
       int mo = _o[ko]->getSphHarm()[idx].second;
       for (auto k1 : not_done) {
-        std::cout << "Calculating Vex for orbital eq. " << ko << ", term from k1 = " << k1 << " (partial sub-shell)" << std::endl;
+        std::cout << "Calculating Vex for orbital eq. " << ko << ", term from k1 = " << k1 << " (non-central potential)" << std::endl;
 
         std::vector<ldouble> &vexsum_curr = _vexsum[std::pair<int,int>(ko,k1)][std::pair<int,int>(lo, mo)];
 
@@ -312,10 +313,10 @@ void HF::calculateVex(ldouble gamma) {
   }
 
   for (int ko = 0; ko < _o.size(); ++ko) {
-    for (int idx = 0; idx < _o[ko]->getSphHarm().size(); ++idx) {
-      int lj = _o[ko]->getSphHarm()[idx].first;
-      int mj = _o[ko]->getSphHarm()[idx].second;
-      for (int k1 = 0; k1 < _o.size(); ++k1) {
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      for (auto &idx : _vex[std::pair<int,int>(ko,k1)]) {
+        int lj = idx.first.first;
+        int mj = idx.first.second;
         std::vector<ldouble> &currentVex = _vex[std::pair<int,int>(ko,k1)][std::pair<int,int>(lj, mj)];
         for (int k = 0; k < _g.N(); ++k) currentVex[k] = (1-gamma)*currentVex[k] + gamma*_vexsum[std::pair<int,int>(ko,k1)][std::pair<int,int>(lj,mj)][k];
       }
@@ -385,7 +386,7 @@ void HF::calculateVd(ldouble gamma) {
   for (auto k1 : done) {
     int l1 = _o[k1]->initialL();
     int m1 = _o[k1]->initialM();
-    std::cout << "Calculating Vd term from k1 = " << k1 << " (filled sub-shell)" << std::endl;
+    std::cout << "Calculating Vd term from k1 = " << k1 << " (assuming central potential)" << std::endl;
 
     // temporary variable
     std::vector<ldouble> vd(_g.N(), 0); // calculate it here first
@@ -428,7 +429,7 @@ void HF::calculateVd(ldouble gamma) {
 
       // now with open shells
       for (auto k1 : not_done) {
-        std::cout << "Calculating Vd term for eq. " << ko << ", due to k1 = " << k1 << " (partial sub-shell)" << std::endl;
+        std::cout << "Calculating Vd term for eq. " << ko << ", due to k1 = " << k1 << " (non-central potential)" << std::endl;
         for (int idx1 = 0; idx1 < _o[k1]->getSphHarm().size(); ++idx1) {
           int l1 = _o[k1]->getSphHarm()[idx1].first;
           int m1 = _o[k1]->getSphHarm()[idx1].second;
@@ -469,9 +470,9 @@ void HF::calculateVd(ldouble gamma) {
   }
 
   for (int ko = 0; ko < _o.size(); ++ko) {
-    for (int idx = 0; idx < _o[ko]->getSphHarm().size(); ++idx) {
-      int lj = _o[ko]->getSphHarm()[idx].first;
-      int mj = _o[ko]->getSphHarm()[idx].second;
+    for (auto &idx : _vd[ko]) {
+      int lj = idx.first.first;
+      int mj = idx.first.second;
       std::cout << "Adding Vd term for eq. " << ko << std::endl;
       std::vector<ldouble> &currentVd = _vd[ko][std::pair<int,int>(lj, mj)];
       for (int k = 0; k < _g.N(); ++k) currentVd[k] = (1-gamma)*currentVd[k] + gamma*_vdsum[ko][std::pair<int,int>(lj,mj)][k];
@@ -484,11 +485,11 @@ std::vector<ldouble> HF::getNucleusPotential() {
 }
 
 std::vector<ldouble> HF::getDirectPotential(int k) {
-  return _vd[k][std::pair<int, int>(0, 0)];
+  return _vd[k][std::pair<int, int>(_o[k]->initialL(), _o[k]->initialM())];
 }
 
 std::vector<ldouble> HF::getExchangePotential(int k, int k2) {
-  return _vex[std::pair<int,int>(k,k2)][std::pair<int, int>(0, 0)];
+  return _vex[std::pair<int,int>(k,k2)][std::pair<int, int>(_o[k2]->initialL(), _o[k2]->initialM())];
 }
 
 ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
