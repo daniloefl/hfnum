@@ -175,7 +175,7 @@ const ldouble Orbital::getNorm(int i_in, int l_in, int m_in, const Grid &g) {
       }
     }
     norm = 1.0/std::sqrt(norm);
-    if (integ < 0) norm *= -1;
+    //if (integ < 0) norm *= -1;
     for (int k = 0; k < _N; ++k) {
       for (int idx = 0; idx < _sphHarm.size(); ++idx) {
         _wf_norm[k + idx*_N] *= norm;
