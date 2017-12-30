@@ -93,6 +93,11 @@ class HF {
     /// \return Vector of orbital values for each Grid point, in that spherical harmonic component.
     std::vector<ldouble> getOrbital(int no, int mo, int lo);
 
+    /// \brief Get value of orbital component for orbital no, assuming a central potential.
+    /// \param no Orbital identification.
+    /// \return Vector of orbital values for each Grid point, in that spherical harmonic component.
+    std::vector<ldouble> getOrbitalCentral(int no);
+
     /// \brief Get Coulomb attraction potential -Z/r
     /// \return Coulomb potential
     std::vector<ldouble> getNucleusPotential();
@@ -126,6 +131,10 @@ class HF {
     /// \brief Add an orbital from a Python object.
     /// \param o Orbital object from Python interface.
     void addOrbitalPython(boost::python::object o);
+
+    /// \brief Force the direct and exchange potential calculation to assume only a central potential.
+    /// \param central Whether to consider a central potential
+    void centralPotential(bool central);
 
   private:
     /// \brief Calculate direct SCF potentials.
@@ -200,6 +209,9 @@ class HF {
 
     /// Class that maps orbitals to indices
     OrbitalMapper _om;
+
+    /// Central potential?
+    bool _central;
 };
 
 #endif

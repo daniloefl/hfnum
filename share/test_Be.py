@@ -13,7 +13,7 @@ Z = 4
 
 # log grid
 dx = 1e-1/Z
-N = 320*Z
+N = 310*Z
 rmin = 1e-12
 g = hfnum.Grid(True, dx, int(N), rmin)
 h = hfnum.HF(g, Z)
@@ -39,7 +39,7 @@ for i in range(0, 20):
   h.gammaSCF(0.7)
   h.solve(NiterSCF, Niter, F0stop)
 
-  o = [np.asarray(orb0.get(0, 0)), np.asarray(orb1.get(0, 0)), np.asarray(orb2.get(0, 0)), np.asarray(orb3.get(0, 0))]
+  o = [np.asarray(orb0.getCentral()), np.asarray(orb1.getCentral()), np.asarray(orb2.getCentral()), np.asarray(orb3.getCentral())]
   v = h.getNucleusPotential()
   vex = {}
   vd = {}

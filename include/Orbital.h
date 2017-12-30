@@ -110,6 +110,10 @@ class Orbital {
     /// \return List of orbital values in the Grid points.
     python::list getNormPython(int lo, int mo);
 
+    /// \brief Get normalised orbital assuming central potential approximation.
+    /// \return List of orbital values in the Grid points.
+    python::list getCentralNormPython();
+
     /// \brief Normalise orbital
     /// \param g Grid
     void normalise(const Grid &g);

@@ -145,6 +145,19 @@ python::list Orbital::getNormPython(int lo, int mo) {
   return l;
 }
 
+python::list Orbital::getCentralNormPython() {
+  python::list l;
+  if (_torenorm) return l;
+  int idx = 0;
+  for (; idx < _sphHarm.size(); ++idx) {
+    if (_sphHarm[idx].first == initialL() && _sphHarm[idx].second == initialM()) {
+      break;
+    }
+  }
+  for (int k = 0; k < _N; ++k) l.append(_wf_norm[k + idx*_N]);
+  return l;
+}
+
 const double Orbital::getNorm(int i_in, int l_in, int m_in, const Grid &g) {
   if (_torenorm) {
     double norm = 0;

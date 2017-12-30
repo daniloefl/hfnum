@@ -33,7 +33,7 @@ for i in range(0, 10):
   h.gammaSCF(0.7)
   h.solve(NiterSCF, Niter, F0stop)
 
-  o = [np.asarray(orb0.get(0, 0)), np.asarray(orb1.get(0, 0))]
+  o = [np.asarray(orb0.getCentral()), np.asarray(orb1.getCentral())]
   v = h.getNucleusPotential()
   vex = {}
   vd = {}

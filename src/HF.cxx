@@ -24,9 +24,15 @@ using namespace boost;
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
+void HF::centralPotential(bool central) {
+  _central = central;
+}
+
+
 HF::HF(const Grid &g, ldouble Z)
   : _g(g), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
   _pot.resize(_g.N());
+  _central = true;
   for (int k = 0; k < _g.N(); ++k) {
     _pot[k] = -_Z/_g(k);
   }
@@ -37,6 +43,7 @@ HF::HF(const Grid &g, ldouble Z)
 HF::HF(python::object o, ldouble Z)
   : _g(python::extract<const Grid &>(o)), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
   _pot.resize(_g.N());
+  _central = true;
   for (int k = 0; k < _g.N(); ++k) {
     _pot[k] = -_Z/_g(k);
   }
@@ -78,6 +85,15 @@ std::vector<ldouble> HF::getOrbital(int no, int lo, int mo) {
   std::vector<ldouble> res;
   for (int k = 0; k < _g.N(); ++k) {
     res.push_back(o->getNorm(k, lo, mo, _g));
+  }
+  return res;
+}
+
+std::vector<ldouble> HF::getOrbitalCentral(int no) {
+  Orbital *o = _o[no];
+  std::vector<ldouble> res;
+  for (int k = 0; k < _g.N(); ++k) {
+    res.push_back(o->getNorm(k, o->initialL(), o->initialM(), _g));
   }
   return res;
 }
@@ -177,17 +193,22 @@ void HF::calculateVex(ldouble gamma) {
   std::vector<int> done;
   std::vector<int> not_done;
 
-  for (int k1 = 0; k1 < _o.size(); ++k1) {
-    int nSameShell = 0;
-    for (int kx = 0; kx < _o.size(); ++kx) {
-      if (_o[k1]->initialN() == _o[kx]->initialN() && _o[k1]->initialL() == _o[kx]->initialL())
-        nSameShell++;
+  if (_central) {
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      done.push_back(k1);
     }
-    if (nSameShell == 2*(2*_o[k1]->initialL() + 1)) {
-      done.push_back(k1);
-    } else {
-      done.push_back(k1);
-      //not_done.push_back(k1);
+  } else {
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      int nSameShell = 0;
+      for (int kx = 0; kx < _o.size(); ++kx) {
+        if (_o[k1]->initialN() == _o[kx]->initialN() && _o[k1]->initialL() == _o[kx]->initialL())
+          nSameShell++;
+      }
+      if (nSameShell == 2*(2*_o[k1]->initialL() + 1)) {
+        done.push_back(k1);
+      } else {
+        not_done.push_back(k1);
+      }
     }
   }
 
@@ -338,17 +359,22 @@ void HF::calculateVd(ldouble gamma) {
   std::vector<int> done;
   std::vector<int> not_done;
 
-  for (int k1 = 0; k1 < _o.size(); ++k1) {
-    int nSameShell = 0;
-    for (int kx = 0; kx < _o.size(); ++kx) {
-      if (_o[k1]->initialN() == _o[kx]->initialN() && _o[k1]->initialL() == _o[kx]->initialL())
-        nSameShell++;
+  if (_central) {
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      done.push_back(k1);
     }
-    if (nSameShell == 2*(2*_o[k1]->initialL() + 1)) {
-      done.push_back(k1);
-    } else {
-      done.push_back(k1);
-      //not_done.push_back(k1);
+  } else {
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      int nSameShell = 0;
+      for (int kx = 0; kx < _o.size(); ++kx) {
+        if (_o[k1]->initialN() == _o[kx]->initialN() && _o[k1]->initialL() == _o[kx]->initialL())
+          nSameShell++;
+      }
+      if (nSameShell == 2*(2*_o[k1]->initialL() + 1)) {
+        done.push_back(k1);
+      } else {
+        not_done.push_back(k1);
+      }
     }
   }
 

@@ -35,7 +35,7 @@ for i in range(0, 2):
   h.gammaSCF(0.5)
   h.solve(NiterSCF, Niter, F0stop)
 
-  o = [np.asarray(orb.get(0, 0))]
+  o = [np.asarray(orb.getCentral())]
   v = h.getNucleusPotential()
   H1s = 2*np.exp(-r)
 

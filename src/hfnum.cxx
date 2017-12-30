@@ -16,6 +16,7 @@ BOOST_PYTHON_MODULE(hfnum)
     .def(init<int, int, int, int>())
     .def("addSphHarm", &Orbital::addSphHarm)
     .def("get", &Orbital::getNormPython)
+    .def("getCentral", &Orbital::getCentralNormPython)
     .def("E", &Orbital::EPython)
   ;
   class_<HF>("HF", init<object, double>())

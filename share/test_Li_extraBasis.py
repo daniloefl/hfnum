@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 Z = 3
 
 # log grid
-dx = 1e-2/Z
-N = 1800*Z
+dx = 1e-1/Z
+N = 170*Z
 rmin = 1e-6
 g = hfnum.Grid(True, dx, int(N), rmin)
 
@@ -39,7 +39,7 @@ print "Last r:", r[-1]
 print "First r:", r[0:5]
 for i in range(0, 20):
   print "SCF it.", i
-  h.gammaSCF(0.7)
+  h.gammaSCF(0.4)
   h.solve(NiterSCF, Niter, F0stop)
 
   o = [np.asarray(orb0.get(0, 0)), np.asarray(orb1.get(0, 0)), np.asarray(orb2.get(0, 0))]
