@@ -192,12 +192,13 @@ void HF::calculateVex(ldouble gamma) {
     }
   }
 
+  std::vector<int> avg;
   std::vector<int> done;
   std::vector<int> not_done;
 
   if (_central) {
     for (int k1 = 0; k1 < _o.size(); ++k1) {
-      done.push_back(k1);
+      avg.push_back(k1);
     }
   } else {
     for (int k1 = 0; k1 < _o.size(); ++k1) {
@@ -210,6 +211,51 @@ void HF::calculateVex(ldouble gamma) {
         done.push_back(k1);
       } else {
         not_done.push_back(k1);
+      }
+    }
+  }
+
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    int l1 = _o[k1]->initialL();
+    int m1 = _o[k1]->initialM();
+
+    // calculate it first with filled orbitals, dividing by the number of orbitals
+    // this is exact if all 2(2*l+1) orbitals in this level are filled
+    for (auto k2 : avg) {
+      if (k1 == k2) continue;
+      if (_o[k1]->spin()*_o[k2]->spin() < 0) continue;
+
+      int l2 = _o[k2]->initialL();
+      int m2 = _o[k2]->initialM();
+      std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
+
+      // temporary variable
+      std::vector<ldouble> vex(_g.N(), 0); // calculate it here first
+      for (int L = (int) std::fabs(l1 - l2); L <= l1 + l2; ++L) {
+        ldouble coeff = 1.0/((ldouble) (2*L + 1))*std::pow(CG(l1, l2, 0, 0, L, 0), 2);
+        for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
+          ldouble r1 = _g(ir1);
+          ldouble rmax = r1;
+          for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+            ldouble r2 = _g(ir2);
+            ldouble rmin = r2;
+
+            ldouble dr = 0;
+            if (ir2 < _g.N()-1) dr = _g(ir2+1) - _g(ir2);
+            if (ir2 > ir1) {
+              rmax = r2;
+              rmin = r1;
+            } else {
+              rmax = r1;
+              rmin = r2;
+            }
+            vex[ir1] += coeff*_o[k1]->getNorm(ir2, l1, m1, _g)*_o[k2]->getNorm(ir2, l2, m2, _g)*std::pow(r2, 2)*std::pow(rmin, L)/std::pow(rmax, L+1)*dr;
+          }
+        }
+      }
+
+      for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
+        _vexsum[std::pair<int,int>(k1, k2)][std::pair<int,int>(l2, m2)][ir1] += vex[ir1];
       }
     }
   }
@@ -357,12 +403,13 @@ void HF::calculateVd(ldouble gamma) {
     _vdsum[k][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g.N(), 0);
   }
 
+  std::vector<int> avg;
   std::vector<int> done;
   std::vector<int> not_done;
 
   if (_central) {
     for (int k1 = 0; k1 < _o.size(); ++k1) {
-      done.push_back(k1);
+      avg.push_back(k1);
     }
   } else {
     for (int k1 = 0; k1 < _o.size(); ++k1) {
@@ -380,6 +427,40 @@ void HF::calculateVd(ldouble gamma) {
   }
 
   std::map<int, std::map<std::pair<int,int>, std::vector<ldouble> > > vdsum; // calculate it here first
+
+  // calculate it first with filled orbitals, dividing by the number of orbitals
+  // this is exact if all 2(2*l+1) orbitals in this level are filled
+  for (auto k1 : avg) {
+    int l1 = _o[k1]->initialL();
+    int m1 = _o[k1]->initialM();
+    std::cout << "Calculating Vd term from k = " << k1 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
+
+    // temporary variable
+    std::vector<ldouble> vd(_g.N(), 0); // calculate it here first
+
+    vd[_g.N()-1] = 0;
+    for (int ir1 = 0; ir1 < _g.N(); ++ir1) {
+      ldouble r1 = _g(ir1);
+      ldouble rmax = r1;
+      for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+        ldouble r2 = _g(ir2);
+        ldouble dr = 0;
+        if (ir2 < _g.N()-1) dr = _g(ir2+1) - _g(ir2);
+        if (ir2 > ir1) rmax = r2;
+        else rmax = r1;
+        vd[ir1] += std::pow(_o[k1]->getNorm(ir2, l1, m1, _g), 2)*std::pow(r2, 2)/rmax*dr;
+      }
+    }
+
+    for (int ko = 0; ko < _o.size(); ++ko) {
+      if (ko == k1) continue;
+      int lj = _o[ko]->initialL();
+      int mj = _o[ko]->initialM();
+      for (int ir2 = 0; ir2 < _g.N(); ++ir2) {
+        _vdsum[ko][std::pair<int,int>(lj,mj)][ir2] += vd[ir2];
+      }
+    }
+  }
 
   // calculate it first with filled orbitals
   // loop over orbitals (this is the sum over k1 above)
