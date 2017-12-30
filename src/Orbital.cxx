@@ -17,8 +17,8 @@ Orbital::~Orbital() {
 
 void Orbital::addSphHarm(int l, int m) {
   _sphHarm.push_back(lm(l, m));
-  double *wf_new = new double[_N*_sphHarm.size()];
-  double *wf_norm_new = new double[_N*_sphHarm.size()];
+  ldouble *wf_new = new ldouble[_N*_sphHarm.size()];
+  ldouble *wf_norm_new = new ldouble[_N*_sphHarm.size()];
   for (int idx = 0; idx < _N*(_sphHarm.size()-1); ++idx) {
     wf_new[idx] = _wf[idx];
     wf_norm_new[idx] = _wf_norm[idx];
@@ -100,7 +100,7 @@ void Orbital::N(int N) {
 
 int Orbital::N() const { return _N; }
 
-double &Orbital::operator()(int i, int l, int m) {
+ldouble &Orbital::operator()(int i, int l, int m) {
   int idx = 0;
   for (; idx < _sphHarm.size(); ++idx) {
     if (_sphHarm[idx].first == l && _sphHarm[idx].second == m) {
@@ -111,7 +111,7 @@ double &Orbital::operator()(int i, int l, int m) {
   return _wf[i + idx*_N];
 }
 
-const double Orbital::operator()(int i, int l, int m) const {
+const ldouble Orbital::operator()(int i, int l, int m) const {
   int idx = 0;
   for (; idx < _sphHarm.size(); ++idx) {
     if (_sphHarm[idx].first == l && _sphHarm[idx].second == m) {
@@ -124,7 +124,7 @@ const double Orbital::operator()(int i, int l, int m) const {
 void Orbital::normalise(const Grid &g) {
   getNorm(0, initialL(), initialM(), g);
   for (int k = 0; k < _N; ++k) {
-    double r = g(k);
+    ldouble r = g(k);
     for (int idx = 0; idx < _sphHarm.size(); ++idx) {
       _wf[k + idx*_N] = _wf_norm[k + idx*_N];
       if (g.isLog()) _wf[k + idx*_N] *= std::pow(r, 0.5);
@@ -158,23 +158,27 @@ python::list Orbital::getCentralNormPython() {
   return l;
 }
 
-const double Orbital::getNorm(int i_in, int l_in, int m_in, const Grid &g) {
+const ldouble Orbital::getNorm(int i_in, int l_in, int m_in, const Grid &g) {
   if (_torenorm) {
-    double norm = 0;
+    ldouble norm = 0;
+    ldouble integ = 0;
     for (int k = 0; k < _N; ++k) {
-      double r = g(k);
-      double dr = 0;
+      ldouble r = g(k);
+      ldouble dr = 0;
       if (k < _N-1) dr = std::fabs(g(k+1) - g(k));
       for (int idx = 0; idx < _sphHarm.size(); ++idx) {
-        double ov = _wf[k + idx*_N];
+        ldouble ov = _wf[k + idx*_N];
         if (g.isLog()) ov *= std::pow(r, -0.5);
         _wf_norm[k + idx*_N] = ov;
         norm += std::pow(ov*r, 2)*dr;
+        integ += ov*r*dr;
       }
     }
+    norm = 1.0/std::sqrt(norm);
+    if (integ < 0) norm *= -1;
     for (int k = 0; k < _N; ++k) {
       for (int idx = 0; idx < _sphHarm.size(); ++idx) {
-        _wf_norm[k + idx*_N] /= std::sqrt(norm);
+        _wf_norm[k + idx*_N] *= norm;
       }
     }
   }
@@ -188,21 +192,21 @@ const double Orbital::getNorm(int i_in, int l_in, int m_in, const Grid &g) {
   return _wf_norm[i_in + idx*_N];
 }
 
-void Orbital::E(double E_in) {
+void Orbital::E(ldouble E_in) {
   _E = E_in;
 }
 
-double Orbital::E() const {
+ldouble Orbital::E() const {
   return _E;
 }
 
-double Orbital::EPython() const {
+ldouble Orbital::EPython() const {
   return _E;
 }
 
 void Orbital::load() {
-  _wf = new double [_sphHarm.size()*_N];
-  _wf_norm = new double [_sphHarm.size()*_N];
+  _wf = new ldouble [_sphHarm.size()*_N];
+  _wf_norm = new ldouble [_sphHarm.size()*_N];
   for (int idx = 0; idx < _sphHarm.size()*_N; ++idx) {
     _wf[idx] = 0;
     _wf_norm[idx] = 0;

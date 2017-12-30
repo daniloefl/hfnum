@@ -23,6 +23,8 @@ class Grid;
 
 typedef std::pair<int, int> lm;
 
+#include "utils.h"
+
 class Orbital {
   public:
 
@@ -78,23 +80,23 @@ class Orbital {
 
     /// \brief Setter for energy.
     /// \param E_in Energy.
-    void E(double E_in);
+    void E(ldouble E_in);
 
     /// \brief Getter for energy.
     /// \return Energy.
-    double E() const;
+    ldouble E() const;
 
     /// \brief Getter for energy in Python.
     /// \return Energy.
-    double EPython() const;
+    ldouble EPython() const;
 
     /// \brief Return non-normalised orbital value in a Grid point.
     /// \param i Grid point index.
     /// \param l Value of l
     /// \param m Value of m
     /// \return Non-normalised orbital value.
-    double &operator()(int i, int l, int m);
-    const double operator()(int i, int l, int m) const;
+    ldouble &operator()(int i, int l, int m);
+    const ldouble operator()(int i, int l, int m) const;
 
     /// \brief Get value of normalised orbital in a points.
     /// \param i Grid point index.
@@ -102,7 +104,7 @@ class Orbital {
     /// \param m Value of m.
     /// \param g Grid object.
     /// \return Orbital value.
-    const double getNorm(int i, int l, int m, const Grid &g);
+    const ldouble getNorm(int i, int l, int m, const Grid &g);
 
     /// \brief Get normalised orbital in spherical harmonic component (l, m)
     /// \param lo Value of l.
@@ -130,7 +132,7 @@ class Orbital {
     int _N;
 
     /// Orbital wave function array
-    double *_wf;
+    ldouble *_wf;
 
     /// Quantum number n
     int _initial_n;
@@ -142,7 +144,7 @@ class Orbital {
     int _initial_m;
 
     /// Energy
-    double _E;
+    ldouble _E;
 
     /// List of spherical harmonic components
     std::vector<lm> _sphHarm;
@@ -151,7 +153,7 @@ class Orbital {
     bool _torenorm;
 
     /// Cached normalised orbital
-    double *_wf_norm;
+    ldouble *_wf_norm;
 };
 
 #endif
