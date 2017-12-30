@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 Z = 5
 
 # log grid
-dx = 1e-1/Z
-N = 310*Z
+dx = 0.5e-1/Z
+N = 2*310*Z
 rmin = 1e-12
 g = hfnum.Grid(True, dx, int(N), rmin)
 h = hfnum.HF(g, Z)

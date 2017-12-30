@@ -591,7 +591,7 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   do {
     int nStep = 0;
     while (nStep < Niter) {
-      gamma = 0.5; // *(1 - std::exp(-(nStep+1)/20.0));
+      gamma = 0.5*(1 - std::exp(-(nStep+1)/5.0));
       // compute sum of squares of F(x_old)
       nStep += 1;
       if (_method == 0) {
