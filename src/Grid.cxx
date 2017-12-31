@@ -26,6 +26,20 @@ Grid::~Grid() {
   delete [] _r;
 }
 
+void Grid::reset(bool isLog, double dx, int N, double rmin) {
+  delete [] _r;
+  _isLog = isLog;
+  _N = N;
+  _dx = dx;
+  _rmin = rmin;
+  _r = new double[_N];
+  if (_isLog) {
+    for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  } else {
+    for (int k = 0; k < _N; ++k) _r[k] = _rmin + k*_dx;
+  }
+}
+
 double Grid::dx() const {
   return _dx;
 }

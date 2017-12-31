@@ -29,7 +29,7 @@ class HF {
     /// \brief Constructor for an atom.
     /// \param g Grid object.
     /// \param Z Atomic number.
-    HF(const Grid &g, ldouble Z);
+    HF(Grid &g, ldouble Z);
 
     /// \brief Constructor for an atom.
     /// \param o Grid object for a Python interface.
@@ -136,6 +136,14 @@ class HF {
     /// \param central Whether to consider a central potential
     void centralPotential(bool central);
 
+    /// \brief Save orbital and potentials in file.
+    /// \param fout File name on which to save information.
+    void save(const std::string fout);
+
+    /// \brief Load orbital and potentials from file.
+    /// \param fin File name from which to load information.
+    void load(const std::string fin);
+
   private:
     /// \brief Calculate direct SCF potentials.
     /// \param gamma Parameter used to take a linear combination of previous potential and new one.
@@ -146,7 +154,7 @@ class HF {
     void calculateVex(ldouble gamma);
 
     /// Numerical Grid
-    const Grid &_g;
+    Grid &_g;
 
     /// Atomic number
     ldouble _Z;
@@ -212,6 +220,9 @@ class HF {
 
     /// Central potential?
     bool _central;
+
+    /// List of owned Orbital pointers
+    std::vector<Orbital *> _owned_orb;
 };
 
 #endif

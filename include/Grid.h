@@ -54,6 +54,14 @@ class Grid {
     /// \brief Python interface for getting list of radial values.
     python::list getR() const;
 
+    /// \brief Reset configuration.
+    /// \param isLog Whether the Grid is logarithmic. If this is true, the Grid is r = exp(rmin + dx*i), otherwise: r = rmin + dx*i for i = 0..N-1
+    /// \param dx Step size.
+    /// \param N Number of Grid points.
+    /// \param rmin Minimum Grid point.
+    void reset(bool isLog = true, double dx = 1e-1, int N = 150, double rmin = 1e-4);
+
+
   private:
 
     /// Grid values

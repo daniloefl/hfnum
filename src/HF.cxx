@@ -24,12 +24,14 @@ using namespace boost;
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
+#include <fstream>
+
 void HF::centralPotential(bool central) {
   _central = central;
 }
 
 
-HF::HF(const Grid &g, ldouble Z)
+HF::HF(Grid &g, ldouble Z)
   : _g(g), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
   _pot.resize(_g.N());
   _central = true;
@@ -41,7 +43,7 @@ HF::HF(const Grid &g, ldouble Z)
 }
 
 HF::HF(python::object o, ldouble Z)
-  : _g(python::extract<const Grid &>(o)), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
+  : _g(python::extract<Grid &>(o)), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
   _pot.resize(_g.N());
   _central = true;
   for (int k = 0; k < _g.N(); ++k) {
@@ -52,6 +54,122 @@ HF::HF(python::object o, ldouble Z)
 }
 
 HF::~HF() {
+  for (auto &o : _owned_orb) {
+    delete o;
+  }
+  _owned_orb.clear();
+}
+
+void HF::save(const std::string fout) {
+  std::ofstream f(fout.c_str());
+  f << std::setw(10) << "method" << std::setw(10) << _method << std::endl;
+  f << std::setw(10) << "Z" << std::setw(10) << _Z << std::endl;
+  f << std::setw(10) << "gamma_scf" << std::setw(10) << _gamma_scf << std::endl;
+  f << std::setw(10) << "central" << std::setw(10) << _central << std::endl;
+  f << std::setw(10) << "grid.isLog" << std::setw(10) << _g.isLog() << std::endl;
+  f << std::setw(10) << "grid.dx" << std::setw(10) << _g.dx() << std::endl;
+  f << std::setw(10) << "grid.N" << std::setw(10) << _g.N() << std::endl;
+  f << std::setw(10) << "grid.rmin" << std::setw(10) << _g(0) << std::endl;
+  for (int i = 0; i < _o.size(); ++i) {
+    f << std::setw(10) << "orbital" << std::setw(10) << i;
+    f << std::setw(5) << "n" << std::setw(5) << _o[i]->initialN();
+    f << std::setw(5) << "l" << std::setw(5) << _o[i]->initialL();
+    f << std::setw(5) << "m" << std::setw(5) << _o[i]->initialM();
+    f << std::setw(5) << "s" << std::setw(5) << _o[i]->spin();
+    f << std::setw(5) << "E" << std::setw(64) << std::setprecision(60) << _o[i]->E();
+    f << std::setw(10) << "sph_size" << std::setw(5) << _o[i]->getSphHarm().size();
+    for (int idx = 0; idx < _o[i]->getSphHarm().size(); ++idx) {
+      f << std::setw(5) << "sph_l" << std::setw(5) << _o[i]->getSphHarm()[idx].first;
+      f << std::setw(5) << "sph_m" << std::setw(5) << _o[i]->getSphHarm()[idx].second;
+      f << std::setw(5) << "value";
+      for (int ir = 0; ir < _g.N(); ++ir) {
+        f << std::setw(64) << std::setprecision(60) << (*_o[i])(ir, _o[i]->getSphHarm()[idx].first, _o[i]->getSphHarm()[idx].second);
+      }
+    }
+    f << std::endl;
+  }
+  // TODO: save Vd and Vex
+}
+
+void HF::load(const std::string fin) {
+  std::ifstream f(fin.c_str());
+  std::string line;
+
+  bool g_isLog = true;
+  ldouble g_dx = 1e-1;
+  int g_N = 220;
+  ldouble g_rmin = 1e-6;
+
+  _o.clear();
+  for (auto &o : _owned_orb) {
+    delete o;
+  }
+  _owned_orb.clear();
+  
+  while(std::getline(f, line)) {
+    std::stringstream ss;
+    ss.str(line);
+
+    std::string mode;
+
+    ss >> mode;
+    if (mode == "method")
+      ss >> _method;
+    else if (mode == "Z")
+      ss >> _Z;
+    else if (mode == "gamma_scf")
+      ss >> _gamma_scf;
+    else if (mode == "central")
+      ss >> _central;
+    else if (mode == "grid.isLog")
+      ss >> g_isLog;
+    else if (mode == "grid.dx")
+      ss >> g_dx;
+    else if (mode == "grid.N")
+      ss >> g_N;
+    else if (mode == "grid.rmin")
+      ss >> g_rmin;
+    else if (mode == "orbital") {
+      int io;
+      ss >> io;
+
+      std::string trash;
+
+      int o_N, o_L, o_M, o_S;
+      ss >> trash >> o_N >> trash >> o_L >> trash >> o_M >> trash >> o_S;
+
+      ldouble o_E;
+      ss >> trash >> o_E;
+
+
+      _owned_orb.push_back(new Orbital(o_S, o_N, o_L, o_M));
+      _o.push_back(_owned_orb[_owned_orb.size()-1]);
+      int k = _o.size()-1;
+      _o[k]->N(g_N);
+      _o[k]->E(o_E);
+      int sphSize = 1;
+      ss >> trash >> sphSize;
+      for (int idx = 0; idx < sphSize; ++idx) {
+        int l;
+        int m;
+        ss >> trash >> l >> trash >> m;
+
+        if (l != o_L && m != o_M) _o[k]->addSphHarm(l, m);
+
+        ldouble read_value;
+        for (int ir = 0; ir < g_N; ++ir) { // for each radial point
+          ss >> read_value;
+          (*_o[k])(ir, l, m) = read_value;
+        }
+      }
+    }
+  }
+  _g.reset(g_isLog, g_dx, g_N, g_rmin);
+  _pot.resize(_g.N());
+  for (int k = 0; k < _g.N(); ++k) {
+    _pot[k] = -_Z/_g(k);
+  }
+  // TODO: load Vd and Vex
 }
 
 void HF::method(int m) {

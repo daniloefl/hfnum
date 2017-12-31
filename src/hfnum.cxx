@@ -29,6 +29,8 @@ BOOST_PYTHON_MODULE(hfnum)
     .def("getNucleusPotential", &HF::getNucleusPotentialPython)
     .def("getDirectPotential", &HF::getDirectPotentialPython)
     .def("getExchangePotential", &HF::getExchangePotentialPython)
+    .def("save", &HF::save)
+    .def("load", &HF::load)
   ;
 }
 
