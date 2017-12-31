@@ -83,7 +83,7 @@ void HF::save(const std::string fout) {
       f << " " << std::setw(5) << "sph_m" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].second;
       f << " " << std::setw(5) << "value";
       for (int ir = 0; ir < _g.N(); ++ir) {
-        const ldouble v = (*_o[i])(ir, _o[i]->getSphHarm()[idx].first, _o[i]->getSphHarm()[idx].second);
+        const ldouble v = ((const Orbital) (*_o[i]))(ir, _o[i]->getSphHarm()[idx].first, _o[i]->getSphHarm()[idx].second);
         f << " " << std::setw(64) << std::setprecision(60) << v;
       }
     }

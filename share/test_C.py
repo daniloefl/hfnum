@@ -32,16 +32,19 @@ h.addOrbital(orb3)
 h.addOrbital(orb4)
 h.addOrbital(orb5)
 
-NiterSCF = 1
+NiterSCF = 40
 Niter = 1000
 F0stop = 1e-6
 r = np.asarray(g.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
-for i in range(0, 20):
-  print "SCF it.", i
+#for i in range(0, 40):
+#  print "SCF it.", i
+if True:
   h.gammaSCF(0.1)
   h.solve(NiterSCF, Niter, F0stop)
+
+h.save("output/results_C.txt")
 
 if True:
   o = [np.asarray(orb0.getCentral()), np.asarray(orb1.getCentral()), np.asarray(orb2.getCentral()), np.asarray(orb3.getCentral()), np.asarray(orb4.getCentral()), np.asarray(orb5.getCentral())]
