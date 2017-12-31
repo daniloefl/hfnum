@@ -617,19 +617,19 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     }
 
     allNodesOk = true;
-    for (int k = 0; k < _o.size(); ++k) {
-      if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
-        allNodesOk = false;
-        std::cout << "Found too many nodes in orbital " << k << ": I will try again starting at a lower energy." << std::endl;
-        _Emax[k] = _o[k]->E();
-        _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
-      } else if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
-        allNodesOk = false;
-        std::cout << "Found too few nodes in orbital " << k << ": I will try again starting at a higher energy." << std::endl;
-        _Emin[k] = _o[k]->E();
-        _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
-      }
-    }
+    //for (int k = 0; k < _o.size(); ++k) {
+    //  if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
+    //    allNodesOk = false;
+    //    std::cout << "Found too many nodes in orbital " << k << ": I will try again starting at a lower energy." << std::endl;
+    //    _Emax[k] = _o[k]->E();
+    //    _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
+    //  } else if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
+    //    allNodesOk = false;
+    //    std::cout << "Found too few nodes in orbital " << k << ": I will try again starting at a higher energy." << std::endl;
+    //    _Emin[k] = _o[k]->E();
+    //    _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
+    //  }
+    //}
 
   } while (!allNodesOk);
   return F;
