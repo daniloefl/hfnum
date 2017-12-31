@@ -62,28 +62,29 @@ HF::~HF() {
 
 void HF::save(const std::string fout) {
   std::ofstream f(fout.c_str());
-  f << std::setw(10) << "method" << std::setw(10) << _method << std::endl;
-  f << std::setw(10) << "Z" << std::setw(10) << _Z << std::endl;
-  f << std::setw(10) << "gamma_scf" << std::setw(10) << _gamma_scf << std::endl;
-  f << std::setw(10) << "central" << std::setw(10) << _central << std::endl;
-  f << std::setw(10) << "grid.isLog" << std::setw(10) << _g.isLog() << std::endl;
-  f << std::setw(10) << "grid.dx" << std::setw(10) << _g.dx() << std::endl;
-  f << std::setw(10) << "grid.N" << std::setw(10) << _g.N() << std::endl;
-  f << std::setw(10) << "grid.rmin" << std::setw(10) << _g(0) << std::endl;
+  f << std::setw(10) << "method" << " " << std::setw(10) << _method << std::endl;
+  f << std::setw(10) << "Z" << " " << std::setw(10) << _Z << std::endl;
+  f << std::setw(10) << "gamma_scf" << " " << std::setw(10) << _gamma_scf << std::endl;
+  f << std::setw(10) << "central" << " " << std::setw(10) << _central << std::endl;
+  f << std::setw(10) << "grid.isLog" << " " << std::setw(10) << _g.isLog() << std::endl;
+  f << std::setw(10) << "grid.dx" << " " << std::setw(10) << _g.dx() << std::endl;
+  f << std::setw(10) << "grid.N" << " " << std::setw(10) << _g.N() << std::endl;
+  f << std::setw(10) << "grid.rmin" << " " << std::setw(10) << _g(0) << std::endl;
   for (int i = 0; i < _o.size(); ++i) {
-    f << std::setw(10) << "orbital" << std::setw(10) << i;
-    f << std::setw(5) << "n" << std::setw(5) << _o[i]->initialN();
-    f << std::setw(5) << "l" << std::setw(5) << _o[i]->initialL();
-    f << std::setw(5) << "m" << std::setw(5) << _o[i]->initialM();
-    f << std::setw(5) << "s" << std::setw(5) << _o[i]->spin();
-    f << std::setw(5) << "E" << std::setw(64) << std::setprecision(60) << _o[i]->E();
-    f << std::setw(10) << "sph_size" << std::setw(5) << _o[i]->getSphHarm().size();
+    f << " " << std::setw(10) << "orbital" << " " << std::setw(10) << i;
+    f << " " << std::setw(5) << "n" << " " << std::setw(5) << _o[i]->initialN();
+    f << " " << std::setw(5) << "l" << " " << std::setw(5) << _o[i]->initialL();
+    f << " " << std::setw(5) << "m" << " " << std::setw(5) << _o[i]->initialM();
+    f << " " << std::setw(5) << "s" << " " << std::setw(5) << _o[i]->spin();
+    f << " " << std::setw(5) << "E" << " " << std::setw(64) << std::setprecision(60) << _o[i]->E();
+    f << " " << std::setw(10) << "sph_size" << " " << std::setw(5) << _o[i]->getSphHarm().size();
     for (int idx = 0; idx < _o[i]->getSphHarm().size(); ++idx) {
-      f << std::setw(5) << "sph_l" << std::setw(5) << _o[i]->getSphHarm()[idx].first;
-      f << std::setw(5) << "sph_m" << std::setw(5) << _o[i]->getSphHarm()[idx].second;
-      f << std::setw(5) << "value";
+      f << " " << std::setw(5) << "sph_l" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].first;
+      f << " " << std::setw(5) << "sph_m" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].second;
+      f << " " << std::setw(5) << "value";
       for (int ir = 0; ir < _g.N(); ++ir) {
-        f << std::setw(64) << std::setprecision(60) << (*_o[i])(ir, _o[i]->getSphHarm()[idx].first, _o[i]->getSphHarm()[idx].second);
+        const ldouble v = (*_o[i])(ir, _o[i]->getSphHarm()[idx].first, _o[i]->getSphHarm()[idx].second);
+        f << " " << std::setw(64) << std::setprecision(60) << v;
       }
     }
     f << std::endl;
