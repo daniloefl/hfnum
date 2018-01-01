@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 # read from this file
 fname = "output/results_Be.txt"
 
+print "Loading result from file %s" % fname
+
 # random initialisation
 h = hfnum.HF(fname)
 #h.load(fname)
