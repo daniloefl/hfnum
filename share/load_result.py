@@ -3,6 +3,8 @@ import sys
 sys.path.append("../lib/")
 sys.path.append("lib/")
 
+eV = 27.21138602
+
 import numpy as np
 import hfnum
 
@@ -28,7 +30,7 @@ r = np.asarray(g.getR())
 print "r:", r
 
 for n in range(0, h.getNOrbitals()):
-  print "Energy for orbital %10s (index=%2d, n=%2d, l=%2d, m=%2d, s=%2d): %10.6f" % (h.getOrbitalName(n), n, h.getOrbital_n(n), h.getOrbital_l(n), h.getOrbital_m(n), h.getOrbital_s(n), h.getOrbital_E(n))
+  print "Energy for orbital %10s (index=%2d, n=%2d, l=%2d, m=%2d, s=%2d): %10.6f Hartree = %15.8f eV" % (h.getOrbitalName(n), n, h.getOrbital_n(n), h.getOrbital_l(n), h.getOrbital_m(n), h.getOrbital_s(n), h.getOrbital_E(n), h.getOrbital_E(n)*eV)
 
 o = []
 v = h.getNucleusPotential()
