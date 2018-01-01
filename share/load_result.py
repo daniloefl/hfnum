@@ -10,7 +10,7 @@ import seaborn
 import matplotlib.pyplot as plt
 
 # read from this file
-fname = "output/results_C.txt"
+fname = "output/results_H.txt"
 
 # random initialisation
 Z = 1
@@ -47,11 +47,14 @@ for n in range(0, h.getNOrbitals()):
     tmp.append(h.getExchangePotential(n, n2))
   vex[n] = tmp
 
+print r
+print o[0]
+
 # show orbitals
 f = plt.figure()
 i = 0
-for n in range(h.getNOrbitals()-len(style), h.getNOrbitals()):
-  plt.plot(r[:m], r[:m]*o[n][:m], style[i],  linewidth = 2, label = 'r*Orbital %d (l=%d, m=%d, s=%f)' % (n, h.getOrbital_n(n), h.getOrbital_l(n), h.getOrbital_m(n), h.getOrbital_s(n)))
+for n in range(np.maximum(0, h.getNOrbitals()-len(style)), h.getNOrbitals()):
+  plt.plot(r[:m], r[:m]*o[n][:m], style[i], linewidth = 2, label = 'r*Orbital %d (n=%d, l=%d, m=%d, s=%d)' % (n, h.getOrbital_n(n), h.getOrbital_l(n), h.getOrbital_m(n), h.getOrbital_s(n)))
   i += 1
 plt.legend()
 plt.show()
