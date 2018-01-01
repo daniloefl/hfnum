@@ -71,7 +71,7 @@ void HF::save(const std::string fout) {
   f << std::setw(10) << "grid.N" << " " << std::setw(10) << _g.N() << std::endl;
   f << std::setw(10) << "grid.rmin" << " " << std::setw(10) << _g(0) << std::endl;
   for (int i = 0; i < _o.size(); ++i) {
-    f << " " << std::setw(10) << "orbital" << " " << std::setw(10) << i;
+    f << std::setw(10) << "orbital" << " " << std::setw(10) << i;
     f << " " << std::setw(5) << "n" << " " << std::setw(5) << _o[i]->initialN();
     f << " " << std::setw(5) << "l" << " " << std::setw(5) << _o[i]->initialL();
     f << " " << std::setw(5) << "m" << " " << std::setw(5) << _o[i]->initialM();
@@ -89,7 +89,39 @@ void HF::save(const std::string fout) {
     }
     f << std::endl;
   }
-  // TODO: save Vd and Vex
+  for (auto &i : _vd) {
+    const int &k = i.first;
+    Vd &v = i.second;
+    for (auto &vr : v) {
+      const std::pair<int, int> &lm = vr.first;
+      const std::vector<ldouble> &vradial = vr.second;
+      f << std::setw(10) << "vd" << " " << std::setw(10) << k;
+      f << " " << std::setw(5) << "l" << " " << std::setw(5) << lm.first;
+      f << " " << std::setw(5) << "m" << " " << std::setw(5) << lm.second;
+      f << " " << std::setw(5) << "value";
+      for (int ir = 0; ir < vradial.size(); ++ir) {
+        f << " " << std::setw(64) << std::setprecision(60) << vradial[ir];
+      }
+      f << std::endl;
+    }
+  }
+  for (auto &i : _vex) {
+    const int &k1 = i.first.first;
+    const int &k2 = i.first.second;
+    Vd &v = i.second;
+    for (auto &vr : v) {
+      const std::pair<int, int> &lm = vr.first;
+      const std::vector<ldouble> &vradial = vr.second;
+      f << std::setw(10) << "vex" << " " << std::setw(10) << k1 << " " << std::setw(10) << k2;
+      f << " " << std::setw(5) << "l" << " " << std::setw(5) << lm.first;
+      f << " " << std::setw(5) << "m" << " " << std::setw(5) << lm.second;
+      f << " " << std::setw(5) << "value";
+      for (int ir = 0; ir < vradial.size(); ++ir) {
+        f << " " << std::setw(64) << std::setprecision(60) << vradial[ir];
+      }
+      f << std::endl;
+    }
+  }
 }
 
 void HF::load(const std::string fin) {
@@ -163,14 +195,72 @@ void HF::load(const std::string fin) {
           (*_o[k])(ir, l, m) = read_value;
         }
       }
+    } else if (mode == "vd") {
+      int io;
+      ss >> io;
+
+      std::string trash;
+
+      int v_l, v_m;
+      ss >> trash >> v_l >> trash >> v_m;
+
+      ss >> trash;
+
+      _vd[io][std::pair<int, int>(v_l, v_m)] = std::vector<ldouble>(g_N, 0);
+      ldouble read_value;
+      for (int k = 0; k < g_N; ++k) {
+        ss >> read_value;
+        _vd[io][std::pair<int, int>(v_l, v_m)][k] = read_value;
+      }
+    } else if (mode == "vex") {
+      int io1, io2;
+      ss >> io1 >> io2;
+
+      std::string trash;
+
+      int v_l, v_m;
+      ss >> trash >> v_l >> trash >> v_m;
+
+      ss >> trash;
+
+      _vex[std::pair<int, int>(io1, io2)][std::pair<int, int>(v_l, v_m)] = std::vector<ldouble>(g_N, 0);
+      ldouble read_value;
+      for (int k = 0; k < g_N; ++k) {
+        ss >> read_value;
+        _vex[std::pair<int, int>(io1, io2)][std::pair<int, int>(v_l, v_m)][k] = read_value;
+      }
     }
   }
+  std::cout << "Load resetting grid with isLog = " << g_isLog << ", dx = " << g_dx << ", g_N = " << g_N << ", g_rmin = " << g_rmin << std::endl;
   _g.reset(g_isLog, g_dx, g_N, g_rmin);
   _pot.resize(_g.N());
   for (int k = 0; k < _g.N(); ++k) {
     _pot[k] = -_Z/_g(k);
   }
-  // TODO: load Vd and Vex
+}
+
+int HF::getNOrbitals() {
+  return _o.size();
+}
+
+int HF::getOrbital_n(int no) {
+  return _o[no]->initialN();
+}
+
+ldouble HF::getOrbital_E(int no) {
+  return _o[no]->E();
+}
+
+int HF::getOrbital_l(int no) {
+  return _o[no]->initialL();
+}
+
+int HF::getOrbital_m(int no) {
+  return _o[no]->initialM();
+}
+
+int HF::getOrbital_s(int no) {
+  return _o[no]->spin();
 }
 
 void HF::method(int m) {
@@ -215,6 +305,13 @@ std::vector<ldouble> HF::getOrbitalCentral(int no) {
     res.push_back(o->getNorm(k, o->initialL(), o->initialM(), _g));
   }
   return res;
+}
+
+python::list HF::getOrbitalCentralPython(int no) {
+  python::list l;
+  std::vector<ldouble> v = getOrbitalCentral(no);
+  for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
+  return l;
 }
 
 void HF::addOrbitalPython(python::object o) {

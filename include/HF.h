@@ -98,6 +98,40 @@ class HF {
     /// \return Vector of orbital values for each Grid point, in that spherical harmonic component.
     std::vector<ldouble> getOrbitalCentral(int no);
 
+    /// \brief Get value of orbital component for orbital no, assuming a central potential.
+    /// \param no Orbital identification.
+    /// \return Vector of orbital values for each Grid point, in that spherical harmonic component.
+    boost::python::list getOrbitalCentralPython(int no);
+
+    /// \brief Get number of orbitals.
+    /// \return Number of orbitals.
+    int getNOrbitals();
+
+    /// \brief Get orbital quantum number n.
+    /// \param no Orbital index.
+    /// \return Orbital quantum number n
+    int getOrbital_n(int no);
+
+    /// \brief Get orbital quantum number l.
+    /// \param no Orbital index.
+    /// \return Orbital quantum number l
+    int getOrbital_l(int no);
+
+    /// \brief Get orbital quantum number m.
+    /// \param no Orbital index.
+    /// \return Orbital quantum number m
+    int getOrbital_m(int no);
+
+    /// \brief Get orbital spin.
+    /// \param no Orbital index.
+    /// \return Orbital spin
+    int getOrbital_s(int no);
+
+    /// \brief Get orbital energy.
+    /// \param no Orbital index.
+    /// \return Orbital energy
+    ldouble getOrbital_E(int no);
+
     /// \brief Get Coulomb attraction potential -Z/r
     /// \return Coulomb potential
     std::vector<ldouble> getNucleusPotential();
