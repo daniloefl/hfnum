@@ -6,5 +6,6 @@ var classHF =
     [ "calculateFMatrix", "classHF.html#a4cf7aa1341bc8fda15d80aa18ac5087a", null ],
     [ "calculateVd", "classHF.html#abe4a51b742c05d7a787eb4e5e9102ced", null ],
     [ "calculateVex", "classHF.html#aacc5500ebeafe7002580bf1af2ec9e2d", null ],
+    [ "getE0", "classHF.html#a500bc320732e93a162feeb0e9684f6eb", null ],
     [ "solve", "classHF.html#aa63cb58ed259911c29f8aefca00809bc", null ]
 ];

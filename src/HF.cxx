@@ -37,6 +37,14 @@ HF::HF(python::object o, ldouble Z)
 HF::~HF() {
 }
 
+ldouble HF::getE0() {
+  ldouble E0 = 0;
+  for (int k = 0; k < _o.size(); ++k) {
+    E0 += _o[k]->E();
+  }
+  return E0;
+}
+
 void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
   _dE.resize(_o.size());
   _nodes.resize(_o.size());

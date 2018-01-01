@@ -36,6 +36,7 @@ BOOST_PYTHON_MODULE(hfnum)
     .def("getOrbital_s", &HF::getOrbital_s)
     .def("getOrbital_E", &HF::getOrbital_E)
     .def("getCentral", &HF::getOrbitalCentralPython)
+    .def("getE0", &HF::getE0)
     .def("save", &HF::save)
     .def("load", &HF::load)
   ;

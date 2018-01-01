@@ -28,21 +28,18 @@ NiterSCF = 1
 Niter = 100
 F0stop = 1e-6
 r = np.asarray(g.getR())
-print "Last r:", r[-1]
-print "First r:", r[0:5]
-for i in range(0, 2):
-  print "SCF it.", i
-  h.gammaSCF(0.5)
-  h.solve(NiterSCF, Niter, F0stop)
+h.solve(NiterSCF, Niter, F0stop)
 
-  o = [np.asarray(orb.getCentral())]
-  v = h.getNucleusPotential()
-  H1s = 2*np.exp(-r)
+h.save('output/results_H.txt')
 
-  m = next(i for i,v in enumerate(r) if v >= 10)
-  f = plt.figure()
-  plt.plot(r[:m], r[:m]*o[0][:m], 'r-',  linewidth = 2, label = 'r*Orbital 0 (s)')
-  plt.plot(r[:m], r[:m]*H1s[:m], 'g--', linewidth = 2, label = 'r*Hydrogen 1s')
-  plt.legend()
-  plt.show()
+o = [np.asarray(orb.getCentral())]
+v = h.getNucleusPotential()
+H1s = 2*np.exp(-r)
+
+m = next(i for i,v in enumerate(r) if v >= 10)
+f = plt.figure()
+plt.plot(r[:m], r[:m]*o[0][:m], 'r-',  linewidth = 2, label = 'r*Orbital 0 (s)')
+plt.plot(r[:m], r[:m]*H1s[:m], 'g--', linewidth = 2, label = 'r*Hydrogen 1s')
+plt.legend()
+plt.show()
 

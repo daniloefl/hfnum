@@ -46,6 +46,9 @@ class HF : public SCF {
     /// \param F0step Stop looking for correct energies, when all eigenvalues change by lass than this amount.
     void solve(int NiterSCF, int Niter, ldouble F0stop);
 
+    /// \brief Calculate total energy
+    /// \return Ground energy
+    ldouble getE0();
 
     /// \brief Calculate F matrix, which represents the Hamiltonian using the Numerov method. K is the inverse of F. This is used for the Gordon and renormalised methods, since these matrices are calculated per Grid point. The sparse method uses a large matrix solving all points simultaneously.
     /// \param F To be returned by reference. Matrix F for each Grid point.
