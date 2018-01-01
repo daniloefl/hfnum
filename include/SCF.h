@@ -27,6 +27,13 @@ class SCF {
   public:
 
     /// \brief Constructor for an atom.
+    SCF();
+
+    /// \brief Constructor for an atom.
+    /// \param fname Input result form previous calculation for plotting
+    SCF(const std::string fname);
+
+    /// \brief Constructor for an atom.
     /// \param g Grid object.
     /// \param Z Atomic number.
     SCF(Grid &g, ldouble Z);
@@ -38,6 +45,29 @@ class SCF {
 
     /// \brief Destructor.
     virtual ~SCF();
+
+    /// \brief Reset Grid configuration.
+    /// \param isLog Whether the Grid is logarithmic.
+    /// \param dx Grid step.
+    /// \param N Number of Grid points.
+    /// \param rmin Minimum Grid r value.
+    void resetGrid(bool isLog, ldouble dx, int N, ldouble rmin);
+
+    /// \brief Get Z.
+    /// \return Z
+    ldouble Z();
+
+    /// \brief Set Z.
+    /// \param Z Z value.
+    void setZ(ldouble Z);
+
+    /// \brief Get Grid.
+    /// \return Grid object.
+    Grid &getGrid();
+
+    /// \brief Get list of R values from the Grid.
+    /// \return List of R values
+    boost::python::list getR() const;
 
     /// \brief Get direct potential
     /// \param k Identifier of the orbital on which this potential is to be applied.
@@ -193,7 +223,7 @@ class SCF {
 
   protected:
     /// Numerical Grid
-    Grid &_g;
+    Grid *_g;
 
     /// Atomic number
     ldouble _Z;
@@ -250,6 +280,9 @@ class SCF {
 
     /// List of owned Orbital pointers
     std::vector<Orbital *> _owned_orb;
+
+    /// Whether we own the Grid
+    bool _own_grid;
 };
 
 #endif

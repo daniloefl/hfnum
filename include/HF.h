@@ -28,6 +28,13 @@ class HF : public SCF {
   public:
 
     /// \brief Constructor for an atom.
+    HF();
+
+    /// \brief Constructor for an atom.
+    /// \param fname Input result form previous calculation for plotting
+    HF(const std::string fname);
+
+    /// \brief Constructor for an atom.
     /// \param g Grid object.
     /// \param Z Atomic number.
     HF(Grid &g, ldouble Z);

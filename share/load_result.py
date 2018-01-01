@@ -15,18 +15,10 @@ import matplotlib.pyplot as plt
 fname = "output/results_Be.txt"
 
 # random initialisation
-Z = 1
-dx = 1e-1
-N = 10
-rmin = 1e-2
-g = hfnum.Grid(True, dx, int(N), rmin)
-h = hfnum.HF(g, Z)
-h.method(2)
-h.gammaSCF(0.1)
+h = hfnum.HF(fname)
+#h.load(fname)
 
-h.load(fname)
-
-r = np.asarray(g.getR())
+r = np.asarray(h.getR())
 print "r:", r
 
 for n in range(0, h.getNOrbitals()):
@@ -55,7 +47,7 @@ for n in range(0, h.getNOrbitals()):
 f = plt.figure()
 i = 0
 for n in range(np.maximum(0, h.getNOrbitals()-len(style)), h.getNOrbitals()):
-  plt.plot(r[:m], r[:m]*o[n][:m], style[i], linewidth = 2, label = 'r*Orbital %d (n=%d, l=%d, m=%d, s=%d)' % (n, h.getOrbital_n(n), h.getOrbital_l(n), h.getOrbital_m(n), h.getOrbital_s(n)))
+  plt.plot(r[:m], r[:m]*o[n][:m], style[i], linewidth = 2, label = 'r*R[%6s]' % (h.getOrbitalName(n)))
   i += 1
 plt.legend()
 plt.show()
@@ -65,9 +57,9 @@ for n in range(0, h.getNOrbitals()):
   i = 0
   ymin = np.fabs(vd[0][0])
   plt.plot(r[:m], v[:m], 'r:', linewidth = 3, label = 'Coulomb')
-  plt.plot(r[:m], vd[n][:m], 'b:', linewidth = 3, label = 'Direct (%d)' % n)
+  plt.plot(r[:m], vd[n][:m], 'b:', linewidth = 3, label = 'Direct [%s]' % h.getOrbitalName(n))
   for n2 in range(np.maximum(0, h.getNOrbitals()-len(style)), h.getNOrbitals()):
-    plt.plot(r[:m], vex[n][n2][:m], style[i], linewidth = 2, label = 'Exchange (%d,%d)' % (n, n2))
+    plt.plot(r[:m], vex[n][n2][:m], style[i], linewidth = 2, label = 'Exchange [%s, %s]' % (h.getOrbitalName(n), h.getOrbitalName(n2)))
     i = i + 1
   plt.ylim((-ymin, ymin))
   plt.legend()

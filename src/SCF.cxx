@@ -31,24 +31,77 @@ void SCF::centralPotential(bool central) {
   _central = central;
 }
 
+SCF::SCF(const std::string fname)
+  : _g(new Grid(true, 1e-1, 10, 1e-3)), _Z(1), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _irs(*_g, _o, icl, _om), _igs(*_g, _o, icl, _om) {
+  _own_grid = true;
+  _pot.resize(_g->N());
+  _central = true;
+  for (int k = 0; k < _g->N(); ++k) {
+    _pot[k] = -_Z/(*_g)(k);
+  }
+  _gamma_scf = 0.5;
+  _method = 2;
+  load(fname);
+}
+
+SCF::SCF()
+  : _g(new Grid(true, 1e-1, 10, 1e-3)), _Z(1), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _irs(*_g, _o, icl, _om), _igs(*_g, _o, icl, _om) {
+  _own_grid = true;
+  _pot.resize(_g->N());
+  _central = true;
+  for (int k = 0; k < _g->N(); ++k) {
+    _pot[k] = -_Z/(*_g)(k);
+  }
+  _gamma_scf = 0.5;
+  _method = 2;
+}
+
+Grid &SCF::getGrid() {
+  return *_g;
+}
+
+python::list SCF::getR() const {
+  return _g->getR();
+}
+
+void SCF::resetGrid(bool isLog, ldouble dx, int N, ldouble rmin) {
+  _g->reset(isLog, dx, N, rmin);
+  _pot.resize(_g->N());
+  for (int k = 0; k < _g->N(); ++k) {
+    _pot[k] = -_Z/(*_g)(k);
+  }
+}
+
+void SCF::setZ(ldouble Z) {
+  _Z = Z;
+  for (int k = 0; k < _g->N(); ++k) {
+    _pot[k] = -_Z/(*_g)(k);
+  }
+}
+
+ldouble SCF::Z() {
+  return _Z;
+}
 
 SCF::SCF(Grid &g, ldouble Z)
-  : _g(g), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
-  _pot.resize(_g.N());
+  : _g(&g), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
+  _own_grid = false;
+  _pot.resize(_g->N());
   _central = true;
-  for (int k = 0; k < _g.N(); ++k) {
-    _pot[k] = -_Z/_g(k);
+  for (int k = 0; k < _g->N(); ++k) {
+    _pot[k] = -_Z/(*_g)(k);
   }
   _gamma_scf = 0.5;
   _method = 2;
 }
 
 SCF::SCF(python::object o, ldouble Z)
-  : _g(python::extract<Grid &>(o)), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
-  _pot.resize(_g.N());
+  : _g(python::extract<Grid *>(o)), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
+  _own_grid = false;
+  _pot.resize(_g->N());
   _central = true;
-  for (int k = 0; k < _g.N(); ++k) {
-    _pot[k] = -_Z/_g(k);
+  for (int k = 0; k < _g->N(); ++k) {
+    _pot[k] = -_Z/(*_g)(k);
   }
   _gamma_scf = 0.5;
   _method = 2;
@@ -59,6 +112,7 @@ SCF::~SCF() {
     delete o;
   }
   _owned_orb.clear();
+  if (_own_grid) delete _g;
 }
 
 void SCF::save(const std::string fout) {
@@ -67,10 +121,10 @@ void SCF::save(const std::string fout) {
   f << std::setw(10) << "Z" << " " << std::setw(10) << _Z << std::endl;
   f << std::setw(10) << "gamma_scf" << " " << std::setw(10) << _gamma_scf << std::endl;
   f << std::setw(10) << "central" << " " << std::setw(10) << _central << std::endl;
-  f << std::setw(10) << "grid.isLog" << " " << std::setw(10) << _g.isLog() << std::endl;
-  f << std::setw(10) << "grid.dx" << " " << std::setw(10) << _g.dx() << std::endl;
-  f << std::setw(10) << "grid.N" << " " << std::setw(10) << _g.N() << std::endl;
-  f << std::setw(10) << "grid.rmin" << " " << std::setw(10) << _g(0) << std::endl;
+  f << std::setw(10) << "grid.isLog" << " " << std::setw(10) << _g->isLog() << std::endl;
+  f << std::setw(10) << "grid.dx" << " " << std::setw(10) << _g->dx() << std::endl;
+  f << std::setw(10) << "grid.N" << " " << std::setw(10) << _g->N() << std::endl;
+  f << std::setw(10) << "grid.rmin" << " " << std::setw(10) << (*_g)(0) << std::endl;
   for (int i = 0; i < _o.size(); ++i) {
     f << std::setw(10) << "orbital" << " " << std::setw(10) << i;
     f << " " << std::setw(5) << "n" << " " << std::setw(5) << _o[i]->initialN();
@@ -83,7 +137,7 @@ void SCF::save(const std::string fout) {
       f << " " << std::setw(5) << "sph_l" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].first;
       f << " " << std::setw(5) << "sph_m" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].second;
       f << " " << std::setw(5) << "value";
-      for (int ir = 0; ir < _g.N(); ++ir) {
+      for (int ir = 0; ir < _g->N(); ++ir) {
         const ldouble v = ((const Orbital) (*_o[i]))(ir, _o[i]->getSphHarm()[idx].first, _o[i]->getSphHarm()[idx].second);
         f << " " << std::setw(64) << std::setprecision(60) << v;
       }
@@ -235,10 +289,10 @@ void SCF::load(const std::string fin) {
     }
   }
   std::cout << "Load resetting grid with isLog = " << g_isLog << ", dx = " << g_dx << ", g_N = " << g_N << ", g_rmin = " << g_rmin << std::endl;
-  _g.reset(g_isLog, g_dx, g_N, g_rmin);
-  _pot.resize(_g.N());
-  for (int k = 0; k < _g.N(); ++k) {
-    _pot[k] = -_Z/_g(k);
+  _g->reset(g_isLog, g_dx, g_N, g_rmin);
+  _pot.resize(_g->N());
+  for (int k = 0; k < _g->N(); ++k) {
+    _pot[k] = -_Z/(*_g)(k);
   }
 }
 
@@ -254,14 +308,14 @@ std::vector<ldouble> SCF::getExchangePotential(int k, int k2) {
 python::list SCF::getDirectPotentialPython(int k) {
   python::list l;
   std::vector<ldouble> v = getDirectPotential(k);
-  for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
+  for (int k = 0; k < _g->N(); ++k) l.append(v[k]);
   return l;
 }
 
 python::list SCF::getExchangePotentialPython(int k, int k2) {
   python::list l;
   std::vector<ldouble> v = getExchangePotential(k, k2);
-  for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
+  for (int k = 0; k < _g->N(); ++k) l.append(v[k]);
   return l;
 }
 
@@ -322,14 +376,14 @@ void SCF::method(int m) {
 python::list SCF::getNucleusPotentialPython() {
   python::list l;
   std::vector<ldouble> v = getNucleusPotential();
-  for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
+  for (int k = 0; k < _g->N(); ++k) l.append(v[k]);
   return l;
 }
 std::vector<ldouble> SCF::getOrbital(int no, int lo, int mo) {
   Orbital *o = _o[no];
   std::vector<ldouble> res;
-  for (int k = 0; k < _g.N(); ++k) {
-    res.push_back(o->getNorm(k, lo, mo, _g));
+  for (int k = 0; k < _g->N(); ++k) {
+    res.push_back(o->getNorm(k, lo, mo, *_g));
   }
   return res;
 }
@@ -337,8 +391,8 @@ std::vector<ldouble> SCF::getOrbital(int no, int lo, int mo) {
 std::vector<ldouble> SCF::getOrbitalCentral(int no) {
   Orbital *o = _o[no];
   std::vector<ldouble> res;
-  for (int k = 0; k < _g.N(); ++k) {
-    res.push_back(o->getNorm(k, o->initialL(), o->initialM(), _g));
+  for (int k = 0; k < _g->N(); ++k) {
+    res.push_back(o->getNorm(k, o->initialL(), o->initialM(), *_g));
   }
   return res;
 }
@@ -346,7 +400,7 @@ std::vector<ldouble> SCF::getOrbitalCentral(int no) {
 python::list SCF::getOrbitalCentralPython(int no) {
   python::list l;
   std::vector<ldouble> v = getOrbitalCentral(no);
-  for (int k = 0; k < _g.N(); ++k) l.append(v[k]);
+  for (int k = 0; k < _g->N(); ++k) l.append(v[k]);
   return l;
 }
 
@@ -457,9 +511,9 @@ ldouble SCF::stepGordon(ldouble gamma) {
     int l = _o[k]->initialL();
     int m = _o[k]->initialM();
     int idx = _om.index(k, l, m);
-    for (int i = 0; i < _g.N(); ++i) {
+    for (int i = 0; i < _g->N(); ++i) {
       (*_o[k])(i, l, m) = matched[i](idx);
-      if (i >= 10 && _g(i) < std::pow(_o.size(),2) && i < _g.N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
+      if (i >= 10 && (*_g)(i) < std::pow(_o.size(),2) && i < _g->N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
         _nodes[k] += 1;
       }
     }
@@ -520,13 +574,13 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
     int l = _o[k]->initialL();
     int m = _o[k]->initialM();
     int idx = _om.index(k, l, m);
-    for (int i = 0; i < _g.N(); ++i) {
+    for (int i = 0; i < _g->N(); ++i) {
       (*_o[k])(i, l, m) = matched[i](idx);
-      if (i >= 10 && i < _g.N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
+      if (i >= 10 && i < _g->N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
         //ldouble deriv = (matched[i](idx) - matched[i-1](idx))/(_g(i) - _g(i-1));
         //if (std::fabs(deriv) > 1e-2) {
           _nodes[k] += 1;
-          std::cout << "Orbital " << k << ": Found node at i=" << i << ", r = " << _g(i) << std::endl;
+          std::cout << "Orbital " << k << ": Found node at i=" << i << ", r = " << (*_g)(i) << std::endl;
         //}
       }
     }
@@ -639,8 +693,8 @@ ldouble SCF::stepSparse(ldouble gamma) {
     _nodes[k] = 0;
     int l = _o[k]->initialL();
     int m = _o[k]->initialM();
-    for (int i = 0; i < _g.N(); ++i) {
-      if (i >= 10 && _g(i) < std::pow(_o.size(),2) && i < _g.N() - 4 && (*_o[k])(i, l, m)*(*_o[k])(i-1, l, m) <= 0) {
+    for (int i = 0; i < _g->N(); ++i) {
+      if (i >= 10 && (*_g)(i) < std::pow(_o.size(),2) && i < _g->N() - 4 && (*_o[k])(i, l, m)*(*_o[k])(i-1, l, m) <= 0) {
         _nodes[k] += 1;
       }
     }
@@ -658,7 +712,7 @@ ldouble SCF::stepSparse(ldouble gamma) {
 }
 
 void SCF::addOrbital(Orbital *o) {
-  o->N(_g.N());
+  o->N(_g->N());
   _o.push_back(o);
   // initialise energies and first solution guess
   for (int k = 0; k < _o.size(); ++k) {
@@ -667,8 +721,8 @@ void SCF::addOrbital(Orbital *o) {
     for (int idx = 0; idx < _o[k]->getSphHarm().size(); ++idx) {
       int l = _o[k]->getSphHarm()[idx].first;
       int m = _o[k]->getSphHarm()[idx].second;
-      for (int ir = 0; ir < _g.N(); ++ir) { // for each radial point
-        (*_o[k])(ir, l, m) = std::pow(_Z*_g(ir)/((ldouble) _o[k]->initialN()), l+0.5)*std::exp(-_Z*_g(ir)/((ldouble) _o[k]->initialN()));
+      for (int ir = 0; ir < _g->N(); ++ir) { // for each radial point
+        (*_o[k])(ir, l, m) = std::pow(_Z*(*_g)(ir)/((ldouble) _o[k]->initialN()), l+0.5)*std::exp(-_Z*(*_g)(ir)/((ldouble) _o[k]->initialN()));
       }
     }
   }
@@ -676,31 +730,31 @@ void SCF::addOrbital(Orbital *o) {
   _vex.clear();
   for (int k = 0; k < _o.size(); ++k) {
     _vd[k] = Vd();
-    _vd[k][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g.N(), 0);
-    _vd[k][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g.N(), 0);
-    _vd[k][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g.N(), 0);
-    _vd[k][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g.N(), 0);
+    _vd[k][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g->N(), 0);
+    _vd[k][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g->N(), 0);
+    _vd[k][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g->N(), 0);
+    _vd[k][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g->N(), 0);
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       _vex[std::pair<int, int>(k, k2)] = Vex();
-      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g.N(), 0);
-      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g.N(), 0);
-      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g.N(), 0);
-      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g.N(), 0);
+      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g->N(), 0);
+      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g->N(), 0);
+      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g->N(), 0);
+      _vex[std::pair<int, int>(k, k2)][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g->N(), 0);
     }
   }
 
   for (int k = 0; k < _o.size(); ++k) {
     _vdsum[k] = Vd();
-    _vdsum[k][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g.N(), 0);
-    _vdsum[k][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g.N(), 0);
-    _vdsum[k][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g.N(), 0);
-    _vdsum[k][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g.N(), 0);
+    _vdsum[k][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g->N(), 0);
+    _vdsum[k][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g->N(), 0);
+    _vdsum[k][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g->N(), 0);
+    _vdsum[k][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g->N(), 0);
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       _vexsum[std::pair<int, int>(k, k2)] = Vex();
-      _vexsum[std::pair<int, int>(k, k2)][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g.N(), 0);
-      _vexsum[std::pair<int, int>(k, k2)][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g.N(), 0);
-      _vexsum[std::pair<int, int>(k, k2)][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g.N(), 0);
-      _vexsum[std::pair<int, int>(k, k2)][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g.N(), 0);
+      _vexsum[std::pair<int, int>(k, k2)][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g->N(), 0);
+      _vexsum[std::pair<int, int>(k, k2)][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g->N(), 0);
+      _vexsum[std::pair<int, int>(k, k2)][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g->N(), 0);
+      _vexsum[std::pair<int, int>(k, k2)][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g->N(), 0);
     }
   }
 }
