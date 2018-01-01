@@ -125,6 +125,33 @@ hfnum/fast:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/build
 .PHONY : hfnum/fast
 
+DFT.o: DFT.cxx.o
+
+.PHONY : DFT.o
+
+# target to build an object file
+DFT.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/DFT.cxx.o
+.PHONY : DFT.cxx.o
+
+DFT.i: DFT.cxx.i
+
+.PHONY : DFT.i
+
+# target to preprocess a source file
+DFT.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/DFT.cxx.i
+.PHONY : DFT.cxx.i
+
+DFT.s: DFT.cxx.s
+
+.PHONY : DFT.s
+
+# target to generate assembly for a file
+DFT.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/DFT.cxx.s
+.PHONY : DFT.cxx.s
+
 Grid.o: Grid.cxx.o
 
 .PHONY : Grid.o
@@ -404,6 +431,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... hfnum"
+	@echo "... DFT.o"
+	@echo "... DFT.i"
+	@echo "... DFT.s"
 	@echo "... Grid.o"
 	@echo "... Grid.i"
 	@echo "... Grid.s"
