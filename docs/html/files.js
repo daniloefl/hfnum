@@ -28,6 +28,10 @@ var files =
     [ "OrbitalMapper.h", "OrbitalMapper_8h.html", [
       [ "OrbitalMapper", "classOrbitalMapper.html", "classOrbitalMapper" ]
     ] ],
+    [ "SCF.cxx", "SCF_8cxx.html", null ],
+    [ "SCF.h", "SCF_8h.html", [
+      [ "SCF", "classSCF.html", "classSCF" ]
+    ] ],
     [ "utils.cxx", "utils_8cxx.html", "utils_8cxx" ],
     [ "utils.h", "utils_8h.html", "utils_8h" ]
 ];

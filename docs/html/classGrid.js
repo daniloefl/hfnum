@@ -9,6 +9,7 @@ var classGrid =
     [ "N", "classGrid.html#a3ef27a43525a9fbfddbb82c44feace92", null ],
     [ "operator()", "classGrid.html#a73354fb78856b4a95618daa1d4840ed0", null ],
     [ "operator=", "classGrid.html#a7e86df562719e3d6c527f977a01f5fbd", null ],
+    [ "reset", "classGrid.html#a498642214b8a7bbe8b8864818217f0e2", null ],
     [ "_dx", "classGrid.html#a725566d70b2512ccdf32b1de49b485c2", null ],
     [ "_isLog", "classGrid.html#a98bf232b6fd8718d9422c3f2235a4c62", null ],
     [ "_N", "classGrid.html#a1fb45e130bd05b521e4eb9ce304fa8ce", null ],

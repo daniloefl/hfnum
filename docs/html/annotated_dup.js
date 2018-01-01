@@ -6,5 +6,6 @@ var annotated_dup =
     [ "IterativeRenormalisedSolver", "classIterativeRenormalisedSolver.html", "classIterativeRenormalisedSolver" ],
     [ "LinearSystemBuilder", "classLinearSystemBuilder.html", "classLinearSystemBuilder" ],
     [ "Orbital", "classOrbital.html", "classOrbital" ],
-    [ "OrbitalMapper", "classOrbitalMapper.html", "classOrbitalMapper" ]
+    [ "OrbitalMapper", "classOrbitalMapper.html", "classOrbitalMapper" ],
+    [ "SCF", "classSCF.html", "classSCF" ]
 ];

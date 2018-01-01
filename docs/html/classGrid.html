@@ -46,6 +46,7 @@
     <ul class="tablist">
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
       <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="inherits.html"><span>Class&#160;Hierarchy</span></a></li>
       <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
@@ -96,6 +97,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ad7e9753669e50448643d61eb87420532"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab80a75ac9889eaa6db6ef90d9a17bba5"><td class="memItemLeft" align="right" valign="top">python::list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGrid.html#ab80a75ac9889eaa6db6ef90d9a17bba5">getR</a> () const </td></tr>
 <tr class="separator:ab80a75ac9889eaa6db6ef90d9a17bba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a498642214b8a7bbe8b8864818217f0e2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGrid.html#a498642214b8a7bbe8b8864818217f0e2">reset</a> (bool <a class="el" href="classGrid.html#ad7e9753669e50448643d61eb87420532">isLog</a>=true, double <a class="el" href="classGrid.html#a57d00a0fead4e8105f7e1b70eb2ca43d">dx</a>=1e-1, int N=150, double rmin=1e-4)</td></tr>
+<tr class="separator:a498642214b8a7bbe8b8864818217f0e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -189,7 +192,7 @@ Private Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00046">46</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00060">60</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
 
 </div>
 </div>
@@ -236,7 +239,7 @@ Private Attributes</h2></td></tr>
 
 <p>Getter for dx. </p>
 
-<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00029">29</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00043">43</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
 
 </div>
 </div>
@@ -255,7 +258,7 @@ Private Attributes</h2></td></tr>
 
 <p>Python interface for getting list of radial values. </p>
 
-<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00040">40</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00054">54</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
 
 </div>
 </div>
@@ -274,7 +277,7 @@ Private Attributes</h2></td></tr>
 
 <p>Getter for isLog flag. </p>
 
-<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00075">75</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00089">89</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
 
 </div>
 </div>
@@ -293,7 +296,7 @@ Private Attributes</h2></td></tr>
 
 <p>Getter for N. </p>
 
-<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00032">32</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00046">46</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
 
 </div>
 </div>
@@ -319,7 +322,7 @@ Private Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00036">36</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00050">50</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
 
 </div>
 </div>
@@ -345,7 +348,58 @@ Private Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00060">60</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00074">74</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a498642214b8a7bbe8b8864818217f0e2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Grid::reset </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>isLog</em> = <code>true</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>dx</em> = <code>1e-1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>N</em> = <code>150</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>rmin</em> = <code>1e-4</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reset configuration. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">isLog</td><td>Whether the <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> is logarithmic. If this is true, the <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> is r = exp(rmin + dx*i), otherwise: r = rmin + dx*i for i = 0..N-1 </td></tr>
+    <tr><td class="paramname">dx</td><td>Step size. </td></tr>
+    <tr><td class="paramname">N</td><td>Number of <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> points. </td></tr>
+    <tr><td class="paramname">rmin</td><td>Minimum <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="Grid_8cxx_source.html#l00029">29</a> of file <a class="el" href="Grid_8cxx_source.html">Grid.cxx</a>.</p>
 
 </div>
 </div>
@@ -370,7 +424,7 @@ Private Attributes</h2></td></tr>
 
 <p>Step size. </p>
 
-<p>Definition at line <a class="el" href="Grid_8h_source.html#l00063">63</a> of file <a class="el" href="Grid_8h_source.html">Grid.h</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8h_source.html#l00071">71</a> of file <a class="el" href="Grid_8h_source.html">Grid.h</a>.</p>
 
 </div>
 </div>
@@ -394,7 +448,7 @@ Private Attributes</h2></td></tr>
 
 <p>Whether the grid is logarithmic. </p>
 
-<p>Definition at line <a class="el" href="Grid_8h_source.html#l00072">72</a> of file <a class="el" href="Grid_8h_source.html">Grid.h</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8h_source.html#l00080">80</a> of file <a class="el" href="Grid_8h_source.html">Grid.h</a>.</p>
 
 </div>
 </div>
@@ -418,7 +472,7 @@ Private Attributes</h2></td></tr>
 
 <p>Number of grid points. </p>
 
-<p>Definition at line <a class="el" href="Grid_8h_source.html#l00066">66</a> of file <a class="el" href="Grid_8h_source.html">Grid.h</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8h_source.html#l00074">74</a> of file <a class="el" href="Grid_8h_source.html">Grid.h</a>.</p>
 
 </div>
 </div>
@@ -442,7 +496,7 @@ Private Attributes</h2></td></tr>
 
 <p><a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> values. </p>
 
-<p>Definition at line <a class="el" href="Grid_8h_source.html#l00060">60</a> of file <a class="el" href="Grid_8h_source.html">Grid.h</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8h_source.html#l00068">68</a> of file <a class="el" href="Grid_8h_source.html">Grid.h</a>.</p>
 
 </div>
 </div>
@@ -466,7 +520,7 @@ Private Attributes</h2></td></tr>
 
 <p>Minimum r value. </p>
 
-<p>Definition at line <a class="el" href="Grid_8h_source.html#l00069">69</a> of file <a class="el" href="Grid_8h_source.html">Grid.h</a>.</p>
+<p>Definition at line <a class="el" href="Grid_8h_source.html#l00077">77</a> of file <a class="el" href="Grid_8h_source.html">Grid.h</a>.</p>
 
 </div>
 </div>
