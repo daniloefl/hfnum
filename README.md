@@ -39,13 +39,16 @@ dx = 1e-1/Z       # Grid step
 N = 255*Z         # number of points
 rmin = 1e-10      # first point in the Grid
 
+# this is the main solver
+h = hfnum.HF()
+
 # initialise library with the Grid parameters
 # the first parameter tells it whether one should use the logarithmic Grid
 # the linear Grid works poorly, so it is recommended to keep this always in True
-g = hfnum.Grid(True, dx, int(N), rmin)
+h.resetGrid(True, dx, int(N), rmin)
 
-# this is the main solver
-h = hfnum.HF(g, Z)
+# set atomic number
+h.setZ(Z)
 
 # use this to use the faster method, which iteratively looks for the energy
 # without solving the equations using the NxN grid of points
@@ -84,7 +87,7 @@ h.gammaSCF(0.7)
 h.solve(NiterSCF, Niter, F0stop)
 
 # get list with r values for plotting later
-r = np.asarray(g.getR())
+r = np.asarray(h.getR())
 
 # get orbitals shape
 o = [np.asarray(orb0.get(0, 0)), np.asarray(orb1.get(0, 0)), np.asarray(orb2.get(0, 0))]
@@ -103,6 +106,14 @@ vd[2] = h.getDirectPotential(2)
 vex[2] = [h.getExchangePotential(2, 0), h.getExchangePotential(2, 1), h.getExchangePotential(2, 2)]
 
 # one can now plot all the above as needed
+
+# you can also save the result:
+h.save("myresult.txt")
+
+# and later load it again:
+# to save the calculation state and continue, or plot the results later
+h.load("myresult.txt")
+
 ```
 
 # Installing packages necessary for compilation
