@@ -314,6 +314,33 @@ OrbitalMapper.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/OrbitalMapper.cxx.s
 .PHONY : OrbitalMapper.cxx.s
 
+SCF.o: SCF.cxx.o
+
+.PHONY : SCF.o
+
+# target to build an object file
+SCF.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/SCF.cxx.o
+.PHONY : SCF.cxx.o
+
+SCF.i: SCF.cxx.i
+
+.PHONY : SCF.i
+
+# target to preprocess a source file
+SCF.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/SCF.cxx.i
+.PHONY : SCF.cxx.i
+
+SCF.s: SCF.cxx.s
+
+.PHONY : SCF.s
+
+# target to generate assembly for a file
+SCF.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/SCF.cxx.s
+.PHONY : SCF.cxx.s
+
 hfnum.o: hfnum.cxx.o
 
 .PHONY : hfnum.o
@@ -398,6 +425,9 @@ help:
 	@echo "... OrbitalMapper.o"
 	@echo "... OrbitalMapper.i"
 	@echo "... OrbitalMapper.s"
+	@echo "... SCF.o"
+	@echo "... SCF.i"
+	@echo "... SCF.s"
 	@echo "... hfnum.o"
 	@echo "... hfnum.i"
 	@echo "... hfnum.s"
