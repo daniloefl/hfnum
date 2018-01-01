@@ -189,6 +189,8 @@ void SCF::load(const std::string fin) {
 
         if (l != o_L && m != o_M) _o[k]->addSphHarm(l, m);
 
+        ss >> trash;
+
         ldouble read_value;
         for (int ir = 0; ir < g_N; ++ir) { // for each radial point
           ss >> read_value;

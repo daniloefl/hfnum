@@ -47,9 +47,6 @@ for n in range(0, h.getNOrbitals()):
     tmp.append(h.getExchangePotential(n, n2))
   vex[n] = tmp
 
-print r
-print o[0]
-
 # show orbitals
 f = plt.figure()
 i = 0
@@ -65,7 +62,7 @@ for n in range(0, h.getNOrbitals()):
   ymin = np.fabs(vd[0][0])
   plt.plot(r[:m], v[:m], 'r:', linewidth = 3, label = 'Coulomb')
   plt.plot(r[:m], vd[n][:m], 'b:', linewidth = 3, label = 'Direct (%d)' % n)
-  for n2 in range(h.getNOrbitals()-len(style), h.getNOrbitals()):
+  for n2 in range(np.maximum(0, h.getNOrbitals()-len(style)), h.getNOrbitals()):
     plt.plot(r[:m], vex[n][n2][:m], style[i], linewidth = 2, label = 'Exchange (%d,%d)' % (n, n2))
     i = i + 1
   plt.ylim((-ymin, ymin))
