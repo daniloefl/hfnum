@@ -25,6 +25,7 @@ using namespace boost;
 #include <Eigen/Dense>
 
 #include <fstream>
+#include <cstdlib>
 
 void SCF::centralPotential(bool central) {
   _central = central;
@@ -271,6 +272,29 @@ int SCF::getNOrbitals() {
 
 int SCF::getOrbital_n(int no) {
   return _o[no]->initialN();
+}
+
+std::string SCF::getOrbitalName(int no) {
+  std::string name = "";
+  name += std::to_string(_o[no]->initialN());
+  int l = _o[no]->initialL();
+  int m = _o[no]->initialM();
+  int s = _o[no]->spin();
+  if (l == 0) name += "s";
+  else if (l == 1) name += "p";
+  else if (l == 2) name += "d";
+  else if (l == 3) name += "f";
+  else if (l == 4) name += "g";
+  else if (l == 5) name += "h";
+  else name += "?";
+  name += "_{m=";
+  name += std::to_string(m);
+  name += "}";
+  if (s > 0)
+    name += "^+";
+  else
+    name += "^-";
+  return name;
 }
 
 ldouble SCF::getOrbital_E(int no) {

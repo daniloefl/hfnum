@@ -132,6 +132,11 @@ class SCF {
     /// \return Number of orbitals.
     int getNOrbitals();
 
+    /// \brief Get spectroscopic name of orbital.
+    /// \param no Orbital index.
+    /// \return Orbital name
+    std::string getOrbitalName(int no);
+
     /// \brief Get orbital quantum number n.
     /// \param no Orbital index.
     /// \return Orbital quantum number n

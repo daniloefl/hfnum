@@ -10,7 +10,7 @@ import seaborn
 import matplotlib.pyplot as plt
 
 # read from this file
-fname = "output/results_H.txt"
+fname = "output/results_Be.txt"
 
 # random initialisation
 Z = 1
@@ -25,8 +25,10 @@ h.gammaSCF(0.1)
 h.load(fname)
 
 r = np.asarray(g.getR())
-print "Last r:", r[-1]
-print "First r:", r[0:5]
+print "r:", r
+
+for n in range(0, h.getNOrbitals()):
+  print "Energy for orbital %10s (index=%2d, n=%2d, l=%2d, m=%2d, s=%2d): %10.6f" % (h.getOrbitalName(n), n, h.getOrbital_n(n), h.getOrbital_l(n), h.getOrbital_m(n), h.getOrbital_s(n), h.getOrbital_E(n))
 
 o = []
 v = h.getNucleusPotential()
