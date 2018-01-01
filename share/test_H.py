@@ -15,9 +15,9 @@ Z = 1
 dx = 1e-2
 N = 1900
 rmin = 1e-7
-g = hfnum.Grid(True, dx, int(N), rmin)
-
-h = hfnum.HF(g, Z)
+h = hfnum.HF()
+h.resetGrid(True, dx, int(N), rmin)
+h.setZ(Z)
 h.method(2)
 
 orb = hfnum.Orbital(1, 1, 0, 0)
@@ -27,7 +27,7 @@ h.addOrbital(orb)
 NiterSCF = 1
 Niter = 100
 F0stop = 1e-6
-r = np.asarray(g.getR())
+r = np.asarray(h.getR())
 h.solve(NiterSCF, Niter, F0stop)
 
 h.save('output/results_H.txt')

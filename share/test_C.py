@@ -15,8 +15,9 @@ Z = 6
 dx = 0.5*1e-1/Z
 N = 2*225*Z
 rmin = 1e-8
-g = hfnum.Grid(True, dx, int(N), rmin)
-h = hfnum.HF(g, Z)
+h = hfnum.HF()
+h.resetGrid(True, dx, int(N), rmin)
+h.setZ(Z)
 h.method(2)
 
 orb0 = hfnum.Orbital( 1, 1, 0, 0)
@@ -35,7 +36,7 @@ h.addOrbital(orb5)
 NiterSCF = 40
 Niter = 1000
 F0stop = 1e-6
-r = np.asarray(g.getR())
+r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
 h.gammaSCF(0.1)
