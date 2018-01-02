@@ -171,6 +171,8 @@ void DFT::calculateN(ldouble gamma) {
     for (int k = 0; k < _g->N(); ++k) currentN[k] = (1-gamma)*currentN[k] + gamma*_nsum_dw[std::pair<int,int>(lj,mj)][k];
   }
 
+  std::cout << "Calculating u." << std::endl;
+  _u = std::vector<ldouble>(_g->N(), 0);
   for (int k = 0; k < _g->N(); ++k) {
     _u[k] = 0;
   }

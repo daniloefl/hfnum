@@ -13,7 +13,7 @@ Z = 2
 dx = 1e-2
 N = 2550
 rmin = 1e-10
-h = hfnum.HF()
+h = hfnum.DFT()
 h.resetGrid(True, dx, int(N), rmin)
 h.setZ(Z)
 orb0 = hfnum.Orbital( 1, 1, 0, 0)
@@ -31,5 +31,5 @@ print "Last r:", r[-1]
 print "First r:", r[0:5]
 h.gammaSCF(0.4)
 h.solve(NiterSCF, Niter, F0stop)
-h.save('output/results_He.txt')
+h.save('output/results_He_dft.txt')
 
