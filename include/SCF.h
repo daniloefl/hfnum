@@ -131,7 +131,7 @@ class SCF {
 
     /// \brief Add an orbital in internal _o list.
     /// \param o Pointer to orbital.
-    void addOrbital(Orbital *o);
+    virtual void addOrbital(Orbital *o);
 
     /// \brief Change gamma parameter for self-consistent step, used to slowly incorporate direct and exchange potential fields.
     /// \param g gamma parameter.

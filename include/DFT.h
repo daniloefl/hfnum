@@ -53,15 +53,28 @@ class DFT : public SCF {
     /// \param E Values of energy in each orbital.
     void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E);
 
+    /// \brief Add an orbital in internal _o list.
+    /// \param o Pointer to orbital.
+    void addOrbital(Orbital *o);
+
   private:
     /// \brief Calculate direct SCF potentials.
     /// \param gamma Parameter used to take a linear combination of previous potential and new one.
     void calculateVd(ldouble gamma);
 
-    /// \brief Calculate exchange SCF potentials.
+    /// \brief Calculate electron density
     /// \param gamma Parameter used to take a linear combination of previous potential and new one.
-    void calculateVex(ldouble gamma);
+    void calculateN(ldouble gamma);
 
+    /// Electron densities
+    Vd _nsum_up;
+    Vd _n_up;
+
+    Vd _nsum_dw;
+    Vd _n_dw;
+
+    // potential
+    std::vector<ldouble> _u;
 };
 
 #endif
