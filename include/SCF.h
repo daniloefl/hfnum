@@ -33,16 +33,6 @@ class SCF {
     /// \param fname Input result form previous calculation for plotting
     SCF(const std::string fname);
 
-    /// \brief Constructor for an atom.
-    /// \param g Grid object.
-    /// \param Z Atomic number.
-    SCF(Grid &g, ldouble Z);
-
-    /// \brief Constructor for an atom.
-    /// \param o Grid object for a Python interface.
-    /// \param Z Atomic number.
-    SCF(python::object o, ldouble Z);
-
     /// \brief Destructor.
     virtual ~SCF();
 

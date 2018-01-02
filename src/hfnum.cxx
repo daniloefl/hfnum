@@ -9,10 +9,10 @@ using namespace boost::python;
 
 BOOST_PYTHON_MODULE(hfnum)
 {
-  class_<Grid>("Grid", init<bool, double, int, double>())
-    .def(init<bool, double, int, double>())
-    .def("getR", &Grid::getR)
-  ;
+  //class_<Grid>("Grid", init<bool, double, int, double>())
+  //  .def(init<bool, double, int, double>())
+  //  .def("getR", &Grid::getR)
+  //;
   class_<Orbital>("Orbital", init<int, int, int, int>())
     .def(init<int, int, int, int>())
     .def("addSphHarm", &Orbital::addSphHarm)

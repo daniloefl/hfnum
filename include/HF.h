@@ -34,16 +34,6 @@ class HF : public SCF {
     /// \param fname Input result form previous calculation for plotting
     HF(const std::string fname);
 
-    /// \brief Constructor for an atom.
-    /// \param g Grid object.
-    /// \param Z Atomic number.
-    HF(Grid &g, ldouble Z);
-
-    /// \brief Constructor for an atom.
-    /// \param o Grid object for a Python interface.
-    /// \param Z Atomic number.
-    HF(python::object o, ldouble Z);
-
     /// \brief Destructor.
     virtual ~HF();
 

@@ -34,14 +34,6 @@ HF::HF(const std::string fname)
   : SCF(fname) {
 }
 
-HF::HF(Grid &g, ldouble Z)
-  : SCF(g, Z) {
-}
-
-HF::HF(python::object o, ldouble Z)
-  : SCF(o, Z) {
-}
-
 HF::~HF() {
 }
 

@@ -83,30 +83,6 @@ ldouble SCF::Z() {
   return _Z;
 }
 
-SCF::SCF(Grid &g, ldouble Z)
-  : _g(&g), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
-  _own_grid = false;
-  _pot.resize(_g->N());
-  _central = true;
-  for (int k = 0; k < _g->N(); ++k) {
-    _pot[k] = -_Z/(*_g)(k);
-  }
-  _gamma_scf = 0.5;
-  _method = 2;
-}
-
-SCF::SCF(python::object o, ldouble Z)
-  : _g(python::extract<Grid *>(o)), _Z(Z), _om(_g, _o), _lsb(_g, _o, icl, _om), _irs(_g, _o, icl, _om), _igs(_g, _o, icl, _om) {
-  _own_grid = false;
-  _pot.resize(_g->N());
-  _central = true;
-  for (int k = 0; k < _g->N(); ++k) {
-    _pot[k] = -_Z/(*_g)(k);
-  }
-  _gamma_scf = 0.5;
-  _method = 2;
-}
-
 SCF::~SCF() {
   for (auto &o : _owned_orb) {
     delete o;
