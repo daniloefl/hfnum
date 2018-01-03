@@ -1,5 +1,9 @@
 var files =
 [
+    [ "DFT.cxx", "DFT_8cxx.html", null ],
+    [ "DFT.h", "DFT_8h.html", [
+      [ "DFT", "classDFT.html", "classDFT" ]
+    ] ],
     [ "feature_tests.cxx", "feature__tests_8cxx.html", "feature__tests_8cxx" ],
     [ "Grid.cxx", "Grid_8cxx.html", null ],
     [ "Grid.h", "Grid_8h.html", [

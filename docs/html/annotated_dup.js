@@ -1,5 +1,6 @@
 var annotated_dup =
 [
+    [ "DFT", "classDFT.html", "classDFT" ],
     [ "Grid", "classGrid.html", "classGrid" ],
     [ "HF", "classHF.html", "classHF" ],
     [ "IterativeGordonSolver", "classIterativeGordonSolver.html", "classIterativeGordonSolver" ],

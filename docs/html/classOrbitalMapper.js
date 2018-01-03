@@ -7,6 +7,7 @@ var classOrbitalMapper =
     [ "m", "classOrbitalMapper.html#a8fc96bef85dd87d540428ab0a93a38cc", null ],
     [ "N", "classOrbitalMapper.html#acf12adb40795e94804377e7fa3427eb4", null ],
     [ "orbital", "classOrbitalMapper.html#a8ab5d3b6d67deb5aa9bf07609ede0037", null ],
+    [ "s", "classOrbitalMapper.html#a2a3639a9f226570b81a7f4ce89c88245", null ],
     [ "sparseIndex", "classOrbitalMapper.html#a0232b3489668c870cfb0f6698b2fd517", null ],
     [ "sparseN", "classOrbitalMapper.html#a52a76b3cbe20362ad8fde0f87a08e477", null ],
     [ "_g", "classOrbitalMapper.html#a891ed753ead9ec8514de2d2be6116fbc", null ],

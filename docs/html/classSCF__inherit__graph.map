@@ -1,3 +1,4 @@
 <map id="SCF" name="SCF">
-<area shape="rect" id="node2" href="$classHF.html" title="HF" alt="" coords="10,80,50,107"/>
+<area shape="rect" id="node2" href="$classDFT.html" title="DFT" alt="" coords="5,80,53,107"/>
+<area shape="rect" id="node3" href="$classHF.html" title="HF" alt="" coords="77,80,117,107"/>
 </map>

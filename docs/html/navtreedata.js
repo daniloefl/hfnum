@@ -25,7 +25,8 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"Grid_8cxx.html"
+"DFT_8cxx.html",
+"functions_vars.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

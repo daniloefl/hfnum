@@ -94,6 +94,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3fdc519ebc35e7b68a33cf779efed909"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c5dce19d0e6c8b68f05c5b75f50ea69"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLinearSystemBuilder.html#a6c5dce19d0e6c8b68f05c5b75f50ea69">prepareMatrices</a> (<a class="el" href="utils_8h.html#ae3b527b467f17f26f18115c21dc7075c">SMatrixXld</a> &amp;A, <a class="el" href="utils_8h.html#a7c6892fef5f51fae1b62981a2b41f44c">VectorXld</a> &amp;b0, std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;pot, std::map&lt; int, <a class="el" href="utils_8h.html#ac58c2599b4f7f76ddce384d5e2f20390">Vd</a> &gt; &amp;vd, std::map&lt; std::pair&lt; int, int &gt;, <a class="el" href="utils_8h.html#af2a61ede0250ffd5ae66b383e5028aa9">Vex</a> &gt; &amp;vex)</td></tr>
 <tr class="separator:a6c5dce19d0e6c8b68f05c5b75f50ea69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba363f9aaa76fdaf73ad00dc71cd08bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLinearSystemBuilder.html#aba363f9aaa76fdaf73ad00dc71cd08bd">prepareMatrices</a> (<a class="el" href="utils_8h.html#ae3b527b467f17f26f18115c21dc7075c">SMatrixXld</a> &amp;A, <a class="el" href="utils_8h.html#a7c6892fef5f51fae1b62981a2b41f44c">VectorXld</a> &amp;b0, std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;pot, std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;vsum_up, std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;vsum_dw)</td></tr>
+<tr class="separator:aba363f9aaa76fdaf73ad00dc71cd08bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab40c3c5526b30662678e6fe0246943b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLinearSystemBuilder.html#ab40c3c5526b30662678e6fe0246943b6">propagate</a> (<a class="el" href="utils_8h.html#a7c6892fef5f51fae1b62981a2b41f44c">VectorXld</a> &amp;b, std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;dE, const <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma)</td></tr>
 <tr class="separator:ab40c3c5526b30662678e6fe0246943b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -245,7 +247,64 @@ Private Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="LinearSystemBuilder_8cxx_source.html#l00017">17</a> of file <a class="el" href="LinearSystemBuilder_8cxx_source.html">LinearSystemBuilder.cxx</a>.</p>
+<p>Definition at line <a class="el" href="LinearSystemBuilder_8cxx_source.html#l00130">130</a> of file <a class="el" href="LinearSystemBuilder_8cxx_source.html">LinearSystemBuilder.cxx</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aba363f9aaa76fdaf73ad00dc71cd08bd"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void LinearSystemBuilder::prepareMatrices </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="utils_8h.html#ae3b527b467f17f26f18115c21dc7075c">SMatrixXld</a> &amp;&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="utils_8h.html#a7c6892fef5f51fae1b62981a2b41f44c">VectorXld</a> &amp;&#160;</td>
+          <td class="paramname"><em>b0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>pot</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>vsum_up</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>vsum_dw</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Build sparse matrices to solve system of equations. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>Jacobian matrix. </td></tr>
+    <tr><td class="paramname">b0</td><td>Column vector at current orbital and energy configuration. </td></tr>
+    <tr><td class="paramname">pot</td><td>Coulomb potential. </td></tr>
+    <tr><td class="paramname">vsum</td><td>Extra multiplicative potential (in <a class="el" href="classDFT.html">DFT</a> case). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="LinearSystemBuilder_8cxx_source.html#l00016">16</a> of file <a class="el" href="LinearSystemBuilder_8cxx_source.html">LinearSystemBuilder.cxx</a>.</p>
 
 </div>
 </div>
@@ -289,7 +348,7 @@ Private Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="LinearSystemBuilder_8cxx_source.html#l00151">151</a> of file <a class="el" href="LinearSystemBuilder_8cxx_source.html">LinearSystemBuilder.cxx</a>.</p>
+<p>Definition at line <a class="el" href="LinearSystemBuilder_8cxx_source.html#l00264">264</a> of file <a class="el" href="LinearSystemBuilder_8cxx_source.html">LinearSystemBuilder.cxx</a>.</p>
 
 </div>
 </div>
@@ -314,7 +373,7 @@ Private Attributes</h2></td></tr>
 
 <p><a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a>. </p>
 
-<p>Definition at line <a class="el" href="LinearSystemBuilder_8h_source.html#l00049">49</a> of file <a class="el" href="LinearSystemBuilder_8h_source.html">LinearSystemBuilder.h</a>.</p>
+<p>Definition at line <a class="el" href="LinearSystemBuilder_8h_source.html#l00056">56</a> of file <a class="el" href="LinearSystemBuilder_8h_source.html">LinearSystemBuilder.h</a>.</p>
 
 </div>
 </div>
@@ -338,7 +397,7 @@ Private Attributes</h2></td></tr>
 
 <p>Orbitals. </p>
 
-<p>Definition at line <a class="el" href="LinearSystemBuilder_8h_source.html#l00052">52</a> of file <a class="el" href="LinearSystemBuilder_8h_source.html">LinearSystemBuilder.h</a>.</p>
+<p>Definition at line <a class="el" href="LinearSystemBuilder_8h_source.html#l00059">59</a> of file <a class="el" href="LinearSystemBuilder_8h_source.html">LinearSystemBuilder.h</a>.</p>
 
 </div>
 </div>
@@ -362,7 +421,7 @@ Private Attributes</h2></td></tr>
 
 <p><a class="el" href="classOrbital.html">Orbital</a> to index mapper. </p>
 
-<p>Definition at line <a class="el" href="LinearSystemBuilder_8h_source.html#l00058">58</a> of file <a class="el" href="LinearSystemBuilder_8h_source.html">LinearSystemBuilder.h</a>.</p>
+<p>Definition at line <a class="el" href="LinearSystemBuilder_8h_source.html#l00065">65</a> of file <a class="el" href="LinearSystemBuilder_8h_source.html">LinearSystemBuilder.h</a>.</p>
 
 </div>
 </div>
@@ -386,7 +445,7 @@ Private Attributes</h2></td></tr>
 
 <p>Crossing points for reference. </p>
 
-<p>Definition at line <a class="el" href="LinearSystemBuilder_8h_source.html#l00055">55</a> of file <a class="el" href="LinearSystemBuilder_8h_source.html">LinearSystemBuilder.h</a>.</p>
+<p>Definition at line <a class="el" href="LinearSystemBuilder_8h_source.html#l00062">62</a> of file <a class="el" href="LinearSystemBuilder_8h_source.html">LinearSystemBuilder.h</a>.</p>
 
 </div>
 </div>

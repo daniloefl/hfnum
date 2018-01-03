@@ -7,6 +7,7 @@ var hierarchy =
     [ "Orbital", "classOrbital.html", null ],
     [ "OrbitalMapper", "classOrbitalMapper.html", null ],
     [ "SCF", "classSCF.html", [
+      [ "DFT", "classDFT.html", null ],
       [ "HF", "classHF.html", null ]
     ] ]
 ];
