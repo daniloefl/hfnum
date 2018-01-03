@@ -525,7 +525,9 @@ ldouble DFT::getE0() {
     //vxcn += (_vex_lda_up[ir] + _vex_lda_dw[ir])*(_n_up[ir] + _n_dw[ir])*std::pow(r, 2)*dr;
     vxcn += _vex_lda_up[ir]*_n_up[ir]*std::pow(r, 2)*dr;
     vxcn += _vex_lda_dw[ir]*_n_dw[ir]*std::pow(r, 2)*dr;
-    Exc += 0.5*Ax*std::pow(2*_n_up[ir] + 2*_n_dw[ir], 1.0/3.0)*std::pow(r, 2)*dr;
+    //Exc += 0.5*Ax*std::pow(2*_n_up[ir] + 2*_n_dw[ir], 1.0/3.0)*std::pow(r, 2)*dr;
+    Exc += Ax*std::pow(_n_up[ir], 4.0/3.0)*std::pow(r, 2)*dr;
+    Exc += Ax*std::pow(_n_dw[ir], 4.0/3.0)*std::pow(r, 2)*dr;
   }
   E0 += -0.5*J - vxcn + Exc;
   return E0;
@@ -655,13 +657,13 @@ void DFT::calculateV(ldouble gamma) {
     //  _vex_lda_dw[ir1] += (_n_dw[ir1])*Ax*std::pow(_n_up[ir1] + _n_dw[ir1], -2.0/3.0);
     //}
 
-    _vex_lda_up[ir1] += Ax*std::pow(_n_up[ir1], 1.0/3.0);
-    _vex_lda_dw[ir1] += Ax*std::pow(_n_dw[ir1], 1.0/3.0);
+    _vex_lda_up[ir1] += Ax*4.0/3.0*std::pow(_n_up[ir1], 1.0/3.0);
+    _vex_lda_dw[ir1] += Ax*4.0/3.0*std::pow(_n_dw[ir1], 1.0/3.0);
 
-    if (_n_up[ir1] + _n_dw[ir1] != 0) {
-      _vex_lda_up[ir1] += (_n_up[ir1])*Ax*std::pow(2*_n_up[ir1], -2.0/3.0);
-      _vex_lda_dw[ir1] += (_n_dw[ir1])*Ax*std::pow(2*_n_dw[ir1], -2.0/3.0);
-    }
+    //if (_n_up[ir1] + _n_dw[ir1] != 0) {
+    //  _vex_lda_up[ir1] += (_n_up[ir1] + _n_dw[ir1])*Ax*std::pow(2*_n_up[ir1], -2.0/3.0);
+    //  _vex_lda_dw[ir1] += (_n_up[ir1] + _n_dw[ir1])*Ax*std::pow(2*_n_dw[ir1], -2.0/3.0);
+    //}
   }
 
   std::cout << "Calculating sum of SCF potentials." << std::endl;
