@@ -100,6 +100,14 @@ class DFT : public SCF {
     /// \return Vector of hartree potential values for each Grid point.
     boost::python::list getHartreePython();
 
+    /// \brief Get Exchange potential for spin up orbitals
+    /// \return Vector of exchange potential up values for each Grid point.
+    boost::python::list getExchangeUpPython();
+
+    /// \brief Get Exchange potential for spin down orbitals
+    /// \return Vector of exchange potential down values for each Grid point.
+    boost::python::list getExchangeDownPython();
+
     /// \brief Get electron density for spin down orbitals.
     /// \return Vector of electron density values for each Grid point.
     std::vector<ldouble> getDensityDown();

@@ -54,6 +54,18 @@ python::list DFT::getHartreePython() {
   return l;
 }
 
+python::list DFT::getExchangeUpPython() {
+  python::list l;
+  for (int k = 0; k < _g->N(); ++k) l.append(_vex_lda_up[k]);
+  return l;
+}
+
+python::list DFT::getExchangeDownPython() {
+  python::list l;
+  for (int k = 0; k < _g->N(); ++k) l.append(_vex_lda_dw[k]);
+  return l;
+}
+
 std::vector<ldouble> DFT::getDensityDown() {
   return _n_dw;
 }

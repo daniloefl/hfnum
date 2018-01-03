@@ -39,6 +39,8 @@ style = ['r-', 'b-', 'm-', 'c-', 'k-', 'g-']
 n_up = h.getDensityUp()
 n_dw = h.getDensityDown()
 vhartree = h.getHartree()
+vxup = h.getExchangeUp()
+vxdw = h.getExchangeDown()
 
 for n in range(0, h.getNOrbitals()):
   o.append(np.asarray(h.getCentral(n)))
@@ -63,6 +65,8 @@ i = 0
 ymin = np.fabs(vhartree[0])
 plt.plot(r[:m], v[:m], 'r-', linewidth = 2, label = 'Coulomb')
 plt.plot(r[:m], vhartree[:m], 'b-', linewidth = 2, label = 'Hartree potential')
+plt.plot(r[:m], vxup[:m], 'g-', linewidth = 2, label = 'Exchange up potential')
+plt.plot(r[:m], vxdw[:m], 'm-', linewidth = 2, label = 'Exchange down potential')
 plt.ylim((-ymin, ymin))
 plt.legend()
 plt.show()
