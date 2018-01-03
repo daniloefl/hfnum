@@ -233,6 +233,13 @@ void DFT::load(const std::string fin) {
   for (int k = 0; k < _g->N(); ++k) {
     _pot[k] = -_Z/(*_g)(k);
   }
+
+  _u = std::vector<ldouble>(_g->N(), 0);
+  _vex_lda_up = std::vector<ldouble>(_g->N(), 0);
+  _vex_lda_dw = std::vector<ldouble>(_g->N(), 0);
+  _vsum_up = std::vector<ldouble>(_g->N(), 0);
+  _vsum_dw = std::vector<ldouble>(_g->N(), 0);
+
   calculateV(1.0);
 }
 
@@ -499,11 +506,7 @@ ldouble DFT::getE0() {
     ldouble dr = 0;
     if (ir < _g->N()-1)
       dr = (*_g)(ir+1) - (*_g)(ir);
-    for (int k = 0; k < _o.size(); ++k) {
-      int l = _o[k]->initialL();
-      int m = _o[k]->initialM();
-      J += _u[ir]*std::pow(_o[k]->getNorm(ir, l, m, *_g), 2)*std::pow(r, 2)*dr;
-    }
+    J += _u[ir]*(_n_up[ir] + _n_dw[ir])*std::pow(r, 2)*dr;
   }
   E0 += -0.5*J;
   return E0;
