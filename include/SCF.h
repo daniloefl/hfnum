@@ -29,10 +29,6 @@ class SCF {
     /// \brief Constructor for an atom.
     SCF();
 
-    /// \brief Constructor for an atom.
-    /// \param fname Input result form previous calculation for plotting
-    SCF(const std::string fname);
-
     /// \brief Destructor.
     virtual ~SCF();
 
@@ -59,69 +55,17 @@ class SCF {
     /// \return List of R values
     boost::python::list getR() const;
 
-    /// \brief Get direct potential
-    /// \param k Identifier of the orbital on which this potential is to be applied.
-    /// \return Direct potential.
-    std::vector<ldouble> getDirectPotential(int k);
-
-    /// \brief Get exchange potential
-    /// \param k Identifier of the orbital equation on which this potential is to be applied.
-    /// \param k2 Identifier of the orbital on which this potential is to be applied.
-    /// \return Exchange potential.
-    std::vector<ldouble> getExchangePotential(int k, int k2);
-
-    /// \brief Get direct potential. Python interface.
-    /// \param k Identifier of the orbital on which this potential is to be applied.
-    /// \return Direct potential.
-    boost::python::list getDirectPotentialPython(int k);
-
-    /// \brief Get exchange potential. Python interface.
-    /// \param k Identifier of the orbital equation on which this potential is to be applied.
-    /// \param k2 Identifier of the orbital on which this potential is to be applied.
-    /// \return Exchange potential.
-    boost::python::list getExchangePotentialPython(int k, int k2);
-
     /// \brief Save orbital and potentials in file.
     /// \param fout File name on which to save information.
-    void save(const std::string fout);
+    virtual void save(const std::string fout) = 0;
 
     /// \brief Load orbital and potentials from file.
     /// \param fin File name from which to load information.
-    void load(const std::string fin);
-
-
-    /// \brief Calculate F matrix, which represents the Hamiltonian using the Numerov method. K is the inverse of F. This is used for the Gordon and renormalised methods, since these matrices are calculated per Grid point. The sparse method uses a large matrix solving all points simultaneously.
-    /// \param F To be returned by reference. Matrix F for each Grid point.
-    /// \param K To be returned by reference. Inverse of F.
-    /// \param E Values of energy in each orbital.
-    virtual void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E) = 0;
-
-    /// \brief Keep self-consistent potentials constant and solve Schroedinger eq., looking for the correct energy eigenvalue.
-    /// \param Niter Number of iterations used to seek for energy eigenvalue.
-    /// \param F0stop When energies vary by less than this value, stop looking for energy eigenvalue.
-    /// \return Value of a constraint being minimised (depends on the method).
-    ldouble solveForFixedPotentials(int Niter, ldouble F0stop);
-
-    /// \brief Use Gordon's method, which tries a set of orthogonal initial conditions to find the energy.
-    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
-    /// \return Minimisation function value at the end of the step.
-    ldouble stepGordon(ldouble gamma);
-
-    /// \brief Use renormalised wave function method, which looks for solution in ratio of Numerov parameters to avoid overflow.
-    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
-    /// \return Minimisation function value at the end of the step.
-    ldouble stepRenormalised(ldouble gamma);
-
-    ldouble solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched);
-
-    /// \brief Build NxN matrix to solve all equations of the Numerov method for each point simultaneously. Includes an extra equation to control the orbital normalisations, which is non-linear.
-    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
-    /// \return Minimisation function value at the end of the step.
-    ldouble stepSparse(ldouble gamma);
+    virtual void load(const std::string fin) = 0;
 
     /// \brief Add an orbital in internal _o list.
     /// \param o Pointer to orbital.
-    virtual void addOrbital(Orbital *o);
+    virtual void addOrbital(Orbital *o) = 0;
 
     /// \brief Change gamma parameter for self-consistent step, used to slowly incorporate direct and exchange potential fields.
     /// \param g gamma parameter.
@@ -197,19 +141,6 @@ class SCF {
     /// \brief Force the direct and exchange potential calculation to assume only a central potential.
     /// \param central Whether to consider a central potential
     void centralPotential(bool central);
-
-    /// Direct potential
-    std::map<int, Vd>   _vd;
-
-    /// Exchange potential
-    std::map<std::pair<int, int>, Vex>  _vex;
-
-    /// temporary variable for the new Vd
-    std::map<int, Vd>   _vdsum;
-
-    /// temporary variable for the new Vex
-    std::map<std::pair<int, int>, Vex>  _vexsum;
-
 
   protected:
     /// Numerical Grid

@@ -38,6 +38,13 @@ class LinearSystemBuilder {
     /// \param vex Exchange potential.
     void prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vector<ldouble> &pot, std::map<int, Vd> &vd, std::map<std::pair<int, int>, Vex> &vex);
 
+    /// \brief Build sparse matrices to solve system of equations.
+    /// \param A Jacobian matrix.
+    /// \param b0 Column vector at current orbital and energy configuration.
+    /// \param pot Coulomb potential.
+    /// \param vsum Extra multiplicative potential (in DFT case).
+    void prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vector<ldouble> &pot, std::vector<ldouble> &vsum);
+
     /// \brief Propagate results of doing one step in the direction of -b0*Jacobian.inverse() to orbitals and energy vectors.
     /// \param b New solution.
     /// \param dE Energy step to be returned by reference.

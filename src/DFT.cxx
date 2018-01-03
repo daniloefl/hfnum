@@ -31,11 +31,462 @@ DFT::DFT()
 }
 
 DFT::DFT(const std::string fname)
-  : SCF(fname) {
+  : SCF() {
+  load(fname);
 }
 
 DFT::~DFT() {
 }
+
+std::vector<ldouble> DFT::getDensityUp() {
+  return _n_up;
+}
+
+python::list DFT::getDensityUpPython() {
+  python::list l;
+  for (int k = 0; k < _g->N(); ++k) l.append(_n_up[k]);
+  return l;
+}
+
+python::list DFT::getHartreePython() {
+  python::list l;
+  for (int k = 0; k < _g->N(); ++k) l.append(_u[k]);
+  return l;
+}
+
+std::vector<ldouble> DFT::getDensityDown() {
+  return _n_dw;
+}
+
+python::list DFT::getDensityDownPython() {
+  python::list l;
+  for (int k = 0; k < _g->N(); ++k) l.append(_n_dw[k]);
+  return l;
+}
+
+void DFT::save(const std::string fout) {
+  std::ofstream f(fout.c_str());
+  f << std::setw(10) << "method" << " " << std::setw(10) << _method << std::endl;
+  f << std::setw(10) << "Z" << " " << std::setw(10) << _Z << std::endl;
+  f << std::setw(10) << "gamma_scf" << " " << std::setw(10) << _gamma_scf << std::endl;
+  f << std::setw(10) << "central" << " " << std::setw(10) << _central << std::endl;
+  f << std::setw(10) << "grid.isLog" << " " << std::setw(10) << _g->isLog() << std::endl;
+  f << std::setw(10) << "grid.dx" << " " << std::setw(10) << _g->dx() << std::endl;
+  f << std::setw(10) << "grid.N" << " " << std::setw(10) << _g->N() << std::endl;
+  f << std::setw(10) << "grid.rmin" << " " << std::setw(10) << (*_g)(0) << std::endl;
+  for (int i = 0; i < _o.size(); ++i) {
+    f << std::setw(10) << "orbital" << " " << std::setw(10) << i;
+    f << " " << std::setw(5) << "n" << " " << std::setw(5) << _o[i]->initialN();
+    f << " " << std::setw(5) << "l" << " " << std::setw(5) << _o[i]->initialL();
+    f << " " << std::setw(5) << "m" << " " << std::setw(5) << _o[i]->initialM();
+    f << " " << std::setw(5) << "s" << " " << std::setw(5) << _o[i]->spin();
+    f << " " << std::setw(5) << "E" << " " << std::setw(64) << std::setprecision(60) << _o[i]->E();
+    f << " " << std::setw(10) << "sph_size" << " " << std::setw(5) << _o[i]->getSphHarm().size();
+    for (int idx = 0; idx < _o[i]->getSphHarm().size(); ++idx) {
+      f << " " << std::setw(5) << "sph_l" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].first;
+      f << " " << std::setw(5) << "sph_m" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].second;
+      f << " " << std::setw(5) << "value";
+      for (int ir = 0; ir < _g->N(); ++ir) {
+        const ldouble v = ((const Orbital) (*_o[i]))(ir, _o[i]->getSphHarm()[idx].first, _o[i]->getSphHarm()[idx].second);
+        f << " " << std::setw(64) << std::setprecision(60) << v;
+      }
+    }
+    f << std::endl;
+  }
+  //for (auto &vr : _n_up) {
+  //  const std::pair<int, int> &lm = vr.first;
+  //  const std::vector<ldouble> &vradial = vr.second;
+    f << std::setw(10) << "n_up";
+  //  f << " " << std::setw(5) << "l" << " " << std::setw(5) << lm.first;
+  //  f << " " << std::setw(5) << "m" << " " << std::setw(5) << lm.second;
+    f << " " << std::setw(5) << "value";
+  //  for (int ir = 0; ir < vradial.size(); ++ir) {
+  //    f << " " << std::setw(64) << std::setprecision(60) << vradial[ir];
+    for (int ir = 0; ir < _n_up.size(); ++ir) {
+      f << " " << std::setw(64) << std::setprecision(60) << _n_up[ir];
+    }
+    f << std::endl;
+  //}
+  //for (auto &vr : _n_dw) {
+  //  const std::pair<int, int> &lm = vr.first;
+  //  const std::vector<ldouble> &vradial = vr.second;
+    f << std::setw(10) << "n_dw";
+  //  f << " " << std::setw(5) << "l" << " " << std::setw(5) << lm.first;
+  //  f << " " << std::setw(5) << "m" << " " << std::setw(5) << lm.second;
+    f << " " << std::setw(5) << "value";
+  //  for (int ir = 0; ir < vradial.size(); ++ir) {
+  //    f << " " << std::setw(64) << std::setprecision(60) << vradial[ir];
+    for (int ir = 0; ir < _n_dw.size(); ++ir) {
+      f << " " << std::setw(64) << std::setprecision(60) << _n_dw[ir];
+    }
+    f << std::endl;
+  //}
+}
+
+void DFT::load(const std::string fin) {
+  std::ifstream f(fin.c_str());
+  std::string line;
+
+  bool g_isLog = true;
+  ldouble g_dx = 1e-1;
+  int g_N = 220;
+  ldouble g_rmin = 1e-6;
+
+  _o.clear();
+  for (auto &o : _owned_orb) {
+    delete o;
+  }
+  _owned_orb.clear();
+  
+  while(std::getline(f, line)) {
+    std::stringstream ss;
+    ss.str(line);
+
+    std::string mode;
+
+    ss >> mode;
+    if (mode == "method")
+      ss >> _method;
+    else if (mode == "Z")
+      ss >> _Z;
+    else if (mode == "gamma_scf")
+      ss >> _gamma_scf;
+    else if (mode == "central")
+      ss >> _central;
+    else if (mode == "grid.isLog")
+      ss >> g_isLog;
+    else if (mode == "grid.dx")
+      ss >> g_dx;
+    else if (mode == "grid.N")
+      ss >> g_N;
+    else if (mode == "grid.rmin")
+      ss >> g_rmin;
+    else if (mode == "orbital") {
+      int io;
+      ss >> io;
+
+      std::string trash;
+
+      int o_N, o_L, o_M, o_S;
+      ss >> trash >> o_N >> trash >> o_L >> trash >> o_M >> trash >> o_S;
+
+      ldouble o_E;
+      ss >> trash >> o_E;
+
+
+      _owned_orb.push_back(new Orbital(o_S, o_N, o_L, o_M));
+      _o.push_back(_owned_orb[_owned_orb.size()-1]);
+      int k = _o.size()-1;
+      _o[k]->N(g_N);
+      _o[k]->E(o_E);
+      int sphSize = 1;
+      ss >> trash >> sphSize;
+      for (int idx = 0; idx < sphSize; ++idx) {
+        int l;
+        int m;
+        ss >> trash >> l >> trash >> m;
+
+        if (l != o_L && m != o_M) _o[k]->addSphHarm(l, m);
+
+        ss >> trash;
+
+        ldouble read_value;
+        for (int ir = 0; ir < g_N; ++ir) { // for each radial point
+          ss >> read_value;
+          (*_o[k])(ir, l, m) = read_value;
+        }
+      }
+    } else if (mode == "n_up") {
+      std::string trash;
+      int v_l, v_m;
+      //ss >> trash >> v_l >> trash >> v_m;
+
+      ss >> trash;
+
+      //_n_up[std::pair<int, int>(v_l, v_m)] = std::vector<ldouble>(g_N, 0);
+      _n_up = std::vector<ldouble>(g_N, 0);
+      ldouble read_value;
+      for (int k = 0; k < g_N; ++k) {
+        ss >> read_value;
+        _n_up[k] = read_value;
+      }
+    } else if (mode == "n_dw") {
+      std::string trash;
+
+      int v_l, v_m;
+      //ss >> trash >> v_l >> trash >> v_m;
+
+      ss >> trash;
+
+      //_n_dw[std::pair<int, int>(v_l, v_m)] = std::vector<ldouble>(g_N, 0);
+      _n_dw = std::vector<ldouble>(g_N, 0);
+      ldouble read_value;
+      for (int k = 0; k < g_N; ++k) {
+        ss >> read_value;
+        _n_dw[k] = read_value;
+      }
+    }
+  }
+  std::cout << "Load resetting grid with isLog = " << g_isLog << ", dx = " << g_dx << ", g_N = " << g_N << ", g_rmin = " << g_rmin << std::endl;
+  _g->reset(g_isLog, g_dx, g_N, g_rmin);
+  _pot.resize(_g->N());
+  for (int k = 0; k < _g->N(); ++k) {
+    _pot[k] = -_Z/(*_g)(k);
+  }
+  calculateV(1.0);
+}
+
+ldouble DFT::solveForFixedPotentials(int Niter, ldouble F0stop) {
+  ldouble gamma = 1; // move in the direction of the negative slope with this velocity per step
+
+  std::string strMethod = "";
+  if (_method == 0) {
+    strMethod = "Sparse Matrix Numerov";
+  } else if (_method == 1) {
+    strMethod = "Iterative Numerov with Gordon method for initial condition (http://aip.scitation.org/doi/pdf/10.1063/1.436421)";
+  } else if (_method == 2) {
+    strMethod = "Iterative Renormalised Numerov (http://aip.scitation.org/doi/pdf/10.1063/1.436421)";
+  }
+
+  ldouble F = 0;
+  bool allNodesOk = false;
+  do {
+    int nStep = 0;
+    while (nStep < Niter) {
+      gamma = 0.5*(1 - std::exp(-(nStep+1)/5.0));
+      // compute sum of squares of F(x_old)
+      nStep += 1;
+      if (_method == 0) {
+        F = stepSparse(gamma);
+      } else if (_method == 1) {
+        F = stepGordon(gamma);
+      } else if (_method == 2) {
+        F = stepRenormalised(gamma);
+      }
+
+      // change orbital energies
+      std::cout << "Orbital energies at step " << nStep << ", with constraint = " << std::setw(16) << F << ", method = " << strMethod << "." << std::endl;
+      std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "next energy (H)" << " " << std::setw(16) << "Min. (H)" << " " << std::setw(16) << "Max. (H)" << " " << std::setw(5) << "nodes" << std::endl;
+      for (int k = 0; k < _o.size(); ++k) {
+        ldouble stepdE = _dE[k];
+        ldouble newE = (_o[k]->E()+stepdE);
+        //if (newE > _Emax[k]) newE = 0.5*(_Emax[k] + _Emin[k]);
+        //if (newE < _Emin[k]) newE = 0.5*(_Emax[k] + _Emin[k]);
+        std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << newE << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
+        _o[k]->E(newE);
+      }
+
+      if (std::fabs(*std::max_element(_dE.begin(), _dE.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop) break;
+      //if (std::fabs(F) < F0stop) break;
+    }
+
+    allNodesOk = true;
+    //for (int k = 0; k < _o.size(); ++k) {
+    //  if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
+    //    allNodesOk = false;
+    //    std::cout << "Found too many nodes in orbital " << k << ": I will try again starting at a lower energy." << std::endl;
+    //    _Emax[k] = _o[k]->E();
+    //    _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
+    //  } else if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
+    //    allNodesOk = false;
+    //    std::cout << "Found too few nodes in orbital " << k << ": I will try again starting at a higher energy." << std::endl;
+    //    _Emin[k] = _o[k]->E();
+    //    _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
+    //  }
+    //}
+
+  } while (!allNodesOk);
+  return F;
+}
+
+// solve for a fixed energy and calculate _dE for the next step
+ldouble DFT::stepGordon(ldouble gamma) {
+  int N = 0;
+  for (int k = 0; k < _o.size(); ++k) {
+    N += _o[k]->getSphHarm().size();
+  }
+
+  std::vector<ldouble> E(_o.size(), 0);
+  std::vector<int> l(_o.size(), 0);
+
+  std::vector<ldouble> dE(_o.size(), 0);
+  for (int k = 0; k < _o.size(); ++k) {
+    dE[k] = -1e-3;
+    E[k] = _o[k]->E();
+    l[k] = _o[k]->initialL();
+  }
+
+  std::vector<MatrixXld> Fmn;
+  std::vector<MatrixXld> Kmn;
+  std::vector<VectorXld> matched;
+  calculateFMatrix(Fmn, Kmn, E);
+
+  ldouble Fn = _igs.solve(E, l, Fmn, Kmn, matched);
+
+  for (int k = 0; k < _o.size(); ++k) {
+    _nodes[k] = 0;
+    int l = _o[k]->initialL();
+    int m = _o[k]->initialM();
+    int idx = _om.index(k, l, m);
+    for (int i = 0; i < _g->N(); ++i) {
+      (*_o[k])(i, l, m) = matched[i](idx);
+      if (i >= 10 && (*_g)(i) < std::pow(_o.size(),2) && i < _g->N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
+        _nodes[k] += 1;
+      }
+    }
+  }
+
+  VectorXld J(_o.size());
+  J.setZero();
+  std::cout << "Calculating energy change Jacobian." << std::endl;
+  for (int k2 = 0; k2 < _o.size(); ++k2) {
+    std::vector<ldouble> EdE = E;
+    EdE[k2] += dE[k2];
+
+    std::vector<MatrixXld> Fmd;
+    std::vector<MatrixXld> Kmd;
+    calculateFMatrix(Fmd, Kmd, EdE);
+
+    ldouble Fd = _igs.solve(EdE, l, Fmd, Kmd, matched);
+    J(k2) = (Fd - Fn)/dE[k2];
+
+  }
+
+  ldouble F = Fn;
+  for (int k = 0; k < _o.size(); ++k) {
+    if (J(k) != 0) {
+      _dE[k] = -gamma*Fn/J(k);
+    } else {
+      _dE[k] = dE[k];
+    }
+    std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
+  }
+
+  return F;
+}
+
+// solve for a fixed energy and calculate _dE for the next step
+ldouble DFT::stepRenormalised(ldouble gamma) {
+  int N = _om.N();
+
+  std::vector<ldouble> E(_o.size(), 0);
+  std::vector<int> l(_o.size(), 0);
+
+  std::vector<ldouble> dE(_o.size(), 0);
+  for (int k = 0; k < _o.size(); ++k) {
+    dE[k] = 1e-3;
+    E[k] = _o[k]->E();
+    l[k] = _o[k]->initialL();
+  }
+
+  std::vector<MatrixXld> Fmn;
+  std::vector<MatrixXld> Kmn;
+  std::vector<VectorXld> matched;
+  calculateFMatrix(Fmn, Kmn, E);
+
+  ldouble Fn = _irs.solve(E, l, Fmn, Kmn, matched);
+
+  for (int k = 0; k < _o.size(); ++k) {
+    _nodes[k] = 0;
+    int l = _o[k]->initialL();
+    int m = _o[k]->initialM();
+    int idx = _om.index(k, l, m);
+    for (int i = 0; i < _g->N(); ++i) {
+      (*_o[k])(i, l, m) = matched[i](idx);
+      if (i >= 10 && i < _g->N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
+        //ldouble deriv = (matched[i](idx) - matched[i-1](idx))/(_g(i) - _g(i-1));
+        //if (std::fabs(deriv) > 1e-2) {
+          _nodes[k] += 1;
+          std::cout << "Orbital " << k << ": Found node at i=" << i << ", r = " << (*_g)(i) << std::endl;
+        //}
+      }
+    }
+  }
+
+  VectorXld grad(_o.size());
+  grad.setZero();
+  for (int k = 0; k < _o.size(); ++k) {
+    std::vector<ldouble> EdE = E;
+    EdE[k] += dE[k];
+
+    std::vector<MatrixXld> Fmd;
+    std::vector<MatrixXld> Kmd;
+    calculateFMatrix(Fmd, Kmd, EdE);
+
+    ldouble Fd = _irs.solve(EdE, l, Fmd, Kmd, matched);
+    grad(k) = (Fd - Fn)/dE[k];
+  }
+
+  ldouble F = Fn;
+  for (int k = 0; k < _o.size(); ++k) {
+    //_dE[k] = gamma*dX(k); // to use the curvature for extrema finding
+    if (grad(k) != 0) {
+      //_dE[k] = -gamma*Fn/grad(k); // for root finding
+      _dE[k] = Fn/grad(k); // for root finding
+      _dE[k] *= -gamma;
+    } else {
+      _dE[k] = 0;
+    }
+    //if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);
+    std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
+  }
+
+  return F;
+}
+
+// solve for a fixed energy and calculate _dE for the next step
+ldouble DFT::stepSparse(ldouble gamma) {
+  // 1) build sparse matrix _A
+  // 2) build sparse matrix _b
+  _lsb.prepareMatrices(_A, _b0, _pot, _vsum);
+  //std::cout << _A << std::endl;
+  //std::cout << _b0 << std::endl;
+  // 3) solve sparse system
+  _b.resize(_b0.rows(), 1);
+  ConjugateGradient<SMatrixXld, Upper> solver;
+  //SparseQR<SMatrixXld, COLAMDOrdering<int> > solver;
+  solver.compute(_A);
+  _b = solver.solve(_b0);
+
+  //SMatrixXld L(_b.rows(), _b.rows());
+  //for (int idxD = 0; idxD < _b.rows(); ++idxD) L.coeffRef(idxD, idxD) = _A.coeffRef(idxD, idxD);
+  //SMatrixXld K = _A - L;
+  //for (int idxD = 0; idxD < _b.rows(); ++idxD) L.coeffRef(idxD, idxD) = 1.0/L.coeffRef(idxD, idxD);
+  //K = L*K;
+  //SMatrixXld I(_b.rows(), _b.rows());
+  //I.setIdentity();
+  //K = (I + K + (K*K))*L;
+  //_b = K*_b0;
+
+  //std::cout << "b:" << _b << std::endl;
+  
+  // 4) change results in _o[k]
+  _lsb.propagate(_b, _dE, gamma);
+  // 5) change results in _dE[k]
+
+  // count nodes for monitoring
+  for (int k = 0; k < _o.size(); ++k) {
+    _nodes[k] = 0;
+    int l = _o[k]->initialL();
+    int m = _o[k]->initialM();
+    for (int i = 0; i < _g->N(); ++i) {
+      if (i >= 10 && (*_g)(i) < std::pow(_o.size(),2) && i < _g->N() - 4 && (*_o[k])(i, l, m)*(*_o[k])(i-1, l, m) <= 0) {
+        _nodes[k] += 1;
+      }
+    }
+    //if (_nodes[k] < _o[k].initialN() - _o[k].initialL() - 1) {
+    //  _dE[k] = std::fabs(_Z*_Z*0.5/std::pow(_o[k].initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k].initialN()+1, 2));
+    //} else if (_nodes[k] > _o[k].initialN() - _o[k].initialL() - 1) {
+    //  _dE[k] = -std::fabs(_Z*_Z*0.5/std::pow(_o[k].initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k].initialN()+1, 2));
+    //}
+  }
+
+  // 6) calculate F = sum _b[k]^2
+  ldouble F = 0;
+  for (int k = 0; k < _b.rows(); ++k) F += std::pow(_b(k), 2);
+  return F;
+}
+
 
 ldouble DFT::getE0() {
   ldouble E0 = 0;
@@ -43,17 +494,15 @@ ldouble DFT::getE0() {
     E0 += _o[k]->E();
   }
   ldouble J = 0;
-  ldouble K = 0;
-  for (auto &vditm : _vd) {
-    int k = vditm.first;
-    int l = _o[k]->initialL();
-    int m = _o[k]->initialM();
-    for (int ir = 0; ir < _g->N(); ++ir) {
-      ldouble r = (*_g)(ir);
-      ldouble dr = 0;
-      if (ir < _g->N()-1)
-        dr = (*_g)(ir+1) - (*_g)(ir);
-      J += _vd[k][std::pair<int,int>(l, m)][ir]*std::pow(_o[k]->getNorm(ir, l, m, *_g), 2)*std::pow(r, 2)*dr;
+  for (int ir = 0; ir < _g->N(); ++ir) {
+    ldouble r = (*_g)(ir);
+    ldouble dr = 0;
+    if (ir < _g->N()-1)
+      dr = (*_g)(ir+1) - (*_g)(ir);
+    for (int k = 0; k < _o.size(); ++k) {
+      int l = _o[k]->initialL();
+      int m = _o[k]->initialM();
+      J += _u[ir]*std::pow(_o[k]->getNorm(ir, l, m, *_g), 2)*std::pow(r, 2)*dr;
     }
   }
   E0 += -0.5*J;
@@ -105,24 +554,15 @@ void DFT::solve(int NiterSCF, int Niter, ldouble F0stop) {
     solveForFixedPotentials(Niter, F0stop);
     nStepSCF++;
     calculateN(_gamma_scf);
-    calculateVd(_gamma_scf);
+    calculateV(_gamma_scf);
   }
 }
 
 void DFT::calculateN(ldouble gamma) {
   std::cout << "Calculating n." << std::endl;
 
-  _nsum_up.clear();
-  _nsum_up[std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g->N(), 0);
-  _nsum_up[std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g->N(), 0);
-  _nsum_up[std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g->N(), 0);
-  _nsum_up[std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g->N(), 0);
-
-  _nsum_dw.clear();
-  _nsum_dw[std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g->N(), 0);
-  _nsum_dw[std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g->N(), 0);
-  _nsum_dw[std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g->N(), 0);
-  _nsum_dw[std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g->N(), 0);
+  _nsum_up = std::vector<ldouble>(_g->N(), 0);
+  _nsum_dw = std::vector<ldouble>(_g->N(), 0);
 
   for (int k1 = 0; k1 < _o.size(); ++k1) {
     int l1 = _o[k1]->initialL();
@@ -133,29 +573,20 @@ void DFT::calculateN(ldouble gamma) {
 
     for (int k = 0; k < _g->N(); ++k) {
       if (s1 > 0) {
-        _nsum_up[std::pair<int,int>(l1, m1)][k] += std::pow(_o[k1]->getNorm(k, l1, m1, *_g), 2);
+        _nsum_up[k] += std::pow(_o[k1]->getNorm(k, l1, m1, *_g), 2);
       } else {
-        _nsum_dw[std::pair<int,int>(l1, m1)][k] += std::pow(_o[k1]->getNorm(k, l1, m1, *_g), 2);
+        _nsum_dw[k] += std::pow(_o[k1]->getNorm(k, l1, m1, *_g), 2);
       }
     }
   }
 
-  for (auto &i : _nsum_up) {
-    const std::pair<int, int> k = i.first;
-    int lj = k.first;
-    int mj = k.second;
-    std::vector<ldouble> &currentN = _n_up[std::pair<int,int>(lj, mj)];
-    for (int k = 0; k < _g->N(); ++k) currentN[k] = (1-gamma)*currentN[k] + gamma*_nsum_up[std::pair<int,int>(lj,mj)][k];
-  }
+  for (int k = 0; k < _g->N(); ++k) _n_up[k] = (1-gamma)*_n_up[k] + gamma*_nsum_up[k];
+  for (int k = 0; k < _g->N(); ++k) _n_dw[k] = (1-gamma)*_n_dw[k] + gamma*_nsum_dw[k];
 
-  for (auto &i : _nsum_dw) {
-    const std::pair<int, int> k = i.first;
-    int lj = k.first;
-    int mj = k.second;
-    std::vector<ldouble> &currentN = _n_dw[std::pair<int,int>(lj, mj)];
-    for (int k = 0; k < _g->N(); ++k) currentN[k] = (1-gamma)*currentN[k] + gamma*_nsum_dw[std::pair<int,int>(lj,mj)][k];
-  }
+}
 
+
+void DFT::calculateV(ldouble gamma) {
   std::cout << "Calculating u." << std::endl;
   _u = std::vector<ldouble>(_g->N(), 0);
   for (int k = 0; k < _g->N(); ++k) {
@@ -170,13 +601,8 @@ void DFT::calculateN(ldouble gamma) {
     if (ir1 < _g->N()-1) dr = (*_g)(ir1+1) - (*_g)(ir1);
     ldouble n_up = 0;
     ldouble n_dw = 0;
-    for (auto &i : _n_up) { // ignores spherical components
-      const std::pair<int, int> k = i.first;
-      int lj = k.first;
-      int mj = k.second;
-      n_up += _n_up[k][ir1];
-      n_dw += _n_dw[k][ir1];
-    }
+    n_up += _n_up[ir1];
+    n_dw += _n_dw[ir1];
     Q += (n_up + n_dw)*std::pow(r1, 2)*dr;
     E[ir1] = Q/std::pow(r1, 2);
   }
@@ -186,21 +612,8 @@ void DFT::calculateN(ldouble gamma) {
     _u[ir1] = _u[ir1+1] + E[ir1]*dr;
   }
 
-}
-
-
-void DFT::calculateVd(ldouble gamma) {
-  std::cout << "Calculating Vd." << std::endl;
-
-  for (int ko = 0; ko < _o.size(); ++ko) {
-    for (auto &idx : _vd[ko]) {
-      int lj = idx.first.first;
-      int mj = idx.first.second;
-      std::cout << "Adding SCF potential term for eq. " << ko << std::endl;
-      std::vector<ldouble> &currentVd = _vd[ko][std::pair<int,int>(lj, mj)];
-      for (int k = 0; k < _g->N(); ++k) currentVd[k] = (1-gamma)*currentVd[k] + gamma*_u[k];
-    }
-  }
+  std::cout << "Calculating sum of SCF potentials." << std::endl;
+  for (int k = 0; k < _g->N(); ++k) _vsum[k] = (1-gamma)*_vsum[k] + gamma*_u[k];
 }
 
 
@@ -233,8 +646,8 @@ void DFT::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K,
 
         if (idx1 == idx2) {
           ldouble a = 0;
-          if (_g->isLog()) a = 2*std::pow(r, 2)*(E[k1] - _pot[i] - _vd[k1][std::pair<int, int>(l1, m1)][i]) - std::pow(l1_eq + 0.5, 2);
-          else a = 2*(E[k1] - _pot[i] - _vd[k1][std::pair<int, int>(l1, m1)][i] - l1_eq*(l1_eq + 1)/std::pow((*_g)(i), 2));
+          if (_g->isLog()) a = 2*std::pow(r, 2)*(E[k1] - _pot[i] - _vsum[i]) - std::pow(l1_eq + 0.5, 2);
+          else a = 2*(E[k1] - _pot[i] - _vsum[i] - l1_eq*(l1_eq + 1)/std::pow((*_g)(i), 2));
 
           F[i](idx1,idx1) += 1 + a*std::pow(_g->dx(), 2)/12.0;
           Lambda[i](idx1,idx1) += 1 + a*std::pow(_g->dx(), 2)/12.0;
@@ -263,34 +676,10 @@ void DFT::addOrbital(Orbital *o) {
       }
     }
   }
-  _n_up.clear();
-  _n_dw.clear();
-  _vd.clear();
-  _n_up = Vd();
-  _n_up[std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g->N(), 0);
-  _n_up[std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g->N(), 0);
-  _n_up[std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g->N(), 0);
-  _n_up[std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g->N(), 0);
-  _n_dw = Vd();
-  _n_dw[std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g->N(), 0);
-  _n_dw[std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g->N(), 0);
-  _n_dw[std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g->N(), 0);
-  _n_dw[std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g->N(), 0);
-  for (int k = 0; k < _o.size(); ++k) {
-    _vd[k] = Vd();
-    _vd[k][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g->N(), 0);
-    _vd[k][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g->N(), 0);
-    _vd[k][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g->N(), 0);
-    _vd[k][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g->N(), 0);
-  }
-
-  for (int k = 0; k < _o.size(); ++k) {
-    _vdsum[k] = Vd();
-    _vdsum[k][std::pair<int, int>(0, 0)] = std::vector<ldouble>(_g->N(), 0);
-    _vdsum[k][std::pair<int, int>(1, -1)] = std::vector<ldouble>(_g->N(), 0);
-    _vdsum[k][std::pair<int, int>(1, 0)] = std::vector<ldouble>(_g->N(), 0);
-    _vdsum[k][std::pair<int, int>(1, 1)] = std::vector<ldouble>(_g->N(), 0);
-  }
+  _n_up = std::vector<ldouble>(_g->N(), 0);
+  _n_dw = std::vector<ldouble>(_g->N(), 0);
+  _u = std::vector<ldouble>(_g->N(), 0);
+  _vsum = std::vector<ldouble>(_g->N(), 0);
 }
 
 
