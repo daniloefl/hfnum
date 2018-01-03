@@ -513,14 +513,21 @@ ldouble DFT::getE0() {
     E0 += _o[k]->E();
   }
   ldouble J = 0;
+  ldouble vxcn = 0;
+  ldouble Exc = 0;
+  ldouble Ax = -3.0/4.0*std::pow(3.0/M_PI, 1.0/3.0);
   for (int ir = 0; ir < _g->N(); ++ir) {
     ldouble r = (*_g)(ir);
     ldouble dr = 0;
     if (ir < _g->N()-1)
       dr = (*_g)(ir+1) - (*_g)(ir);
     J += _u[ir]*(_n_up[ir] + _n_dw[ir])*std::pow(r, 2)*dr;
+    //vxcn += (_vex_lda_up[ir] + _vex_lda_dw[ir])*(_n_up[ir] + _n_dw[ir])*std::pow(r, 2)*dr;
+    vxcn += _vex_lda_up[ir]*_n_up[ir]*std::pow(r, 2)*dr;
+    vxcn += _vex_lda_dw[ir]*_n_dw[ir]*std::pow(r, 2)*dr;
+    Exc += 0.5*Ax*std::pow(2*_n_up[ir] + 2*_n_dw[ir], 1.0/3.0)*std::pow(r, 2)*dr;
   }
-  E0 += -0.5*J;
+  E0 += -0.5*J - vxcn + Exc;
   return E0;
 }
 
@@ -648,12 +655,12 @@ void DFT::calculateV(ldouble gamma) {
     //  _vex_lda_dw[ir1] += (_n_dw[ir1])*Ax*std::pow(_n_up[ir1] + _n_dw[ir1], -2.0/3.0);
     //}
 
-    _vex_lda_up[ir1] += 0.5*Ax*std::pow(2*_n_up[ir1], 1.0/3.0);
-    _vex_lda_dw[ir1] += 0.5*Ax*std::pow(2*_n_dw[ir1], 1.0/3.0);
+    _vex_lda_up[ir1] += Ax*std::pow(_n_up[ir1], 1.0/3.0);
+    _vex_lda_dw[ir1] += Ax*std::pow(_n_dw[ir1], 1.0/3.0);
 
     if (_n_up[ir1] + _n_dw[ir1] != 0) {
-      _vex_lda_up[ir1] += 0.5*(2*_n_up[ir1])*Ax*std::pow(2*_n_up[ir1], -2.0/3.0);
-      _vex_lda_dw[ir1] += 0.5*(2*_n_dw[ir1])*Ax*std::pow(2*_n_dw[ir1], -2.0/3.0);
+      _vex_lda_up[ir1] += (_n_up[ir1])*Ax*std::pow(2*_n_up[ir1], -2.0/3.0);
+      _vex_lda_dw[ir1] += (_n_dw[ir1])*Ax*std::pow(2*_n_dw[ir1], -2.0/3.0);
     }
   }
 
