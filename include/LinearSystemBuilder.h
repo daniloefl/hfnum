@@ -43,7 +43,7 @@ class LinearSystemBuilder {
     /// \param b0 Column vector at current orbital and energy configuration.
     /// \param pot Coulomb potential.
     /// \param vsum Extra multiplicative potential (in DFT case).
-    void prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vector<ldouble> &pot, std::vector<ldouble> &vsum);
+    void prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vector<ldouble> &pot, std::vector<ldouble> &vsum_up, std::vector<ldouble> &vsum_dw);
 
     /// \brief Propagate results of doing one step in the direction of -b0*Jacobian.inverse() to orbitals and energy vectors.
     /// \param b New solution.

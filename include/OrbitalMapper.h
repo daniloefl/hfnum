@@ -60,6 +60,11 @@ class OrbitalMapper {
     /// \param idx Index in matrix.
     /// \return Quantum number m.
     int m(int idx);
+
+    /// \brief Get quantum number s from general index
+    /// \param idx Index in matrix.
+    /// \return Quantum number s.
+    int s(int idx);
     
 
   private:

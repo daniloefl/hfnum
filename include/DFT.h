@@ -124,11 +124,16 @@ class DFT : public SCF {
     std::vector<ldouble> _nsum_dw;
     std::vector<ldouble> _n_dw;
 
-    // central Hartree potential
+    /// central Hartree potential
     std::vector<ldouble> _u;
 
-    // potential
-    std::vector<ldouble> _vsum;
+    /// LDA exchange potential
+    std::vector<ldouble> _vex_lda_up;
+    std::vector<ldouble> _vex_lda_dw;
+
+    /// total potential
+    std::vector<ldouble> _vsum_up;
+    std::vector<ldouble> _vsum_dw;
 };
 
 #endif

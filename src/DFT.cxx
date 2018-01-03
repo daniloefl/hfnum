@@ -438,7 +438,7 @@ ldouble DFT::stepRenormalised(ldouble gamma) {
 ldouble DFT::stepSparse(ldouble gamma) {
   // 1) build sparse matrix _A
   // 2) build sparse matrix _b
-  _lsb.prepareMatrices(_A, _b0, _pot, _vsum);
+  _lsb.prepareMatrices(_A, _b0, _pot, _vsum_up, _vsum_dw);
   //std::cout << _A << std::endl;
   //std::cout << _b0 << std::endl;
   // 3) solve sparse system
@@ -589,9 +589,6 @@ void DFT::calculateN(ldouble gamma) {
 void DFT::calculateV(ldouble gamma) {
   std::cout << "Calculating u." << std::endl;
   _u = std::vector<ldouble>(_g->N(), 0);
-  for (int k = 0; k < _g->N(); ++k) {
-    _u[k] = 0;
-  }
 
   ldouble Q = 0;
   std::vector<ldouble> E(_g->N(), 0); // electric field
@@ -612,8 +609,42 @@ void DFT::calculateV(ldouble gamma) {
     _u[ir1] = _u[ir1+1] + E[ir1]*dr;
   }
 
+  std::cout << "Calculating vex using LDA." << std::endl;
+  _vex_lda_up = std::vector<ldouble>(_g->N(), 0);
+  _vex_lda_dw = std::vector<ldouble>(_g->N(), 0);
+  // Ex = -3/4 (3/pi)^(1/3) int n^(4/3) dr = int exc n dr
+  // exc = -3/4 (3/pi)^(1/3) n^(1/3)
+  //
+  // vx = dE/dn
+  // with spin:
+  // Ex = 0.5*(Ex[2*n_up] + Ex[2*n_dw])
+  // vx = 0.5*(2*dE[n_up]/dn_up + 2*dE[n_dw]/dn_dw) = dE/dn_up + dE/dn_dw
+  // vx = exc + n dexc/dn
+
+  // rs = (3/(4*pi*n))^(1/3)
+  // ex = -3/(4pi)*(3 pi^2 n)^(1/3) = -3/4 (3/pi)^(1/3) n^(1/3)
+  ldouble Ax = -3.0/4.0*std::pow(3.0/M_PI, 1.0/3.0);
+  for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+    //_vex_lda_up[ir1] += Ax*std::pow(_n_up[ir1] + _n_dw[ir1], 1.0/3.0);
+    //_vex_lda_dw[ir1] += Ax*std::pow(_n_up[ir1] + _n_dw[ir1], 1.0/3.0);
+
+    //if (_n_up[ir1] + _n_dw[ir1] != 0) {
+    //  _vex_lda_up[ir1] += (_n_up[ir1])*Ax*std::pow(_n_up[ir1] + _n_dw[ir1], -2.0/3.0);
+    //  _vex_lda_dw[ir1] += (_n_dw[ir1])*Ax*std::pow(_n_up[ir1] + _n_dw[ir1], -2.0/3.0);
+    //}
+
+    _vex_lda_up[ir1] += 0.5*Ax*std::pow(2*_n_up[ir1], 1.0/3.0);
+    _vex_lda_dw[ir1] += 0.5*Ax*std::pow(2*_n_dw[ir1], 1.0/3.0);
+
+    if (_n_up[ir1] + _n_dw[ir1] != 0) {
+      _vex_lda_up[ir1] += 0.5*(2*_n_up[ir1])*Ax*std::pow(2*_n_up[ir1], -2.0/3.0);
+      _vex_lda_dw[ir1] += 0.5*(2*_n_dw[ir1])*Ax*std::pow(2*_n_dw[ir1], -2.0/3.0);
+    }
+  }
+
   std::cout << "Calculating sum of SCF potentials." << std::endl;
-  for (int k = 0; k < _g->N(); ++k) _vsum[k] = (1-gamma)*_vsum[k] + gamma*_u[k];
+  for (int k = 0; k < _g->N(); ++k) _vsum_up[k] = (1-gamma)*_vsum_up[k] + gamma*(_u[k] + _vex_lda_up[k]);
+  for (int k = 0; k < _g->N(); ++k) _vsum_dw[k] = (1-gamma)*_vsum_dw[k] + gamma*(_u[k] + _vex_lda_dw[k]);
 }
 
 
@@ -637,6 +668,7 @@ void DFT::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K,
       int l1 = _om.l(idx1);
       ldouble l1_eq = _om.l(idx1);
       int m1 = _om.m(idx1);
+      int s1 = _om.s(idx1);
 
       for (int idx2 = 0; idx2 < N; ++idx2) {
         int k2 = _om.orbital(idx2);
@@ -646,8 +678,13 @@ void DFT::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K,
 
         if (idx1 == idx2) {
           ldouble a = 0;
-          if (_g->isLog()) a = 2*std::pow(r, 2)*(E[k1] - _pot[i] - _vsum[i]) - std::pow(l1_eq + 0.5, 2);
-          else a = 2*(E[k1] - _pot[i] - _vsum[i] - l1_eq*(l1_eq + 1)/std::pow((*_g)(i), 2));
+          if (s1 > 0) {
+            if (_g->isLog()) a = 2*std::pow(r, 2)*(E[k1] - _pot[i] - _vsum_up[i]) - std::pow(l1_eq + 0.5, 2);
+            else a = 2*(E[k1] - _pot[i] - _vsum_up[i] - l1_eq*(l1_eq + 1)/std::pow((*_g)(i), 2));
+          } else {
+            if (_g->isLog()) a = 2*std::pow(r, 2)*(E[k1] - _pot[i] - _vsum_dw[i]) - std::pow(l1_eq + 0.5, 2);
+            else a = 2*(E[k1] - _pot[i] - _vsum_dw[i] - l1_eq*(l1_eq + 1)/std::pow((*_g)(i), 2));
+          }
 
           F[i](idx1,idx1) += 1 + a*std::pow(_g->dx(), 2)/12.0;
           Lambda[i](idx1,idx1) += 1 + a*std::pow(_g->dx(), 2)/12.0;
@@ -679,7 +716,10 @@ void DFT::addOrbital(Orbital *o) {
   _n_up = std::vector<ldouble>(_g->N(), 0);
   _n_dw = std::vector<ldouble>(_g->N(), 0);
   _u = std::vector<ldouble>(_g->N(), 0);
-  _vsum = std::vector<ldouble>(_g->N(), 0);
+  _vex_lda_up = std::vector<ldouble>(_g->N(), 0);
+  _vex_lda_dw = std::vector<ldouble>(_g->N(), 0);
+  _vsum_up = std::vector<ldouble>(_g->N(), 0);
+  _vsum_dw = std::vector<ldouble>(_g->N(), 0);
 }
 
 

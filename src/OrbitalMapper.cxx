@@ -94,3 +94,19 @@ int OrbitalMapper::m(int i) {
   return -1;
 }
 
+// get quantum number s from general index
+int OrbitalMapper::s(int i) {
+  int idx = 0;
+  int ki = 0;
+  int ii = 0;
+  for (ki = 0; ki < _o.size(); ++ki) {
+    for (ii = 0; ii < _o[ki]->getSphHarm().size(); ++ii) {
+      if (idx == i) {
+        return _o[ki]->spin();
+      }
+      idx += 1;
+    }
+  }
+  return 1;
+}
+
