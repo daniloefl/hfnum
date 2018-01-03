@@ -138,10 +138,6 @@ class SCF {
     /// \param o Orbital object from Python interface.
     void addOrbitalPython(boost::python::object o);
 
-    /// \brief Force the direct and exchange potential calculation to assume only a central potential.
-    /// \param central Whether to consider a central potential
-    void centralPotential(bool central);
-
   protected:
     /// Numerical Grid
     Grid *_g;
@@ -195,9 +191,6 @@ class SCF {
 
     /// Class that maps orbitals to indices
     OrbitalMapper _om;
-
-    /// Central potential?
-    bool _central;
 
     /// List of owned Orbital pointers
     std::vector<Orbital *> _owned_orb;

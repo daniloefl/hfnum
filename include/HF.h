@@ -122,16 +122,16 @@ class HF : public SCF {
 
 
     /// Direct potential
-    std::map<int, Vd>   _vd;
+    std::map<int, Vradial>   _vd;
 
     /// Exchange potential
-    std::map<std::pair<int, int>, Vex>  _vex;
+    std::map<std::pair<int, int>, Vradial>  _vex;
 
     /// temporary variable for the new Vd
-    std::map<int, Vd>   _vdsum;
+    std::map<int, Vradial>   _vdsum;
 
     /// temporary variable for the new Vex
-    std::map<std::pair<int, int>, Vex>  _vexsum;
+    std::map<std::pair<int, int>, Vradial>  _vexsum;
 
 
 };

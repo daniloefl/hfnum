@@ -20,8 +20,7 @@ typedef Matrix<ldouble, Dynamic, Dynamic> MatrixXld;
 typedef Matrix<ldouble, Dynamic, 1> VectorXld;
 
 /// Types used for direct and exchange potential storage.
-typedef std::map<std::pair<int, int>, std::vector<ldouble> > Vd;
-typedef std::map<std::pair<int, int>, std::vector<ldouble> > Vex;
+typedef std::vector<ldouble> Vradial;
 
 /// Sparse matrix
 typedef SparseMatrix<ldouble, ColMajor> SMatrixXld;

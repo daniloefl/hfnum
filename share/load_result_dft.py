@@ -12,7 +12,16 @@ import seaborn
 import matplotlib.pyplot as plt
 
 # read from this file
-fname = "output/results_B_dft.txt"
+fname = "output/results_He_dft.txt"
+
+import readline, glob
+def complete(text, state):
+  return (glob.glob(text+'*')+[None])[state]
+
+readline.set_completer_delims(' \t\n;')
+readline.parse_and_bind("tab: complete")
+readline.set_completer(complete)
+fname = raw_input('What is the input file to load? [feel free to use TAB to auto-complete; examples are shipped in the output directory]    ')
 
 print "Loading result from file %s" % fname
 

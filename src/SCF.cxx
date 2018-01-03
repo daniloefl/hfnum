@@ -27,15 +27,10 @@ using namespace boost;
 #include <fstream>
 #include <cstdlib>
 
-void SCF::centralPotential(bool central) {
-  _central = central;
-}
-
 SCF::SCF()
   : _g(new Grid(true, 1e-1, 10, 1e-3)), _Z(1), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _irs(*_g, _o, icl, _om), _igs(*_g, _o, icl, _om) {
   _own_grid = true;
   _pot.resize(_g->N());
-  _central = true;
   for (int k = 0; k < _g->N(); ++k) {
     _pot[k] = -_Z/(*_g)(k);
   }

@@ -81,7 +81,7 @@ void DFT::save(const std::string fout) {
   f << std::setw(10) << "method" << " " << std::setw(10) << _method << std::endl;
   f << std::setw(10) << "Z" << " " << std::setw(10) << _Z << std::endl;
   f << std::setw(10) << "gamma_scf" << " " << std::setw(10) << _gamma_scf << std::endl;
-  f << std::setw(10) << "central" << " " << std::setw(10) << _central << std::endl;
+  f << std::setw(10) << "central" << " " << std::setw(10) << 1 << std::endl;
   f << std::setw(10) << "grid.isLog" << " " << std::setw(10) << _g->isLog() << std::endl;
   f << std::setw(10) << "grid.dx" << " " << std::setw(10) << _g->dx() << std::endl;
   f << std::setw(10) << "grid.N" << " " << std::setw(10) << _g->N() << std::endl;
@@ -144,6 +144,8 @@ void DFT::load(const std::string fin) {
   int g_N = 220;
   ldouble g_rmin = 1e-6;
 
+  std::string trash;
+
   _o.clear();
   for (auto &o : _owned_orb) {
     delete o;
@@ -164,7 +166,7 @@ void DFT::load(const std::string fin) {
     else if (mode == "gamma_scf")
       ss >> _gamma_scf;
     else if (mode == "central")
-      ss >> _central;
+      ss >> trash;
     else if (mode == "grid.isLog")
       ss >> g_isLog;
     else if (mode == "grid.dx")
