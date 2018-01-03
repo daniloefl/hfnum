@@ -24,7 +24,7 @@ orb = hfnum.Orbital(1, 1, 0, 0)
 
 h.addOrbital(orb)
 
-NiterSCF = 1
+NiterSCF = 40
 Niter = 100
 F0stop = 1e-6
 r = np.asarray(h.getR())
