@@ -26,12 +26,13 @@ int OrbitalMapper::sparseN() {
 }
 
 int OrbitalMapper::index(int k, int l, int m) {
+  lm tlm(l, m);
   int idx = 0;
   for (int ki = 0; ki < k; ++ki) {
     idx += _o[ki]->getSphHarm().size();
   }
   for (int ii = 0; ii < _o[k]->getSphHarm().size(); ++ii) {
-    if (_o[k]->getSphHarm()[ii] == lm(l, m)) {
+    if (_o[k]->getSphHarm()[ii] == tlm) {
       break;
     }
     idx += 1;
@@ -70,7 +71,7 @@ int OrbitalMapper::l(int i) {
   for (ki = 0; ki < _o.size(); ++ki) {
     for (ii = 0; ii < _o[ki]->getSphHarm().size(); ++ii) {
       if (idx == i) {
-        return _o[ki]->getSphHarm()[ii].first;
+        return _o[ki]->getSphHarm()[ii].l;
       }
       idx += 1;
     }
@@ -86,7 +87,7 @@ int OrbitalMapper::m(int i) {
   for (ki = 0; ki < _o.size(); ++ki) {
     for (ii = 0; ii < _o[ki]->getSphHarm().size(); ++ii) {
       if (idx == i) {
-        return _o[ki]->getSphHarm()[ii].second;
+        return _o[ki]->getSphHarm()[ii].m;
       }
       idx += 1;
     }

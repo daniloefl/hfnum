@@ -21,8 +21,6 @@ using namespace boost;
 
 class Grid;
 
-typedef std::pair<int, int> lm;
-
 #include "utils.h"
 
 class Orbital {

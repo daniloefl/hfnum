@@ -95,11 +95,11 @@ void DFT::save(const std::string fout) {
     f << " " << std::setw(5) << "E" << " " << std::setw(64) << std::setprecision(60) << _o[i]->E();
     f << " " << std::setw(10) << "sph_size" << " " << std::setw(5) << _o[i]->getSphHarm().size();
     for (int idx = 0; idx < _o[i]->getSphHarm().size(); ++idx) {
-      f << " " << std::setw(5) << "sph_l" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].first;
-      f << " " << std::setw(5) << "sph_m" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].second;
+      f << " " << std::setw(5) << "sph_l" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].l;
+      f << " " << std::setw(5) << "sph_m" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].m;
       f << " " << std::setw(5) << "value";
       for (int ir = 0; ir < _g->N(); ++ir) {
-        const ldouble v = ((const Orbital) (*_o[i]))(ir, _o[i]->getSphHarm()[idx].first, _o[i]->getSphHarm()[idx].second);
+        const ldouble v = ((const Orbital) (*_o[i]))(ir, _o[i]->getSphHarm()[idx].l, _o[i]->getSphHarm()[idx].m);
         f << " " << std::setw(64) << std::setprecision(60) << v;
       }
     }
@@ -732,8 +732,8 @@ void DFT::addOrbital(Orbital *o) {
     _o[k]->E(-_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2));
 
     for (int idx = 0; idx < _o[k]->getSphHarm().size(); ++idx) {
-      int l = _o[k]->getSphHarm()[idx].first;
-      int m = _o[k]->getSphHarm()[idx].second;
+      int l = _o[k]->getSphHarm()[idx].l;
+      int m = _o[k]->getSphHarm()[idx].m;
       for (int ir = 0; ir < _g->N(); ++ir) { // for each radial point
         (*_o[k])(ir, l, m) = std::pow(_Z*(*_g)(ir)/((ldouble) _o[k]->initialN()), l+0.5)*std::exp(-_Z*(*_g)(ir)/((ldouble) _o[k]->initialN()));
       }

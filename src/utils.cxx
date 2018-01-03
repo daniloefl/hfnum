@@ -1,6 +1,49 @@
 #include "utils.h"
 #include <cmath>
 
+lm::lm(int li, int mi)
+  : l(li), m(mi) {
+}
+
+lm::~lm() {
+}
+
+lm::lm(const lm &o)
+  : l(o.l), m(o.m) {
+}
+
+lm &lm::operator =(const lm &o) {
+  l = o.l;
+  m = o.m;
+}
+
+bool lm::operator ==(const lm &o) const {
+  return l == o.l && m == o.m;
+}
+bool lm::operator !=(const lm &o) const {
+  return !(*this == o);
+}
+
+bool lm::operator >(const lm &o) const {
+  if (l > o.l) return true;
+
+  if (l == o.l) return m > o.l;
+  
+  return false;
+}
+
+bool lm::operator <(const lm &o) const {
+  if (*this == o) return false;
+  if (*this > o) return false;
+  return true;
+}
+
+std::ostream &lm::operator <<(std::ostream &os) const {
+  os << "(" << l << ", " << m << ")";
+  return os;
+}
+
+
 double factorial(double n) {
   if (n == 1 || n == 0) return 1;
   return std::tgamma(n+1);

@@ -10,6 +10,22 @@
 
 using namespace Eigen;
 
+/// (l,m) pair
+class lm {
+  public:
+  int l;
+  int m;
+  lm(int li = 0, int mi = 0);
+  ~lm();
+  lm(const lm &o);
+  lm &operator =(const lm &o);
+  bool operator ==(const lm &o) const;
+  bool operator !=(const lm &o) const;
+  bool operator >(const lm &o) const;
+  bool operator <(const lm &o) const;
+  std::ostream &operator <<(std::ostream &os) const;
+};
+
 /// Scalar type. Used to have a single long double type everywhere.
 typedef long double ldouble;
 

@@ -38,6 +38,51 @@ HF::HF(const std::string fname)
 HF::~HF() {
 }
 
+std::vector<ldouble> HF::perturbativeLSEnergy() {
+  // define delta V = (full Vd - full Vex) - (Vd - Vex)
+  std::vector<ldouble> E1(_o.size(), 0);
+  for (int k = 0; k < _o.size(); ++k) {
+    lm tlm(_o[k]->initialL(), _o[k]->initialM());
+
+    // the current inaccurate result follows
+    // - vd
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      for (int ir = 0; ir < _g->N(); ++ir) {
+        ldouble r = (*_g)(ir);
+        ldouble dr = 0;
+        if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
+        E1[k] += -_vd[k2][ir]*std::pow(_o[k]->getNorm(ir, tlm.l, tlm.m, *_g), 2)*std::pow(r, 2)*dr;
+      }
+    }
+
+    // + vex
+    //for (int k2 = 0; k2 < _o.size(); ++k2) {
+    //  lm tlm(_o[k2]->initialL(), _o[k2]->initialM());
+    //  for (int ir = 0; ir < _g->N(); ++ir) {
+    //    ldouble r = (*_g)(ir);
+    //    ldouble dr = 0;
+    //    if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
+    //    E1[k] += -_vex[std::pair<int, int>(k, k2)][ir]*_o[k]->getNorm(ir, tlm.l, tlm.m, *_g)*_o[k2]->getNorm(ir, tlm.l, tlm.m, *_g)*std::pow(r, 2)*dr;
+    //  }
+    //}
+
+    // TODO calculate correction based on full spherical harmonics
+    std::map<lm, Vradial> full;
+    full[tlm] = Vradial(_g->N(), 0);
+
+    // + full vd
+    // vd = sum_k2 int |psi_k2(r) Y_k2(Omega)|^2 dOmega r^2 dr
+  }
+  return E1;
+}
+
+python::list HF::perturbativeLSEnergyPython() {
+  python::list l;
+  std::vector<ldouble> E = perturbativeLSEnergy();
+  for (int i = 0; i < E.size(); ++i) l.append(E[i]);
+  return l;
+}
+
 std::vector<ldouble> HF::getDirectPotential(int k) {
   return _vd[k];
 }
@@ -372,11 +417,11 @@ void HF::save(const std::string fout) {
     f << " " << std::setw(5) << "E" << " " << std::setw(64) << std::setprecision(60) << _o[i]->E();
     f << " " << std::setw(10) << "sph_size" << " " << std::setw(5) << _o[i]->getSphHarm().size();
     for (int idx = 0; idx < _o[i]->getSphHarm().size(); ++idx) {
-      f << " " << std::setw(5) << "sph_l" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].first;
-      f << " " << std::setw(5) << "sph_m" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].second;
+      f << " " << std::setw(5) << "sph_l" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].l;
+      f << " " << std::setw(5) << "sph_m" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].m;
       f << " " << std::setw(5) << "value";
       for (int ir = 0; ir < _g->N(); ++ir) {
-        const ldouble v = ((const Orbital) (*_o[i]))(ir, _o[i]->getSphHarm()[idx].first, _o[i]->getSphHarm()[idx].second);
+        const ldouble v = ((const Orbital) (*_o[i]))(ir, _o[i]->getSphHarm()[idx].l, _o[i]->getSphHarm()[idx].m);
         f << " " << std::setw(64) << std::setprecision(60) << v;
       }
     }
@@ -831,8 +876,8 @@ void HF::addOrbital(Orbital *o) {
     _o[k]->E(-_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2));
 
     for (int idx = 0; idx < _o[k]->getSphHarm().size(); ++idx) {
-      int l = _o[k]->getSphHarm()[idx].first;
-      int m = _o[k]->getSphHarm()[idx].second;
+      int l = _o[k]->getSphHarm()[idx].l;
+      int m = _o[k]->getSphHarm()[idx].m;
       for (int ir = 0; ir < _g->N(); ++ir) { // for each radial point
         (*_o[k])(ir, l, m) = std::pow(_Z*(*_g)(ir)/((ldouble) _o[k]->initialN()), l+0.5)*std::exp(-_Z*(*_g)(ir)/((ldouble) _o[k]->initialN()));
       }

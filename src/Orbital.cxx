@@ -101,9 +101,10 @@ void Orbital::N(int N) {
 int Orbital::N() const { return _N; }
 
 ldouble &Orbital::operator()(int i, int l, int m) {
+  lm tlm(l, m);
   int idx = 0;
   for (; idx < _sphHarm.size(); ++idx) {
-    if (_sphHarm[idx].first == l && _sphHarm[idx].second == m) {
+    if (_sphHarm[idx] == tlm) {
       break;
     }
   }
@@ -112,9 +113,10 @@ ldouble &Orbital::operator()(int i, int l, int m) {
 }
 
 const ldouble Orbital::operator()(int i, int l, int m) const {
+  lm tlm(l, m);
   int idx = 0;
   for (; idx < _sphHarm.size(); ++idx) {
-    if (_sphHarm[idx].first == l && _sphHarm[idx].second == m) {
+    if (_sphHarm[idx] == tlm) {
       break;
     }
   }
@@ -133,11 +135,12 @@ void Orbital::normalise(const Grid &g) {
 }
 
 python::list Orbital::getNormPython(int lo, int mo) {
+  lm tlm(lo, mo);
   python::list l;
   if (_torenorm) return l;
   int idx = 0;
   for (; idx < _sphHarm.size(); ++idx) {
-    if (_sphHarm[idx].first == lo && _sphHarm[idx].second == mo) {
+    if (_sphHarm[idx] == tlm) {
       break;
     }
   }
@@ -146,11 +149,12 @@ python::list Orbital::getNormPython(int lo, int mo) {
 }
 
 python::list Orbital::getCentralNormPython() {
+  lm tlm(initialL(), initialM());
   python::list l;
   if (_torenorm) return l;
   int idx = 0;
   for (; idx < _sphHarm.size(); ++idx) {
-    if (_sphHarm[idx].first == initialL() && _sphHarm[idx].second == initialM()) {
+    if (_sphHarm[idx] == tlm) {
       break;
     }
   }
@@ -184,8 +188,9 @@ const ldouble Orbital::getNorm(int i_in, int l_in, int m_in, const Grid &g) {
   }
   _torenorm = false;
   int idx = 0;
+  lm tlm(l_in, m_in);
   for (; idx < _sphHarm.size(); ++idx) {
-    if (_sphHarm[idx].first == l_in && _sphHarm[idx].second == m_in) {
+    if (_sphHarm[idx] == tlm) {
       break;
     }
   }
