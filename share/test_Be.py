@@ -32,7 +32,7 @@ h.addOrbital(orb3)
 NiterSCF = 40
 Niter = 1000
 F0stop = 1e-5
-r = np.asarray(r.getR())
+r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
 h.gammaSCF(0.4)
