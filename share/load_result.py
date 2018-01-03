@@ -12,7 +12,7 @@ import seaborn
 import matplotlib.pyplot as plt
 
 # read from this file
-fname = "output/results_Be.txt"
+fname = "output/results_B.txt"
 
 print "Loading result from file %s" % fname
 
