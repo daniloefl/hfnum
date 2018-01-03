@@ -20,8 +20,8 @@ var classHF =
     [ "stepGordon", "classHF.html#a43b4e607f11445644ec595bdb2f16253", null ],
     [ "stepRenormalised", "classHF.html#a918b92a0efae8dc78d2c787f33f070f1", null ],
     [ "stepSparse", "classHF.html#a99ce94f52c6738e811380407dec3ef06", null ],
-    [ "_vd", "classHF.html#aea5bdb65f9f8e466f18ab3d698b7f1c4", null ],
-    [ "_vdsum", "classHF.html#a93bb85bcb6d846c6c43f780f374cb989", null ],
-    [ "_vex", "classHF.html#a03d3a8c50480fa6215d5d22b64453324", null ],
-    [ "_vexsum", "classHF.html#a3d768c27d0b18a08829bd77bed853e9a", null ]
+    [ "_vd", "classHF.html#a7c691413f0978d44fb79bc1a205e032a", null ],
+    [ "_vdsum", "classHF.html#a627269037f92f5c920454a9674d68c00", null ],
+    [ "_vex", "classHF.html#aa6da4d8bc63b5146726a80b2a52fb4b5", null ],
+    [ "_vexsum", "classHF.html#ab41c4e42122111506f09a23301d8af80", null ]
 ];

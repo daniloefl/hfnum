@@ -150,8 +150,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a480a53dc4c73567847d2a76d52fd7512"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c202b9c4e6f5a0994da4ad6720bf2a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a1c202b9c4e6f5a0994da4ad6720bf2a6">addOrbitalPython</a> (boost::python::object o)</td></tr>
 <tr class="separator:a1c202b9c4e6f5a0994da4ad6720bf2a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af757b85bc908393ee5ccff531212fa4f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#af757b85bc908393ee5ccff531212fa4f">centralPotential</a> (bool central)</td></tr>
-<tr class="separator:af757b85bc908393ee5ccff531212fa4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -191,8 +189,6 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a0cd199a66005b34679257de0f4d2ccb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae50df9cfdd4ffd5a9283bf980ac110b2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classOrbitalMapper.html">OrbitalMapper</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ae50df9cfdd4ffd5a9283bf980ac110b2">_om</a></td></tr>
 <tr class="separator:ae50df9cfdd4ffd5a9283bf980ac110b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6abf5e5901f6f0cb572bd6d76bb06dc7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a6abf5e5901f6f0cb572bd6d76bb06dc7">_central</a></td></tr>
-<tr class="separator:a6abf5e5901f6f0cb572bd6d76bb06dc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb0a6ba1a037c9b4aae4592d1256cead"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="classOrbital.html">Orbital</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#afb0a6ba1a037c9b4aae4592d1256cead">_owned_orb</a></td></tr>
 <tr class="separator:afb0a6ba1a037c9b4aae4592d1256cead"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56fe9aa73c9eb688854218263459acf6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a56fe9aa73c9eb688854218263459acf6">_own_grid</a></td></tr>
@@ -217,7 +213,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Constructor for an atom. </p>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00034">34</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00030">30</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -244,7 +240,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Destructor. </p>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00073">73</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00068">68</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -305,33 +301,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00165">165</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="af757b85bc908393ee5ccff531212fa4f"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SCF::centralPotential </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>central</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Force the direct and exchange potential calculation to assume only a central potential. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">central</td><td>Whether to consider a central potential </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00030">30</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00160">160</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -357,7 +327,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00171">171</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00166">166</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -377,7 +347,7 @@ Protected Attributes</h2></td></tr>
 <p>Get <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> object. </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00046">46</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00041">41</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -397,7 +367,7 @@ Protected Attributes</h2></td></tr>
 <p>Get number of orbitals. </p>
 <dl class="section return"><dt>Returns</dt><dd>Number of orbitals. </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00081">81</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00076">76</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -417,7 +387,7 @@ Protected Attributes</h2></td></tr>
 <p>Get Coulomb attraction potential -Z/r. </p>
 <dl class="section return"><dt>Returns</dt><dd>Coulomb potential </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00176">176</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00171">171</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -437,7 +407,7 @@ Protected Attributes</h2></td></tr>
 <p>Get Coulomb attraction potential -Z/r. </p>
 <p>Python interface. </p><dl class="section return"><dt>Returns</dt><dd>Coulomb potential </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00134">134</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00129">129</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -482,7 +452,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of orbital values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point, in that spherical harmonic component. </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00140">140</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00135">135</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -509,7 +479,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> energy </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00112">112</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00107">107</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -536,7 +506,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> quantum number l </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00116">116</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00111">111</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -563,7 +533,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> quantum number m </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00120">120</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00115">115</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -590,7 +560,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> quantum number n </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00085">85</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00080">80</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -617,7 +587,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> spin </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00124">124</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00119">119</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -644,7 +614,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of orbital values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point, in that spherical harmonic component. </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00149">149</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00144">144</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -671,7 +641,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of orbital values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point, in that spherical harmonic component. </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00158">158</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00153">153</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -698,7 +668,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> name </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00089">89</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00084">84</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -718,7 +688,7 @@ Protected Attributes</h2></td></tr>
 <p>Get list of R values from the <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd>List of R values </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00050">50</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00045">45</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -778,7 +748,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00128">128</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00123">123</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -829,7 +799,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00054">54</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00049">49</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -889,7 +859,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00062">62</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00057">57</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -909,7 +879,7 @@ Protected Attributes</h2></td></tr>
 <p>Get Z. </p>
 <dl class="section return"><dt>Returns</dt><dd>Z </dd></dl>
 
-<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00069">69</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8cxx_source.html#l00064">64</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -934,7 +904,7 @@ Protected Attributes</h2></td></tr>
 
 <p>for the matrix Numerov method using sparse matrices A is the Jacobian of the non-linear system </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00181">181</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00177">177</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -958,7 +928,7 @@ Protected Attributes</h2></td></tr>
 
 <p>b is the column vector of solutions </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00183">183</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00179">179</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -982,31 +952,7 @@ Protected Attributes</h2></td></tr>
 
 <p>b0 is the column vector of last solutions for the iteration </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00185">185</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a6abf5e5901f6f0cb572bd6d76bb06dc7"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool SCF::_central</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Central potential? </p>
-
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00200">200</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00181">181</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1030,7 +976,7 @@ Protected Attributes</h2></td></tr>
 
 <p>variation in energy for the next step </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00159">159</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00155">155</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1054,7 +1000,7 @@ Protected Attributes</h2></td></tr>
 
 <p>record maximum energy if needed </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00168">168</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00164">164</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1078,7 +1024,7 @@ Protected Attributes</h2></td></tr>
 
 <p>record minimum energy if needed </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00171">171</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00167">167</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1102,7 +1048,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Numerical <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a>. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00147">147</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00143">143</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1126,7 +1072,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Speed at which the new Vd and Vex are integrated into the next self-consistent step. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00162">162</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00158">158</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1150,7 +1096,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Solver for Gordon's method. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00194">194</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00190">190</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1174,7 +1120,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Solver for the renormalised method. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00191">191</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00187">187</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1198,7 +1144,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Solver using sparse matrices. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00188">188</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00184">184</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1222,7 +1168,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Method to be used for solving equations. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00177">177</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00173">173</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1246,7 +1192,7 @@ Protected Attributes</h2></td></tr>
 
 <p>record number of zero crossings of the main orbital function if needed </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00174">174</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00170">170</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1270,7 +1216,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Vector of orbitals. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00153">153</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00149">149</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1294,7 +1240,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Class that maps orbitals to indices. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00197">197</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00193">193</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1318,7 +1264,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Whether we own the <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a>. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00206">206</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00199">199</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1342,7 +1288,7 @@ Protected Attributes</h2></td></tr>
 
 <p>List of owned <a class="el" href="classOrbital.html">Orbital</a> pointers. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00203">203</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00196">196</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1366,7 +1312,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Coulomb potential. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00156">156</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00152">152</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1390,7 +1336,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Atomic number. </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00150">150</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00146">146</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1414,7 +1360,7 @@ Protected Attributes</h2></td></tr>
 
 <p>index in the numerical <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> where the classical crossing of energy-potential happens </p>
 
-<p>Definition at line <a class="el" href="SCF_8h_source.html#l00165">165</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p>Definition at line <a class="el" href="SCF_8h_source.html#l00161">161</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
