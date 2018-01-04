@@ -36,9 +36,11 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   //ldouble F = std::fabs((Ro[icl[kl]] - Ri[icl[kl]+1].inverse()).determinant());
   //A - B^-1 = B^-1 (B A - I)
   //det(A - B^-1) = 0 => det(BA - I) = 0
+  ldouble F = 0;
   MatrixXld A = Ro[icl[kl]];
   MatrixXld B = Ri[icl[kl]+1];
-  ldouble F = (B*A - MatrixXld::Identity(M,M)).determinant();
+  F += std::fabs((B*A - MatrixXld::Identity(M,M)).determinant());
+
   /*
   //JacobiSVD<MatrixXld> dec_BA(B*A - MatrixXld::Identity(M,M), ComputeThinU | ComputeThinV);
   JacobiSVD<MatrixXld> dec_BA(B*A, ComputeThinU | ComputeThinV);
