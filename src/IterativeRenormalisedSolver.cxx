@@ -39,7 +39,7 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   ldouble F = 0;
   MatrixXld A = Ro[icl[kl]];
   MatrixXld B = Ri[icl[kl]+1];
-  F += std::fabs((B*A - MatrixXld::Identity(M,M)).determinant());
+  F += ((B*A - MatrixXld::Identity(M,M)).determinant());
 
   /*
   //JacobiSVD<MatrixXld> dec_BA(B*A - MatrixXld::Identity(M,M), ComputeThinU | ComputeThinV);
@@ -142,8 +142,8 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
       int k = _om.orbital(idx);
       int l = _om.l(idx);
       int m = _om.m(idx);
-      psi0(idx, idx) = 1e-2;
-      psi1(idx, idx) = 1e-1;
+      psi0(idx, idx) = 1;
+      psi1(idx, idx) = 10;
       if (l == _o[k]->initialL() && m == _o[k]->initialM() && idx == idx2) psi1(idx, idx2) *= 10;
     }
   }
