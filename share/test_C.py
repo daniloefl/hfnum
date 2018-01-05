@@ -13,7 +13,7 @@ Z = 6
 
 # log grid
 dx = 0.5*1e-1/Z
-N = 2*210*Z
+N = 2*220*Z
 rmin = 1e-8
 h = hfnum.HF()
 h.resetGrid(True, dx, int(N), rmin)
