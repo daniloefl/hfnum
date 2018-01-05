@@ -199,53 +199,64 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   }
 
   ldouble F = 0;
-  bool allNodesOk = false;
-  do {
-    int nStep = 0;
-    while (nStep < Niter) {
-      gamma = 0.5*(1 - std::exp(-(nStep+1)/5.0));
-      // compute sum of squares of F(x_old)
-      nStep += 1;
-      if (_method == 0) {
-        F = stepSparse(gamma);
-      } else if (_method == 1) {
-        F = stepGordon(gamma);
-      } else if (_method == 2) {
-        F = stepRenormalised(gamma);
-      }
-
-      // change orbital energies
-      std::cout << "Orbital energies at step " << nStep << ", with constraint = " << std::setw(16) << F << ", method = " << strMethod << "." << std::endl;
-      std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "next energy (H)" << " " << std::setw(16) << "Min. (H)" << " " << std::setw(16) << "Max. (H)" << " " << std::setw(5) << "nodes" << std::endl;
-      for (int k = 0; k < _o.size(); ++k) {
-        ldouble stepdE = _dE[k];
-        ldouble newE = (_o[k]->E()+stepdE);
-        //if (newE > _Emax[k]) newE = 0.5*(_Emax[k] + _Emin[k]);
-        //if (newE < _Emin[k]) newE = 0.5*(_Emax[k] + _Emin[k]);
-        std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << newE << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
-        _o[k]->E(newE);
-      }
-
-      if (std::fabs(*std::max_element(_dE.begin(), _dE.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop) break;
-      //if (std::fabs(F) < F0stop) break;
+  int nStep = 0;
+  while (nStep < Niter) {
+    gamma = 0.5*(1 - std::exp(-(nStep+1)/20.0));
+    // compute sum of squares of F(x_old)
+    nStep += 1;
+    if (_method == 0) {
+      F = stepSparse(gamma);
+    } else if (_method == 1) {
+      F = stepGordon(gamma);
+    } else if (_method == 2) {
+      F = stepRenormalised(gamma);
     }
 
-    allNodesOk = true;
-    //for (int k = 0; k < _o.size(); ++k) {
-    //  if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
-    //    allNodesOk = false;
-    //    std::cout << "Found too many nodes in orbital " << k << ": I will try again starting at a lower energy." << std::endl;
-    //    _Emax[k] = _o[k]->E();
-    //    _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
-    //  } else if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
-    //    allNodesOk = false;
-    //    std::cout << "Found too few nodes in orbital " << k << ": I will try again starting at a higher energy." << std::endl;
-    //    _Emin[k] = _o[k]->E();
-    //    _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
-    //  }
-    //}
+    // This can be enabled to check the number of nodes
+    // and avoid diverging from the proper solution.
+    // But in some cases, it makes matters worse
+    // To be investigated ...
+    /*
+    int orbitalWrongNodes = -1;
+    for (int k = 0; k < _o.size(); ++k) {
+      if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
+        orbitalWrongNodes = k;
+        std::cout << "Found too many nodes in orbital " << k << ": I will try again starting at a lower energy." << std::endl;
+        _Emax[k] = _o[k]->E();
+        _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
+        break;
+      } else if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
+        orbitalWrongNodes = k;
+        std::cout << "Found too few nodes in orbital " << k << ": I will try again starting at a higher energy." << std::endl;
+        _Emin[k] = _o[k]->E();
+        _o[k]->E(0.5*(_Emax[k] + _Emin[k]));
+      }
+    }
+    if (orbitalWrongNodes >= 0) {
+      std::cout << "WARNING: Bisecting energy level of orbital " << orbitalWrongNodes << std::endl;
+      std::cout << "WARNING: Following print out for information only." << std::endl;
+      std::cout << "Orbital energies at step " << nStep << ", with constraint = " << std::setw(16) << F << ", method = " << strMethod << "." << std::endl;
+      std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "Min. (H)" << " " << std::setw(16) << "Max. (H)" << " " << std::setw(5) << "nodes" << std::endl;
+      for (int k = 0; k < _o.size(); ++k) {
+        std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
+      }
+      continue;
+    }*/
 
-  } while (!allNodesOk);
+    // change orbital energies
+    std::cout << "Orbital energies at step " << nStep << ", with constraint = " << std::setw(16) << F << ", method = " << strMethod << "." << std::endl;
+    std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "next energy (H)" << " " << std::setw(16) << "Min. (H)" << " " << std::setw(16) << "Max. (H)" << " " << std::setw(5) << "nodes" << std::endl;
+    for (int k = 0; k < _o.size(); ++k) {
+      ldouble stepdE = _dE[k];
+      ldouble newE = (_o[k]->E()+stepdE);
+      std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << newE << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
+      _o[k]->E(newE);
+    }
+
+    if (std::fabs(*std::max_element(_dE.begin(), _dE.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop) break;
+    //if (std::fabs(F) < F0stop) break;
+  }
+
   return F;
 }
 
@@ -716,8 +727,6 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
       for (int i = _g->N()-3; i >= 3; --i) {
         ldouble r = (*_g)(i);
         ldouble a = 0;
-        //if (_g.isLog()) a = 2*std::pow(r, 2)*(_o[k]->E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i]) - std::pow(lmain_eq + 0.5, 2);
-        //else a = 2*(_o[k]->E() - _pot[i] - _vd[k][std::pair<int, int>(lmain, mmain)][i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
         if (_g->isLog()) a = 2*std::pow(r, 2)*(_o[k]->E() - _pot[i] - _vd[k][i]) - std::pow(lmain_eq + 0.5, 2);
         else a = 2*(_o[k]->E() - _pot[i] - _vd[k][i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
         if (icl[k] < 0 && a*a_m1 < 0) {
