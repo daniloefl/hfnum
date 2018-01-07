@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 Z = 8
 
 # log grid
-dx = 1e-1/Z
-N = 225*Z
+dx = 0.5*1e-1/Z
+N = 2*225*Z
 rmin = 1e-8
 h = hfnum.HF()
 h.resetGrid(True, dx, int(N), rmin)
@@ -24,9 +24,9 @@ orb0 = hfnum.Orbital( 1, 1, 0, 0)
 orb1 = hfnum.Orbital(-1, 1, 0, 0)
 orb2 = hfnum.Orbital( 1, 2, 0, 0)
 orb3 = hfnum.Orbital(-1, 2, 0, 0)
-orb4 = hfnum.Orbital( 1, 2, 1, 0)
-orb5 = hfnum.Orbital(-1, 2, 1, 0)
-orb6 = hfnum.Orbital( 1, 2, 1, -1)
+orb4 = hfnum.Orbital( 1, 2, 1, -1)
+orb5 = hfnum.Orbital( 1, 2, 1, 0)
+orb6 = hfnum.Orbital( 1, 2, 1,  1)
 orb7 = hfnum.Orbital(-1, 2, 1, -1)
 h.addOrbital(orb0)
 h.addOrbital(orb1)
@@ -37,9 +37,9 @@ h.addOrbital(orb5)
 h.addOrbital(orb6)
 h.addOrbital(orb7)
 
-NiterSCF = 40
+NiterSCF = 50
 Niter = 1000
-F0stop = 1e-6
+F0stop = 1e-5
 r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
