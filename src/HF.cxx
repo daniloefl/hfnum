@@ -58,16 +58,15 @@ std::vector<ldouble> HF::perturbativeLSEnergy() {
 
     // TODO this results in nonsensical results
     // + vex
-    /*
     for (int k2 = 0; k2 < _o.size(); ++k2) {
-      lm tlm(_o[k2]->initialL(), _o[k2]->initialM());
+      lm tlm2(_o[k2]->initialL(), _o[k2]->initialM());
       for (int ir = 0; ir < _g->N(); ++ir) {
         ldouble r = (*_g)(ir);
         ldouble dr = 0;
         if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
-        E1[k] += _vex[std::pair<int, int>(k, k2)][ir]*_o[k]->getNorm(ir, tlm.l, tlm.m, *_g)*_o[k2]->getNorm(ir, tlm.l, tlm.m, *_g)*std::pow(r, 2)*dr;
+        E1[k] += _vex[std::pair<int, int>(k, k2)][ir]*_o[k]->getNorm(ir, tlm.l, tlm.m, *_g)*_o[k2]->getNorm(ir, tlm2.l, tlm2.m, *_g)*std::pow(r, 2)*dr;
       }
-    }*/
+    }
 
     // TODO calculate correction based on full spherical harmonics
     // + full vd
@@ -99,7 +98,7 @@ std::vector<ldouble> HF::perturbativeLSEnergy() {
             rlarge = r1;
           }
 
-          for (int l = 0; l < lmax; ++l) {
+          for (int l = 0; l <= lmax; ++l) {
             for (int m = -l; m <= l; ++m) {
               E1[k] += std::pow(-1, m)*(2.0*tlm2.l+1.0)*(2.0*tlm.l+1.0)/std::pow(2.0*l+1.0, 2)*CG(tlm.l, tlm.l, 0, 0, l, 0)*CG(tlm2.l, tlm2.l, 0, 0, l, 0)*CG(tlm.l, tlm.l, -tlm.m, -tlm.m, l, -m)*CG(tlm2.l, tlm2.l, tlm2.m, tlm2.m, l, m)*std::pow(_o[k]->getNorm(ir1, tlm.l, tlm.m, *_g)*_o[k2]->getNorm(ir2, tlm2.l, tlm2.m, *_g), 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
             }
@@ -108,7 +107,6 @@ std::vector<ldouble> HF::perturbativeLSEnergy() {
       }
     }
 
-    /*
     // - full vex
     // vex(r1) psi_k2(r1) Y_k2(r1) = sum_k2 psi_k2(r1) Y_k2(r1) int psi_k2(r2) psi_k(r2) Y*_k2(Omega2) Y_k(Omega2) 1/|r1 - r2| dOmega2 r2^2 dr2
     //
@@ -128,6 +126,7 @@ std::vector<ldouble> HF::perturbativeLSEnergy() {
     //
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       lm tlm2(_o[k2]->initialL(), _o[k2]->initialM());
+      if (_o[k2]->spin()*_o[k]->spin() < 0) continue; // spin component dot product
       for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
         ldouble r1 = (*_g)(ir1);
         ldouble dr1 = 0;
@@ -145,15 +144,14 @@ std::vector<ldouble> HF::perturbativeLSEnergy() {
             rlarge = r1;
           }
 
-          for (int l = 0; l < lmax; ++l) {
+          for (int l = 0; l <= lmax; ++l) {
             for (int m = -l; m <= l; ++m) {
-              E1[k] += std::pow(-1, m + tlm.m + tlm2.m)*(2.0*tlm2.l+1.0)*(2.0*tlm.l+1.0)/std::pow(2.0*l+1.0, 2)*CG(tlm.l, tlm2.l, 0, 0, l, 0)*CG(tlm2.l, tlm.l, 0, 0, l, 0)*CG(tlm.l, tlm2.l, -tlm.m, tlm2.m, l, -m)*CG(tlm2.l, tlm.l, -tlm2.m, tlm.m, l, m)*_o[k]->getNorm(ir1, tlm.l, tlm.m, *_g)*_o[k]->getNorm(ir2, tlm.l, tlm.m, *_g)*_o[k2]->getNorm(ir2, tlm2.l, tlm2.m, *_g)*_o[k2]->getNorm(ir1, tlm2.l, tlm2.m, *_g)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
+              E1[k] += -std::pow(-1, m + tlm.m + tlm2.m)*(2.0*tlm2.l+1.0)*(2.0*tlm.l+1.0)/std::pow(2.0*l+1.0, 2)*CG(tlm.l, tlm2.l, 0, 0, l, 0)*CG(tlm2.l, tlm.l, 0, 0, l, 0)*CG(tlm.l, tlm2.l, -tlm.m, tlm2.m, l, -m)*CG(tlm2.l, tlm.l, -tlm2.m, tlm.m, l, m)*_o[k]->getNorm(ir1, tlm.l, tlm.m, *_g)*_o[k]->getNorm(ir2, tlm.l, tlm.m, *_g)*_o[k2]->getNorm(ir2, tlm2.l, tlm2.m, *_g)*_o[k2]->getNorm(ir1, tlm2.l, tlm2.m, *_g)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
             }
           }
         }
       }
     }
-    */
   }
   return E1;
 }
