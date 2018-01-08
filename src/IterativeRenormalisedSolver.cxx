@@ -137,6 +137,7 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
   MatrixXld psi1(M,M);
   psi0.setZero();
   psi1.setZero();
+  /*
   for (int idx2 = 0; idx2 < M; ++idx2) {
     for (int idx = 0; idx < M; ++idx) {
       int k = _om.orbital(idx);
@@ -148,7 +149,7 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
     }
   }
   R[0] = Fm[1]*psi1*(Fm[0]*psi0).inverse();
-  /*
+  */
   for (int idx = 0; idx < M; ++idx) {
     int k = _om.orbital(idx);
     int l = _om.l(idx);
@@ -157,7 +158,7 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
       R[0](idx, idx) = 6/_g.dx() - 5 + (1 - E[k])*_g.dx();
     if (l == 1)
       R[0](idx, idx) = - 5 + 1.5*_g.dx();
-  }*/
+  }
   for (int i = 1; i <= icl[kl]+1; ++i) {
     R[i] = Km[i]*(MatrixXld::Identity(M, M)*12 - Fm[i]*10);
     if (R[i-1].determinant() != 0) R[i] -= R[i-1].inverse();
