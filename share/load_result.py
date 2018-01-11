@@ -21,7 +21,10 @@ def complete(text, state):
 readline.set_completer_delims(' \t\n;')
 readline.parse_and_bind("tab: complete")
 readline.set_completer(complete)
-fname = raw_input('What is the input file to load? [feel free to use TAB to auto-complete; examples are shipped in the output directory]    ')
+print('What is the input file to load?')
+print('Examples are any result*.txt file in the output directory. The ones with dft in their name are to be used with load_result_dft.py instead, so please do not load them with this script.')
+print('[feel free to use TAB to auto-complete]')
+fname = raw_input('')
 
 print "Loading result from file %s" % fname
 
