@@ -62,9 +62,9 @@ std::vector<ldouble> HF::perturbativeLSEnergy() {
     // Term = sum_k2 int dr1 int dOmega1 int dr2 int dOmega2 [ r1^2 psi_k(r1)^2 Y*_k(Omega1)^2 r2^2 psi_k2(r2)^2 Y_k2(Omega2)^2 1/|r1 - r2| ]
     // 1/|r1 - r2| = sum_l=0^inf sum_m=-l^+l 4 pi/(2*l+1) r_<^l/r_>^(l+1) Y_lm*(Omega1) Y_lm(Omega2)
     // Term = sum_k2 int dr1 int dOmega1 int dr2 int dOmega2 sum_l=0^inf sum_m=-l^+l 4 pi/(2*l+1) [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_k(r1)^2 psi_k2(r2)^2 Y*_k(O1)^2 Y_k2(O2)^2 Y_lm(O1) Y_lm*(O2) ]
-    // int dO1 Y*_k(O1)^2 Y_lm*(O1) = (-1)^m int dO1 Y_(l_k, -m_k)(O1)^2 Y_(l,-m)(O1) = (2l_k+1)/sqrt(4pi(2l+1)) CG(l_k, l_k, 0, 0, l, 0) CG(l_k, l_k, -m_k, -m_k, l, m)
-    // int dO2 Y_k2(O2)^2 Y_lm(O2) = int dO2 Y_(l_k2, m_k2)(O1)^2 Y_(l,m)(O1) = (-1)^m (2l_k2+1)/sqrt(4pi(2l+1)) CG(l_k2, l_k2, 0, 0, l, 0) CG(l_k2, l_k2, m_k2, m_k2, l, -m)
-    // Term = sum_k2 int dr1 int dr2 sum_l=0^inf sum_m=-l^+l [ (2*l_k+1) * (2*l_k2+1) / (2*l+1)^2 (-1)^m CG(l_k, l_k, 0, 0, l, 0) * CG(l_k2, l_k2, 0, 0, l, 0) * CG(l_k, l_k, -m_k, -m_k, l, m) * CG(l_k2, l_k2, m_k2, m_k2, l, -m) ] * [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_k(r1)^2 psi_k2(r2)^2 ]
+    // int dO1 Y*_k(O1) Y_k(O1) Y_lm*(O1) = (-1)^(m+m_k) int dO1 Y_(l_k, -m_k)(O1) Y_(l_k, m_k)(O1) Y_(l,-m)(O1) = (-1)^(m_k) (2l_k+1)/sqrt(4pi(2l+1)) CG(l_k, l_k, 0, 0, l, 0) CG(l_k, l_k, -m_k, m_k, l, m)
+    // int dO2 Y*_k2(O2) Y_k2(O2) Y_lm(O2) = (-1)^(m_k2) int dO2 Y_(l_k2, -m_k2)(O2) Y_(l_k2, m_k2)(O2) Y_(l,m)(O1) = (-1)^(m+m_k2) (2l_k2+1)/sqrt(4pi(2l+1)) CG(l_k2, l_k2, 0, 0, l, 0) CG(l_k2, l_k2, -m_k2, m_k2, l, -m)
+    // Term = sum_k2 int dr1 int dr2 sum_l=0^inf sum_m=-l^+l [ (2*l_k+1) * (2*l_k2+1) / (2*l+1)^2 (-1)^(m+m_k+m_k2) CG(l_k, l_k, 0, 0, l, 0) * CG(l_k2, l_k2, 0, 0, l, 0) * CG(l_k, l_k, -m_k, m_k, l, m) * CG(l_k2, l_k2, -m_k2, m_k2, l, -m) ] * [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_k(r1)^2 psi_k2(r2)^2 ]
     //
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       lm tlm2(_o[k2]->initialL(), _o[k2]->initialM());
@@ -87,7 +87,7 @@ std::vector<ldouble> HF::perturbativeLSEnergy() {
 
           for (int l = 0; l <= lmax; ++l) {
             for (int m = -l; m <= l; ++m) {
-              E1[k] += std::pow(-1, m)*(2.0*tlm2.l+1.0)*(2.0*tlm.l+1.0)/std::pow(2.0*l+1.0, 2)*CG(tlm.l, tlm.l, 0, 0, l, 0)*CG(tlm2.l, tlm2.l, 0, 0, l, 0)*CG(tlm.l, tlm.l, -tlm.m, -tlm.m, l, m)*CG(tlm2.l, tlm2.l, tlm2.m, tlm2.m, l, -m)*std::pow(_o[k]->getNorm(ir1, tlm.l, tlm.m, *_g)*_o[k2]->getNorm(ir2, tlm2.l, tlm2.m, *_g), 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
+              E1[k] += std::pow(-1, m+tlm.m+tlm2.m)*(2.0*tlm2.l+1.0)*(2.0*tlm.l+1.0)/std::pow(2.0*l+1.0, 2)*CG(tlm.l, tlm.l, 0, 0, l, 0)*CG(tlm2.l, tlm2.l, 0, 0, l, 0)*CG(tlm.l, tlm.l, -tlm.m, tlm.m, l, m)*CG(tlm2.l, tlm2.l, -tlm2.m, tlm2.m, l, -m)*std::pow(_o[k]->getNorm(ir1, tlm.l, tlm.m, *_g)*_o[k2]->getNorm(ir2, tlm2.l, tlm2.m, *_g), 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
             }
           }
         }
@@ -861,6 +861,7 @@ void HF::calculateVd(ldouble gamma) {
   for (int k = 0; k < _o.size(); ++k) {
     _vdsum[k] = Vradial(_g->N(), 0);
   }
+  int lmax = 2;
 
   // calculate it first with filled orbitals, dividing by the number of orbitals
   // this is exact if all 2(2*l+1) orbitals in this level are filled
@@ -878,6 +879,8 @@ void HF::calculateVd(ldouble gamma) {
         ldouble dr = 0;
         if (ir2 < _g->N()-1) dr = (*_g)(ir2+1) - (*_g)(ir2);
 
+        // this assumes filled shells and averages over them
+        // works well for s shells, but not p-shells
         //ldouble rmax = r1;
         //if (ir2 > ir1) rmax = r2;
         //vd[ir1] += std::pow(_o[k1]->getNorm(ir2, l1, m1, *_g), 2)*std::pow(r2, 2)/rmax*dr;
@@ -890,8 +893,17 @@ void HF::calculateVd(ldouble gamma) {
         }
         int l = 0;
         int m = 0;
-        //vd[ir1] += 1.0/std::sqrt(4*M_PI)*(2*l1+1.0)/std::sqrt(4*M_PI*(2*l+1.0))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, m1, m1, l, m)*(4*M_PI/(2*l+1.0))*std::pow(_o[k1]->getNorm(ir2, l1, m1, *_g), 2)*std::pow(r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr;
-        vd[ir1] += (2.0*l1+1.0)*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, m1, m1, l, m)*std::pow(_o[k1]->getNorm(ir2, l1, m1, *_g), 2)*std::pow(r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr;
+        //for (int l = 0; l <= lmax; ++l) {
+        //  for (int m = -l; m <= l; ++m) {
+            // first 1/sqrt(PI) is the average of spherical harmonic in T2 integrated in Omega2
+            //vd[ir1] += 1.0/std::sqrt(4*M_PI)*(2*l1+1.0)/std::sqrt(4*M_PI*(2*l+1.0))*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, m1, m1, l, m)*(4*M_PI/(2*l+1.0))*std::pow(_o[k1]->getNorm(ir2, l1, m1, *_g), 2)*std::pow(r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr;
+            // simplified:
+            vd[ir1] += (2*l1+1.0)/std::sqrt(2*l+1.0)*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, m1, m1, l, m)*(1.0/(2*l+1.0))*std::pow(_o[k1]->getNorm(ir2, l1, m1, *_g), 2)*std::pow(r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr;
+        //  }
+        //}
+        //int l = 0;
+        //int m = 0;
+        //vd[ir1] += (2.0*l1+1.0)*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, m1, m1, l, m)*std::pow(_o[k1]->getNorm(ir2, l1, m1, *_g), 2)*std::pow(r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr;
       }
     }
 
