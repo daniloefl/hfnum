@@ -26,6 +26,8 @@ using namespace boost;
 
 #include <fstream>
 
+#include "StateReader.h"
+
 HF::HF()
   : SCF() {
 }
@@ -545,117 +547,37 @@ void HF::save(const std::string fout) {
 }
 
 void HF::load(const std::string fin) {
-  std::ifstream f(fin.c_str());
-  std::string line;
-  std::string trash;
-
-  bool g_isLog = true;
-  ldouble g_dx = 1e-1;
-  int g_N = 220;
-  ldouble g_rmin = 1e-6;
+  std::cout << "Loading state" << std::endl;
+  StateReader sr(fin);
+  std::cout << "Loaded state" << std::endl;
 
   _o.clear();
   for (auto &o : _owned_orb) {
     delete o;
   }
   _owned_orb.clear();
+
+  std::cout << "Cleaned" << std::endl;
   
-  while(std::getline(f, line)) {
-    std::stringstream ss;
-    ss.str(line);
-
-    std::string mode;
-
-    ss >> mode;
-    if (mode == "method")
-      ss >> _method;
-    else if (mode == "Z")
-      ss >> _Z;
-    else if (mode == "gamma_scf")
-      ss >> _gamma_scf;
-    else if (mode == "central")
-      ss >> trash;
-    else if (mode == "grid.isLog")
-      ss >> g_isLog;
-    else if (mode == "grid.dx")
-      ss >> g_dx;
-    else if (mode == "grid.N")
-      ss >> g_N;
-    else if (mode == "grid.rmin")
-      ss >> g_rmin;
-    else if (mode == "orbital") {
-      int io;
-      ss >> io;
-
-      std::string trash;
-
-      int o_N, o_L, o_M, o_S;
-      ss >> trash >> o_N >> trash >> o_L >> trash >> o_M >> trash >> o_S;
-
-      ldouble o_E;
-      ss >> trash >> o_E;
-
-
-      _owned_orb.push_back(new Orbital(o_S, o_N, o_L, o_M));
-      _o.push_back(_owned_orb[_owned_orb.size()-1]);
-      int k = _o.size()-1;
-      _o[k]->N(g_N);
-      _o[k]->E(o_E);
-      int sphSize = 1;
-      ss >> trash >> sphSize;
-      for (int idx = 0; idx < sphSize; ++idx) {
-        int l;
-        int m;
-        ss >> trash >> l >> trash >> m;
-
-        if (l != o_L && m != o_M) _o[k]->addSphHarm(l, m);
-
-        ss >> trash;
-
-        ldouble read_value;
-        for (int ir = 0; ir < g_N; ++ir) { // for each radial point
-          ss >> read_value;
-          (*_o[k])(ir, l, m) = read_value;
-        }
-      }
-    } else if (mode == "vd") {
-      int io;
-      ss >> io;
-
-      std::string trash;
-
-      int v_l, v_m;
-      ss >> trash >> v_l >> trash >> v_m;
-
-      ss >> trash;
-
-      _vd[io] = std::vector<ldouble>(g_N, 0);
-      ldouble read_value;
-      for (int k = 0; k < g_N; ++k) {
-        ss >> read_value;
-        _vd[io][k] = read_value;
-      }
-    } else if (mode == "vex") {
-      int io1, io2;
-      ss >> io1 >> io2;
-
-      std::string trash;
-
-      int v_l, v_m;
-      ss >> trash >> v_l >> trash >> v_m;
-
-      ss >> trash;
-
-      _vex[std::pair<int, int>(io1, io2)] = std::vector<ldouble>(g_N, 0);
-      ldouble read_value;
-      for (int k = 0; k < g_N; ++k) {
-        ss >> read_value;
-        _vex[std::pair<int, int>(io1, io2)][k] = read_value;
-      }
-    }
+  _method = sr.getInt("method");
+  _Z = sr.getDouble("Z");
+  _gamma_scf = sr.getDouble("gamma_scf");
+  std::cout << "Param load" << std::endl;
+  _g->reset((bool) sr.getInt("grid.isLog"), sr.getDouble("grid.dx"), sr.getInt("grid.N"), sr.getDouble("grid.rmin"));
+  std::cout << "Grid reset" << std::endl;
+  for (int k = 0; k < sr._o.size(); ++k) {
+    _owned_orb.push_back(new Orbital(*sr.getOrbital(k)));
+    _o.push_back(_owned_orb[_owned_orb.size()-1]);
   }
-  std::cout << "Load resetting grid with isLog = " << g_isLog << ", dx = " << g_dx << ", g_N = " << g_N << ", g_rmin = " << g_rmin << std::endl;
-  _g->reset(g_isLog, g_dx, g_N, g_rmin);
+  std::cout << "Orbital load" << std::endl;
+  for (auto &k : sr._vd) {
+    _vd[k.first] = k.second;
+  }
+  std::cout << "Vd load" << std::endl;
+  for (auto &k : sr._vex) {
+    _vex[k.first] = k.second;
+  }
+  std::cout << "Vex load" << std::endl;
   _pot.resize(_g->N());
   for (int k = 0; k < _g->N(); ++k) {
     _pot[k] = -_Z/(*_g)(k);

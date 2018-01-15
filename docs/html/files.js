@@ -27,7 +27,9 @@ var files =
       [ "LinearSystemBuilder", "classLinearSystemBuilder.html", "classLinearSystemBuilder" ]
     ] ],
     [ "Orbital.cxx", "Orbital_8cxx.html", null ],
-    [ "Orbital.h", "Orbital_8h.html", "Orbital_8h" ],
+    [ "Orbital.h", "Orbital_8h.html", [
+      [ "Orbital", "classOrbital.html", "classOrbital" ]
+    ] ],
     [ "OrbitalMapper.cxx", "OrbitalMapper_8cxx.html", null ],
     [ "OrbitalMapper.h", "OrbitalMapper_8h.html", [
       [ "OrbitalMapper", "classOrbitalMapper.html", "classOrbitalMapper" ]
@@ -35,6 +37,10 @@ var files =
     [ "SCF.cxx", "SCF_8cxx.html", null ],
     [ "SCF.h", "SCF_8h.html", [
       [ "SCF", "classSCF.html", "classSCF" ]
+    ] ],
+    [ "StateReader.cxx", "StateReader_8cxx.html", null ],
+    [ "StateReader.h", "StateReader_8h.html", [
+      [ "StateReader", "classStateReader.html", "classStateReader" ]
     ] ],
     [ "utils.cxx", "utils_8cxx.html", "utils_8cxx" ],
     [ "utils.h", "utils_8h.html", "utils_8h" ]

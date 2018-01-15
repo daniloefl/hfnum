@@ -368,6 +368,33 @@ SCF.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/SCF.cxx.s
 .PHONY : SCF.cxx.s
 
+StateReader.o: StateReader.cxx.o
+
+.PHONY : StateReader.o
+
+# target to build an object file
+StateReader.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/StateReader.cxx.o
+.PHONY : StateReader.cxx.o
+
+StateReader.i: StateReader.cxx.i
+
+.PHONY : StateReader.i
+
+# target to preprocess a source file
+StateReader.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/StateReader.cxx.i
+.PHONY : StateReader.cxx.i
+
+StateReader.s: StateReader.cxx.s
+
+.PHONY : StateReader.s
+
+# target to generate assembly for a file
+StateReader.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/StateReader.cxx.s
+.PHONY : StateReader.cxx.s
+
 hfnum.o: hfnum.cxx.o
 
 .PHONY : hfnum.o
@@ -458,6 +485,9 @@ help:
 	@echo "... SCF.o"
 	@echo "... SCF.i"
 	@echo "... SCF.s"
+	@echo "... StateReader.o"
+	@echo "... StateReader.i"
+	@echo "... StateReader.s"
 	@echo "... hfnum.o"
 	@echo "... hfnum.i"
 	@echo "... hfnum.s"

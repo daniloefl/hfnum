@@ -1,5 +1,6 @@
 var utils_8h =
 [
+    [ "lm", "classlm.html", "classlm" ],
     [ "ldouble", "utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c", null ],
     [ "MatrixXld", "utils_8h.html#aa30812bb256751833efb7733fe7ae528", null ],
     [ "SMatrixXld", "utils_8h.html#ae3b527b467f17f26f18115c21dc7075c", null ],

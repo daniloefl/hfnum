@@ -68,6 +68,7 @@ Orbital::Orbital(const Orbital &o) {
   _initial_n = o._initial_n;
   _initial_l = o._initial_l;
   _initial_m = o._initial_m;
+  _E = o._E;
   _s = o._s;
   for (int i = 0; i < _sphHarm.size()*_N; ++i) _wf[i] = o._wf[i];
   for (int i = 0; i < _sphHarm.size()*_N; ++i) _wf_norm[i] = o._wf_norm[i];

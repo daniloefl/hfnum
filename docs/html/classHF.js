@@ -13,6 +13,8 @@ var classHF =
     [ "getExchangePotential", "classHF.html#aca079b517f5b8142ba67c5ffbf4a86e8", null ],
     [ "getExchangePotentialPython", "classHF.html#a794af98769156f05866676ce01f472f5", null ],
     [ "load", "classHF.html#a9e27eedfdd795e380b22f2cacf1a7ce0", null ],
+    [ "perturbativeLSEnergy", "classHF.html#a28c2b9acf042dc9212f460c0c90507f0", null ],
+    [ "perturbativeLSEnergyPython", "classHF.html#a959541a134af115b0cc6a719f413aadd", null ],
     [ "save", "classHF.html#a14d49ae3aa4032c9b19abefb5d4f7cec", null ],
     [ "solve", "classHF.html#aa63cb58ed259911c29f8aefca00809bc", null ],
     [ "solveForFixedPotentials", "classHF.html#ad0c4b8b1d7bec2cb42cecd218715ec27", null ],
