@@ -37,14 +37,6 @@ class HF : public SCF {
     /// \brief Destructor.
     virtual ~HF();
 
-    /// \brief Get first order estimate of perturbative correction to orbital energies due to LS effect (central potential).
-    /// \return List of energy corrections per orbital
-    std::vector<ldouble> perturbativeLSEnergy();
-
-    /// \brief Get first order estimate of perturbative correction to orbital energies due to LS effect (central potential).
-    /// \return List of energy corrections per orbital
-    python::list perturbativeLSEnergyPython();
-
     /// \brief Get direct potential
     /// \param k Identifier of the orbital on which this potential is to be applied.
     /// \return Direct potential.

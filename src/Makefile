@@ -287,6 +287,33 @@ LinearSystemBuilder.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/LinearSystemBuilder.cxx.s
 .PHONY : LinearSystemBuilder.cxx.s
 
+NonCentralCorrection.o: NonCentralCorrection.cxx.o
+
+.PHONY : NonCentralCorrection.o
+
+# target to build an object file
+NonCentralCorrection.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/NonCentralCorrection.cxx.o
+.PHONY : NonCentralCorrection.cxx.o
+
+NonCentralCorrection.i: NonCentralCorrection.cxx.i
+
+.PHONY : NonCentralCorrection.i
+
+# target to preprocess a source file
+NonCentralCorrection.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/NonCentralCorrection.cxx.i
+.PHONY : NonCentralCorrection.cxx.i
+
+NonCentralCorrection.s: NonCentralCorrection.cxx.s
+
+.PHONY : NonCentralCorrection.s
+
+# target to generate assembly for a file
+NonCentralCorrection.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/NonCentralCorrection.cxx.s
+.PHONY : NonCentralCorrection.cxx.s
+
 Orbital.o: Orbital.cxx.o
 
 .PHONY : Orbital.o
@@ -340,6 +367,33 @@ OrbitalMapper.s: OrbitalMapper.cxx.s
 OrbitalMapper.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/OrbitalMapper.cxx.s
 .PHONY : OrbitalMapper.cxx.s
+
+PerturbativeCorrection.o: PerturbativeCorrection.cxx.o
+
+.PHONY : PerturbativeCorrection.o
+
+# target to build an object file
+PerturbativeCorrection.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/PerturbativeCorrection.cxx.o
+.PHONY : PerturbativeCorrection.cxx.o
+
+PerturbativeCorrection.i: PerturbativeCorrection.cxx.i
+
+.PHONY : PerturbativeCorrection.i
+
+# target to preprocess a source file
+PerturbativeCorrection.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/PerturbativeCorrection.cxx.i
+.PHONY : PerturbativeCorrection.cxx.i
+
+PerturbativeCorrection.s: PerturbativeCorrection.cxx.s
+
+.PHONY : PerturbativeCorrection.s
+
+# target to generate assembly for a file
+PerturbativeCorrection.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/PerturbativeCorrection.cxx.s
+.PHONY : PerturbativeCorrection.cxx.s
 
 SCF.o: SCF.cxx.o
 
@@ -476,12 +530,18 @@ help:
 	@echo "... LinearSystemBuilder.o"
 	@echo "... LinearSystemBuilder.i"
 	@echo "... LinearSystemBuilder.s"
+	@echo "... NonCentralCorrection.o"
+	@echo "... NonCentralCorrection.i"
+	@echo "... NonCentralCorrection.s"
 	@echo "... Orbital.o"
 	@echo "... Orbital.i"
 	@echo "... Orbital.s"
 	@echo "... OrbitalMapper.o"
 	@echo "... OrbitalMapper.i"
 	@echo "... OrbitalMapper.s"
+	@echo "... PerturbativeCorrection.o"
+	@echo "... PerturbativeCorrection.i"
+	@echo "... PerturbativeCorrection.s"
 	@echo "... SCF.o"
 	@echo "... SCF.i"
 	@echo "... SCF.s"

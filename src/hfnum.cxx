@@ -4,6 +4,7 @@
 #include "DFT.h"
 #include "Grid.h"
 #include "Orbital.h"
+#include "NonCentralCorrection.h"
 
 using namespace boost::python;
 
@@ -32,7 +33,6 @@ BOOST_PYTHON_MODULE(hfnum)
     .def("Z", &HF::Z)
     .def("setZ", &HF::setZ)
     .def("getR", &HF::getR)
-    .def("perturbativeLSEnergy", &HF::perturbativeLSEnergyPython)
     .def("getNucleusPotential", &HF::getNucleusPotentialPython)
     .def("getDirectPotential", &HF::getDirectPotentialPython)
     .def("getExchangePotential", &HF::getExchangePotentialPython)
@@ -47,6 +47,22 @@ BOOST_PYTHON_MODULE(hfnum)
     .def("getE0", &HF::getE0)
     .def("save", &HF::save)
     .def("load", &HF::load)
+  ;
+  class_<NonCentralCorrection>("NonCentralCorrection", init<>())
+    .def(init<>())
+    .def("Z", &NonCentralCorrection::Z)
+    .def("getR", &NonCentralCorrection::getR)
+    .def("correct", &NonCentralCorrection::correct)
+    .def("getNOrbitals", &NonCentralCorrection::getNOrbitals)
+    .def("getOrbital_n", &NonCentralCorrection::getOrbital_n)
+    .def("getOrbital_l", &NonCentralCorrection::getOrbital_l)
+    .def("getOrbital_m", &NonCentralCorrection::getOrbital_m)
+    .def("getOrbital_s", &NonCentralCorrection::getOrbital_s)
+    .def("getOrbital_E", &NonCentralCorrection::getOrbital_E)
+    .def("getOrbitalName", &NonCentralCorrection::getOrbitalName)
+    .def("getCentral", &NonCentralCorrection::getOrbitalCentralPython)
+    .def("getCorrectedE", &NonCentralCorrection::getCorrectedEPython)
+    .def("load", &NonCentralCorrection::load)
   ;
   class_<DFT>("DFT", init<>())
     .def(init<>())

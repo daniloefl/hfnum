@@ -35,10 +35,8 @@ h = hfnum.HF(fname)
 r = np.asarray(h.getR())
 print "r:", r
 
-pert_E = h.perturbativeLSEnergy()
-
 for n in range(0, h.getNOrbitals()):
-  print "Energy for orbital %10s (index=%2d, n=%2d, l=%2d, m=%2d, s=%2d): %10.6f Hartree = %15.8f eV, first order LS correction: %10.6f Hartree = %15.8f eV" % (h.getOrbitalName(n), n, h.getOrbital_n(n), h.getOrbital_l(n), h.getOrbital_m(n), h.getOrbital_s(n), h.getOrbital_E(n), h.getOrbital_E(n)*eV, pert_E[n], pert_E[n]*eV)
+  print "Energy for orbital %10s (index=%2d, n=%2d, l=%2d, m=%2d, s=%2d): %10.6f Hartree = %15.8f eV" % (h.getOrbitalName(n), n, h.getOrbital_n(n), h.getOrbital_l(n), h.getOrbital_m(n), h.getOrbital_s(n), h.getOrbital_E(n), h.getOrbital_E(n)*eV)
 
 E0 = h.getE0()
 print "Total ground energy: %10.6f Hartree = %15.8f eV" % (E0, E0*eV)

@@ -61,7 +61,6 @@ void StateReader::load(const std::string &fin) {
       ss >> a_d;
       _d[mode] = a_d;
     } else if (mode == "orbital") {
-      std::cout << "Making orbital" << std::endl;
       int io;
       ss >> io;
 
@@ -94,9 +93,7 @@ void StateReader::load(const std::string &fin) {
           (*_o[k])(ir, l, m) = read_value;
         }
       }
-      std::cout << "Made orbital" << std::endl;
     } else if (mode == "vd") {
-      std::cout << "Making Vd" << std::endl;
       int io;
       ss >> io;
 
@@ -113,9 +110,7 @@ void StateReader::load(const std::string &fin) {
         ss >> read_value;
         _vd[io][k] = read_value;
       }
-      std::cout << "Made Vd" << std::endl;
     } else if (mode == "vex") {
-      std::cout << "Making Vex" << std::endl;
       int io1, io2;
       ss >> io1 >> io2;
 
@@ -132,10 +127,8 @@ void StateReader::load(const std::string &fin) {
         ss >> read_value;
         _vex[std::pair<int, int>(io1, io2)][k] = read_value;
       }
-      std::cout << "Made Vex" << std::endl;
     }
   }
-  std::cout << "Make Grid" << std::endl;
 }
 
 std::vector<ldouble> &StateReader::getVector(const std::string &id) {
