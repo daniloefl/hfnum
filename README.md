@@ -116,6 +116,32 @@ h.load("myresult.txt")
 
 ```
 
+After the results have been produced (see examples in the `output` directory), one can also read the HF results and
+estimate corrections to the assumptions made using perturbation theory. The following shows how the non-central correction
+can be calculated from a previously saved Lithium atom calculation. In general, one can use `share/load_and_correct_result.py` for this.
+
+```
+import sys
+sys.path.append("../lib/")
+sys.path.append("lib/")
+
+import hfnum
+
+# read from this file
+fname = "output/results_Li.txt"
+ 
+h = hfnum.NonCentralCorrection()
+h.load(fname)
+h.correct()
+pert_E = h.getCorrectedE()
+
+eV = 27.21138602
+
+for n in range(0, h.getNOrbitals()):
+  print "Energy for orbital %10s: %10.6f Hartree = %15.8f eV, first order non-central correction: %10.6f Hartree = %15.8f eV" % (h.getOrbitalName(n), h.getOrbital_E(n), h.getOrbital_E(n)*eV, pert_E[n], pert_E[n]*eV)
+
+```
+
 # Installing packages necessary for compilation
 
 ```
@@ -154,5 +180,19 @@ For Beryllium, with:
 
 ```
 python share/test_Be.py
+```
+
+# Reading saved results
+
+Existing results in the `output` directory can be read using:
+
+```
+python share/load_result.py
+```
+
+In addition, the non-central potential correction can be calculated using perturbation theory with:
+
+```
+python share/load_and_correct_result.py
 ```
 
