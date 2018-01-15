@@ -26,6 +26,10 @@ var files =
     [ "LinearSystemBuilder.h", "LinearSystemBuilder_8h.html", [
       [ "LinearSystemBuilder", "classLinearSystemBuilder.html", "classLinearSystemBuilder" ]
     ] ],
+    [ "NonCentralCorrection.cxx", "NonCentralCorrection_8cxx.html", null ],
+    [ "NonCentralCorrection.h", "NonCentralCorrection_8h.html", [
+      [ "NonCentralCorrection", "classNonCentralCorrection.html", "classNonCentralCorrection" ]
+    ] ],
     [ "Orbital.cxx", "Orbital_8cxx.html", null ],
     [ "Orbital.h", "Orbital_8h.html", [
       [ "Orbital", "classOrbital.html", "classOrbital" ]
@@ -33,6 +37,10 @@ var files =
     [ "OrbitalMapper.cxx", "OrbitalMapper_8cxx.html", null ],
     [ "OrbitalMapper.h", "OrbitalMapper_8h.html", [
       [ "OrbitalMapper", "classOrbitalMapper.html", "classOrbitalMapper" ]
+    ] ],
+    [ "PerturbativeCorrection.cxx", "PerturbativeCorrection_8cxx.html", null ],
+    [ "PerturbativeCorrection.h", "PerturbativeCorrection_8h.html", [
+      [ "PerturbativeCorrection", "classPerturbativeCorrection.html", "classPerturbativeCorrection" ]
     ] ],
     [ "SCF.cxx", "SCF_8cxx.html", null ],
     [ "SCF.h", "SCF_8h.html", [

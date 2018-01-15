@@ -1,0 +1,27 @@
+var classPerturbativeCorrection =
+[
+    [ "PerturbativeCorrection", "classPerturbativeCorrection.html#aa35d422a206f0f922a28c2c96b0d7e91", null ],
+    [ "~PerturbativeCorrection", "classPerturbativeCorrection.html#adcda31f19cd153facd4c87720567b59a", null ],
+    [ "correct", "classPerturbativeCorrection.html#adb62c9285eb400bc00811053c1a708df", null ],
+    [ "getCoefficients", "classPerturbativeCorrection.html#a81ee69cb8a98374614c3b5efa1c4b5a2", null ],
+    [ "getCorrectedE", "classPerturbativeCorrection.html#af2ddd2e0848ecaf170a1640994b31ab1", null ],
+    [ "getCorrectedEPython", "classPerturbativeCorrection.html#a2d3e70f8f9caf0f27a2ee70ce5e338f8", null ],
+    [ "getNOrbitals", "classPerturbativeCorrection.html#a1151f29e9d40b29a04f0f4342ffbb29a", null ],
+    [ "getOrbital_E", "classPerturbativeCorrection.html#a21dfa3483aa8f58a3916e2a0fa1011b1", null ],
+    [ "getOrbital_l", "classPerturbativeCorrection.html#aea29b0caaee25d1e1537b42e3fca466a", null ],
+    [ "getOrbital_m", "classPerturbativeCorrection.html#a9370635552df80f9cdb8a17165f7a600", null ],
+    [ "getOrbital_n", "classPerturbativeCorrection.html#ac2ae33f04eacab682a1643f4271ee1a6", null ],
+    [ "getOrbital_s", "classPerturbativeCorrection.html#a3f730c22c3c35cc5b8765814b4070d8d", null ],
+    [ "getOrbitalCentral", "classPerturbativeCorrection.html#aaf21667d6fd5c228f170c09e30b6b699", null ],
+    [ "getOrbitalCentralPython", "classPerturbativeCorrection.html#a5df3510deaf3e22d0d1aa7cab09563e9", null ],
+    [ "getOrbitalName", "classPerturbativeCorrection.html#a767f04f4cafab99de09d51c9f1c85a3a", null ],
+    [ "getR", "classPerturbativeCorrection.html#ab09e776fe690da36441ebb3e52e260f6", null ],
+    [ "load", "classPerturbativeCorrection.html#a4c7f6e0963d280326ce1bb7d1879b4ed", null ],
+    [ "Z", "classPerturbativeCorrection.html#a7230de17e0025fd92a599a0efc1ec968", null ],
+    [ "_c", "classPerturbativeCorrection.html#a9495e820a37a1421c09a880f440d0c93", null ],
+    [ "_E", "classPerturbativeCorrection.html#afad4630b4b93c40ef6a81516973d8008", null ],
+    [ "_Ec", "classPerturbativeCorrection.html#a9ef0ab4c875817597b6358cc02aa9e5f", null ],
+    [ "_g", "classPerturbativeCorrection.html#af1bc762c37b4676dd78ffa0e991dd5c9", null ],
+    [ "_o", "classPerturbativeCorrection.html#a4a729d7e4c9d232ae1bf8896157c668c", null ],
+    [ "_Z", "classPerturbativeCorrection.html#a5eccc0f6593737aecf7a2a0ecad47601", null ]
+];

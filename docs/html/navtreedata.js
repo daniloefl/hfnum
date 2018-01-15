@@ -26,7 +26,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "DFT_8cxx.html",
-"classStateReader.html#a4d74b652f56a18a0c0e0b61ed2d04ad1"
+"classSCF.html#a35c1ab4ecadb162dd946eef831558afb"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

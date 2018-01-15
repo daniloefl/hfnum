@@ -7,8 +7,10 @@ var annotated_dup =
     [ "IterativeRenormalisedSolver", "classIterativeRenormalisedSolver.html", "classIterativeRenormalisedSolver" ],
     [ "LinearSystemBuilder", "classLinearSystemBuilder.html", "classLinearSystemBuilder" ],
     [ "lm", "classlm.html", "classlm" ],
+    [ "NonCentralCorrection", "classNonCentralCorrection.html", "classNonCentralCorrection" ],
     [ "Orbital", "classOrbital.html", "classOrbital" ],
     [ "OrbitalMapper", "classOrbitalMapper.html", "classOrbitalMapper" ],
+    [ "PerturbativeCorrection", "classPerturbativeCorrection.html", "classPerturbativeCorrection" ],
     [ "SCF", "classSCF.html", "classSCF" ],
     [ "StateReader", "classStateReader.html", "classStateReader" ]
 ];
