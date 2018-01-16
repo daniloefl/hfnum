@@ -4,6 +4,7 @@ var classPerturbativeCorrection =
     [ "~PerturbativeCorrection", "classPerturbativeCorrection.html#adcda31f19cd153facd4c87720567b59a", null ],
     [ "correct", "classPerturbativeCorrection.html#adb62c9285eb400bc00811053c1a708df", null ],
     [ "getCoefficients", "classPerturbativeCorrection.html#a81ee69cb8a98374614c3b5efa1c4b5a2", null ],
+    [ "getCoefficientsPython", "classPerturbativeCorrection.html#a2d8b4b66b6a53f8e5ca77d395d57cb91", null ],
     [ "getCorrectedE", "classPerturbativeCorrection.html#af2ddd2e0848ecaf170a1640994b31ab1", null ],
     [ "getCorrectedEPython", "classPerturbativeCorrection.html#a2d3e70f8f9caf0f27a2ee70ce5e338f8", null ],
     [ "getNOrbitals", "classPerturbativeCorrection.html#a1151f29e9d40b29a04f0f4342ffbb29a", null ],
