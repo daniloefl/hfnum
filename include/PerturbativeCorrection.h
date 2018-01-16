@@ -52,7 +52,7 @@ class PerturbativeCorrection {
 
     /// \brief Get matrix showing mixing of original eigen-states after correction
     /// \return Coefficients matrix
-    MatrixXld getCoefficients();
+    MatrixXcld getCoefficients();
 
     /// \brief Get matrix showing mixing of original eigen-states after correction
     /// \return Coefficients matrix
@@ -123,7 +123,7 @@ class PerturbativeCorrection {
     std::vector<ldouble> _Ec;
 
     /// Coefficients matrix
-    MatrixXld _c;
+    MatrixXcld _c;
     
 };
 

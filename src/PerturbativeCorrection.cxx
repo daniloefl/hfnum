@@ -34,7 +34,7 @@ boost::python::list PerturbativeCorrection::getR() {
   return _g->getR();
 }
 
-MatrixXld PerturbativeCorrection::getCoefficients() {
+MatrixXcld PerturbativeCorrection::getCoefficients() {
   return _c;
 }
 

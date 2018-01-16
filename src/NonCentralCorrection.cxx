@@ -44,7 +44,7 @@ void NonCentralCorrection::correct() {
   _c.resize(_o.size(), _o.size());
   _c.setZero();
 
-  MatrixXld cdeg(_o.size(), _o.size());
+  MatrixXcld cdeg(_o.size(), _o.size());
   cdeg.setZero();
 
   int idx = 0;
@@ -87,7 +87,7 @@ void NonCentralCorrection::correct() {
     lm tlm_d1(_o[k1]->initialL(), _o[k1]->initialM());
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       lm tlm_d2(_o[k2]->initialL(), _o[k2]->initialM());
-      if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m) {
+      if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() > 0) {
         for (int ir = 0; ir < _g->N(); ++ir) {
           ldouble r = (*_g)(ir);
           ldouble dr = 0;
@@ -228,18 +228,45 @@ void NonCentralCorrection::correct() {
       }
     }
 
+    for (int ka = 0; ka < deg_order; ++ka) {
+      for (int kb = 0; kb < deg_order; ++kb) {
+        if (ka == kb) cdeg(idx+ka, idx+kb) = 1.0;
+        else cdeg(idx+ka, idx+kb) = 0.0;
+      }
+    }
+    for (int k = 0; k < deg_order; ++k) {
+      _Ec[idx+k] = 0;
+    }
+
     MatrixXld SidH = S_deg.inverse()*dH_deg;
     EigenSolver<MatrixXld> solver(SidH);
     // translate indices to idx, idx+1, etc.
-    for (int k = 0; k < deg_order; ++k) {
-      _Ec[idx+k] = solver.eigenvalues()(k).real();
-    }
-    for (int ka = 0; ka < deg_order; ++ka) {
-      for (int kb = 0; kb < deg_order; ++kb) {
-        cdeg(idx+ka, idx+kb) = solver.eigenvectors()(ka, kb).real();
+    if (solver.info() == Eigen::Success) {
+      for (int k = 0; k < deg_order; ++k) {
+        _Ec[idx+k] = solver.eigenvalues()(k).real();
       }
+      for (int ka = 0; ka < deg_order; ++ka) {
+        for (int kb = 0; kb < deg_order; ++kb) {
+          cdeg(idx+ka, idx+kb) = solver.eigenvectors()(ka, kb);
+        }
+      }
+    } else {
+      std::cout << "Failed to calculate eigenvectors for this set of degenerate states. Assuming no mixing." << std::endl;
+      std::cout << "States: ";
+      for (auto &o : deg[deg_idx]) std::cout << " " << o;
+      std::cout << std::endl;
+      std::cout << "Eigenvalues = ";
+      for (int k = 0; k < deg_order; ++k) std::cout << " " << _Ec[idx+k];
+      std::cout << std::endl;
+      std::cout << "dH: " << std::endl;
+      std::cout << dH << std::endl;
+      std::cout << "S: " << std::endl;
+      std::cout << S << std::endl;
+      std::cout << "S^-1 H: " << std::endl;
+      std::cout << SidH << std::endl;
+      std::cout << "det(S^-1 H): " << std::endl;
+      std::cout << SidH.determinant() << std::endl;
     }
-
     idx += deg_order;
   }
 
@@ -256,6 +283,9 @@ void NonCentralCorrection::correct() {
     }
   }
   _c = _c*cdeg;
+  for (int i = 0; i < _o.size(); ++i) {
+    _c(i, i) += 1.0;
+  }
   //std::cout << _c << std::endl;
 }
 

@@ -7,6 +7,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <Eigen/IterativeLinearSolvers>
+#include <complex>
 
 using namespace Eigen;
 
@@ -28,12 +29,15 @@ class lm {
 
 /// Scalar type. Used to have a single long double type everywhere.
 typedef long double ldouble;
+typedef std::complex<ldouble> cldouble;
 
 /// Dynamic dense matrix
 typedef Matrix<ldouble, Dynamic, Dynamic> MatrixXld;
+typedef Matrix<cldouble, Dynamic, Dynamic> MatrixXcld;
 
 /// Dynamic dense column vector.
 typedef Matrix<ldouble, Dynamic, 1> VectorXld;
+typedef Matrix<cldouble, Dynamic, 1> VectorXcld;
 
 /// Types used for direct and exchange potential storage.
 typedef std::vector<ldouble> Vradial;
