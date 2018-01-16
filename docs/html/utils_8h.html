@@ -78,6 +78,7 @@ $(document).ready(function(){initNavTree('utils_8h.html','');});
 <code>#include &lt;Eigen/Dense&gt;</code><br />
 <code>#include &lt;Eigen/Sparse&gt;</code><br />
 <code>#include &lt;Eigen/IterativeLinearSolvers&gt;</code><br />
+<code>#include &lt;complex&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for utils.h:</div>
 <div class="dyncontent">
@@ -126,10 +127,16 @@ Classes</h2></td></tr>
 Typedefs</h2></td></tr>
 <tr class="memitem:a1566981a7d4a4b1da64e5330b25a690c"><td class="memItemLeft" align="right" valign="top">typedef long double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a></td></tr>
 <tr class="separator:a1566981a7d4a4b1da64e5330b25a690c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89bc9e5acd4e9c2efb74d42f9f318edd"><td class="memItemLeft" align="right" valign="top">typedef std::complex&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a89bc9e5acd4e9c2efb74d42f9f318edd">cldouble</a></td></tr>
+<tr class="separator:a89bc9e5acd4e9c2efb74d42f9f318edd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa30812bb256751833efb7733fe7ae528"><td class="memItemLeft" align="right" valign="top">typedef Matrix&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>, Dynamic, Dynamic &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a></td></tr>
 <tr class="separator:aa30812bb256751833efb7733fe7ae528"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6c8fd549a81b6bf69075d3cc2426ca4"><td class="memItemLeft" align="right" valign="top">typedef Matrix&lt; <a class="el" href="utils_8h.html#a89bc9e5acd4e9c2efb74d42f9f318edd">cldouble</a>, Dynamic, Dynamic &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#ad6c8fd549a81b6bf69075d3cc2426ca4">MatrixXcld</a></td></tr>
+<tr class="separator:ad6c8fd549a81b6bf69075d3cc2426ca4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c6892fef5f51fae1b62981a2b41f44c"><td class="memItemLeft" align="right" valign="top">typedef Matrix&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>, Dynamic, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a7c6892fef5f51fae1b62981a2b41f44c">VectorXld</a></td></tr>
 <tr class="separator:a7c6892fef5f51fae1b62981a2b41f44c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f304bf856c83e3a05f8eb146bae45e6"><td class="memItemLeft" align="right" valign="top">typedef Matrix&lt; <a class="el" href="utils_8h.html#a89bc9e5acd4e9c2efb74d42f9f318edd">cldouble</a>, Dynamic, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a2f304bf856c83e3a05f8eb146bae45e6">VectorXcld</a></td></tr>
+<tr class="separator:a2f304bf856c83e3a05f8eb146bae45e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b30371d5a83ba053bebcf58f4aa5d53"><td class="memItemLeft" align="right" valign="top">typedef std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53">Vradial</a></td></tr>
 <tr class="separator:a6b30371d5a83ba053bebcf58f4aa5d53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3b527b467f17f26f18115c21dc7075c"><td class="memItemLeft" align="right" valign="top">typedef SparseMatrix&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>, ColMajor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#ae3b527b467f17f26f18115c21dc7075c">SMatrixXld</a></td></tr>
@@ -147,6 +154,20 @@ Functions</h2></td></tr>
 <tr class="separator:ad8a5a66666d34aeddba5a86dee1d30aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
+<a class="anchor" id="a89bc9e5acd4e9c2efb74d42f9f318edd"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::complex&lt;<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&gt; <a class="el" href="utils_8h.html#a89bc9e5acd4e9c2efb74d42f9f318edd">cldouble</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="utils_8h_source.html#l00032">32</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a1566981a7d4a4b1da64e5330b25a690c"></a>
 <div class="memitem">
 <div class="memproto">
@@ -159,7 +180,21 @@ Functions</h2></td></tr>
 
 <p>Scalar type. Used to have a single long double type everywhere. </p>
 
-<p>Definition at line <a class="el" href="utils_8h_source.html#l00030">30</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
+<p>Definition at line <a class="el" href="utils_8h_source.html#l00031">31</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ad6c8fd549a81b6bf69075d3cc2426ca4"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef Matrix&lt;<a class="el" href="utils_8h.html#a89bc9e5acd4e9c2efb74d42f9f318edd">cldouble</a>, Dynamic, Dynamic&gt; <a class="el" href="utils_8h.html#ad6c8fd549a81b6bf69075d3cc2426ca4">MatrixXcld</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="utils_8h_source.html#l00036">36</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
 
 </div>
 </div>
@@ -175,7 +210,7 @@ Functions</h2></td></tr>
 
 <p>Dynamic dense matrix. </p>
 
-<p>Definition at line <a class="el" href="utils_8h_source.html#l00033">33</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
+<p>Definition at line <a class="el" href="utils_8h_source.html#l00035">35</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
 
 </div>
 </div>
@@ -191,7 +226,7 @@ Functions</h2></td></tr>
 
 <p>Sparse matrix. </p>
 
-<p>Definition at line <a class="el" href="utils_8h_source.html#l00042">42</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
+<p>Definition at line <a class="el" href="utils_8h_source.html#l00046">46</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
 
 </div>
 </div>
@@ -207,7 +242,7 @@ Functions</h2></td></tr>
 
 <p>Sparse vector. </p>
 
-<p>Definition at line <a class="el" href="utils_8h_source.html#l00045">45</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
+<p>Definition at line <a class="el" href="utils_8h_source.html#l00049">49</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
 
 </div>
 </div>
@@ -223,7 +258,21 @@ Functions</h2></td></tr>
 
 <p>Triplet used to fast insertion in sparse matrix. </p>
 
-<p>Definition at line <a class="el" href="utils_8h_source.html#l00048">48</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
+<p>Definition at line <a class="el" href="utils_8h_source.html#l00052">52</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a2f304bf856c83e3a05f8eb146bae45e6"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef Matrix&lt;<a class="el" href="utils_8h.html#a89bc9e5acd4e9c2efb74d42f9f318edd">cldouble</a>, Dynamic, 1&gt; <a class="el" href="utils_8h.html#a2f304bf856c83e3a05f8eb146bae45e6">VectorXcld</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="utils_8h_source.html#l00040">40</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
 
 </div>
 </div>
@@ -239,7 +288,7 @@ Functions</h2></td></tr>
 
 <p>Dynamic dense column vector. </p>
 
-<p>Definition at line <a class="el" href="utils_8h_source.html#l00036">36</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
+<p>Definition at line <a class="el" href="utils_8h_source.html#l00039">39</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
 
 </div>
 </div>
@@ -255,7 +304,7 @@ Functions</h2></td></tr>
 
 <p>Types used for direct and exchange potential storage. </p>
 
-<p>Definition at line <a class="el" href="utils_8h_source.html#l00039">39</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
+<p>Definition at line <a class="el" href="utils_8h_source.html#l00043">43</a> of file <a class="el" href="utils_8h_source.html">utils.h</a>.</p>
 
 </div>
 </div>

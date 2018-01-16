@@ -25,7 +25,7 @@ class StateReader {
     /// \param fin Input file name
     StateReader(const std::string &fin);
 
-    /// \briaf Destructor
+    /// \brief Destructor
     virtual ~StateReader();
 
     /// \brief Load an input file
