@@ -19,12 +19,14 @@ ldouble PerturbativeCorrection::Z() {
 }
 
 std::vector<ldouble> PerturbativeCorrection::getCorrectedE() {
-  return _Ec;
+  std::vector<ldouble> o;
+  for (int i = 0; i < _Ec.size(); ++i) o.push_back(_Ec[i]+_o[i]->E());
+  return o;
 }
 
 boost::python::list PerturbativeCorrection::getCorrectedEPython() {
   python::list l;
-  for (int i = 0; i < _Ec.size(); ++i) l.append(_Ec[i]);
+  for (int i = 0; i < _Ec.size(); ++i) l.append(_Ec[i]+_o[i]->E());
   return l;
 }
 
@@ -34,6 +36,19 @@ boost::python::list PerturbativeCorrection::getR() {
 
 MatrixXld PerturbativeCorrection::getCoefficients() {
   return _c;
+}
+
+boost::python::list PerturbativeCorrection::getCoefficientsPython() {
+  int N = _o.size();
+  python::list data;
+  for (int i = 0; i < N; ++i) {
+    python::list row;
+    for (int j = 0; j < N; ++j) {
+      row.append(_c(i, j));
+    }
+    data.append(row);
+  }
+  return data;
 }
 
 std::vector<ldouble> PerturbativeCorrection::getOrbitalCentral(int no) {

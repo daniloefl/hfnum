@@ -62,6 +62,7 @@ BOOST_PYTHON_MODULE(hfnum)
     .def("getOrbitalName", &NonCentralCorrection::getOrbitalName)
     .def("getCentral", &NonCentralCorrection::getOrbitalCentralPython)
     .def("getCorrectedE", &NonCentralCorrection::getCorrectedEPython)
+    .def("getCoefficients", &NonCentralCorrection::getCoefficientsPython)
     .def("load", &NonCentralCorrection::load)
   ;
   class_<DFT>("DFT", init<>())

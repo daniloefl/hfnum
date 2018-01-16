@@ -54,6 +54,10 @@ class PerturbativeCorrection {
     /// \return Coefficients matrix
     MatrixXld getCoefficients();
 
+    /// \brief Get matrix showing mixing of original eigen-states after correction
+    /// \return Coefficients matrix
+    boost::python::list getCoefficientsPython();
+
     /// \brief Get value of orbital component for orbital no, assuming a central potential.
     /// \param no Orbital identification.
     /// \return Vector of orbital values for each Grid point, in that spherical harmonic component.
