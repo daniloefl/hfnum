@@ -111,13 +111,13 @@ void NonCentralCorrection::correct() {
       // + vex
       for (int ko = 0; ko < _o.size(); ++ko) {
         lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
-        if (tlmo.l == tlm_d2.l && tlmo.m == tlm_d2.m && _o[ko]->spin()*_o[k2]->spin() > 0) {
-          for (int ir = 0; ir < _g->N(); ++ir) {
-            ldouble r = (*_g)(ir);
-            ldouble dr = 0;
-            if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
-            dH(k1, k2) += _vex[std::pair<int, int>(k1, ko)][ir]*_o[ko]->getNorm(ir, tlmo.l, tlmo.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 2)*dr;
-          }
+        if (tlmo.l != tlm_d2.l || tlmo.m != tlm_d2.m || _o[ko]->spin()*_o[k2]->spin() < 0) continue;
+        if (tlmo.l != tlm_d1.l || tlmo.m != tlm_d1.m || _o[ko]->spin()*_o[k1]->spin() < 0) continue;
+        for (int ir = 0; ir < _g->N(); ++ir) {
+          ldouble r = (*_g)(ir);
+          ldouble dr = 0;
+          if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
+          dH(k1, k2) += _vex[std::pair<int, int>(k1, ko)][ir]*_o[ko]->getNorm(ir, tlmo.l, tlmo.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 2)*dr;
         }
       }
 
@@ -172,13 +172,13 @@ void NonCentralCorrection::correct() {
       //
       // 1/|r1 - r2| = sum_l=0^inf sum_m=-l^+l 4 pi/(2*l+1) r_<^l/r_>^(l+1) Y_lm*(Omega1) Y_lm(Omega2)
       //
-      // Term = sum_ko int dr1 int dOmega1 int dr2 int dOmega2 sum_l=0^inf sum_m=-l^+l 4 pi/(2*l+1) [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_k2(r1) psi_ko(r1) psi_k2(r2) psi_k1(r2) Y*_k2(O1) Y_ko(Omega1) Y*_ko(O2) Y_k1(O2) Y_lm(O1) Y_lm*(O2) ]
+      // Term = sum_ko int dr1 int dOmega1 int dr2 int dOmega2 sum_l=0^inf sum_m=-l^+l 4 pi/(2*l+1) [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_k2(r1) psi_ko(r1) psi_ko(r2) psi_k1(r2) Y*_k2(O1) Y_ko(Omega1) Y*_ko(O2) Y_k1(O2) Y_lm(O1) Y_lm*(O2) ]
       //
       // int dO1 Y*_k2(O1) Y_ko(O1) Y_lm(O1) = (-1)^m_k2 int dO1 Y_(l_k2, -m_k2)(O1) Y_(l_ko, m_ko) Y_lm(O1) = (-1)^(m+m_k2) sqrt( (2l_k2+1) (2l_ko+1))/sqrt(4pi(2l+1)) CG(l_k2, l_ko, 0, 0, l, 0) CG(l_k2, l_ko, -m_k2, m_ko, l, -m)
       //
       // int dO2 Y*_ko(O2) Y_k1(O2) Y_lm*(O2) = (-1)^(m+m_ko) int dO2 Y_(l_ko, -m_ko)(O2) Y_(l_k, m_k)(O2) Y_(l,-m)(O2) = (-1)^(m_ko) sqrt((2l_ko+1) (2l_k1+1))/sqrt(4pi(2l+1)) CG(l_ko, l_k1, 0, 0, l, 0) CG(l_ko, l_k1, -m_ko, m_k1, l, m)
       //
-      // Term = sum_ko int dr1 int dr2 sum_l=0^inf sum_m=-l^+l (-1)^(m+m_k2+m_ko) [ (2l_k2+1) * (2l_ko+1) / (2l+1)^2 * CG(l_k2, l_ko, 0, 0, l, 0) * CG(l_k2, l_ko, -m_k2, m_ko, l, -m) * CG(l_ko, l_k1, 0, 0, l, 0) * CG(l_ko, l_k1, -m_ko, m_k1, l, m) ] * [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_k2(r1) psi_ko(r1) psi_k2(r2) psi_k1(r2) ]
+      // Term = sum_ko int dr1 int dr2 sum_l=0^inf sum_m=-l^+l (-1)^(m+m_k2+m_ko) [ (2l_k2+1) * (2l_ko+1) / (2l+1)^2 * CG(l_k2, l_ko, 0, 0, l, 0) * CG(l_k2, l_ko, -m_k2, m_ko, l, -m) * CG(l_ko, l_k1, 0, 0, l, 0) * CG(l_ko, l_k1, -m_ko, m_k1, l, m) ] * [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_k2(r1) psi_ko(r1) psi_ko(r2) psi_k1(r2) ]
       //
       for (int ko = 0; ko < _o.size(); ++ko) {
         lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
@@ -203,7 +203,7 @@ void NonCentralCorrection::correct() {
     
             for (int l = 0; l <= lmax; ++l) {
               for (int m = -l; m <= l; ++m) {
-                dH(k1, k2) += -std::pow(-1, m + tlm_d2.m + tlmo.m)*(2.0*tlm_d2.l+1.0)*(2.0*tlmo.l+1.0)/std::pow(2.0*l+1.0, 2)*CG(tlm_d2.l, tlmo.l, 0, 0, l, 0)*CG(tlmo.l, tlm_d1.l, 0, 0, l, 0)*CG(tlm_d2.l, tlmo.l, -tlm_d2.m, tlmo.m, l, -m)*CG(tlmo.l, tlm_d1.l, -tlmo.m, tlm_d1.m, l, m)*_o[k2]->getNorm(ir1, tlm_d2.l, tlm_d2.m, *_g)*_o[ko]->getNorm(ir1, tlmo.l, tlmo.m, *_g)*_o[k2]->getNorm(ir2, tlm_d2.l, tlm_d2.m, *_g)*_o[k1]->getNorm(ir2, tlm_d1.l, tlm_d1.m, *_g)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
+                dH(k1, k2) += -std::pow(-1, m + tlm_d2.m + tlmo.m)*(2.0*tlm_d2.l+1.0)*(2.0*tlmo.l+1.0)/std::pow(2.0*l+1.0, 2)*CG(tlm_d2.l, tlmo.l, 0, 0, l, 0)*CG(tlmo.l, tlm_d1.l, 0, 0, l, 0)*CG(tlm_d2.l, tlmo.l, -tlm_d2.m, tlmo.m, l, -m)*CG(tlmo.l, tlm_d1.l, -tlmo.m, tlm_d1.m, l, m)*_o[k2]->getNorm(ir1, tlm_d2.l, tlm_d2.m, *_g)*_o[ko]->getNorm(ir1, tlmo.l, tlmo.m, *_g)*_o[ko]->getNorm(ir2, tlm_d2.l, tlm_d2.m, *_g)*_o[k1]->getNorm(ir2, tlm_d1.l, tlm_d1.m, *_g)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
               }
             }
           }
