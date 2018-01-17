@@ -203,7 +203,7 @@ void NonCentralCorrection::correct() {
     
             for (int l = 0; l <= lmax; ++l) {
               for (int m = -l; m <= l; ++m) {
-                dH(k1, k2) += -std::pow(-1, m + tlm_d2.m + tlmo.m)*(2.0*tlm_d2.l+1.0)*(2.0*tlmo.l+1.0)/std::pow(2.0*l+1.0, 2)*CG(tlm_d2.l, tlmo.l, 0, 0, l, 0)*CG(tlmo.l, tlm_d1.l, 0, 0, l, 0)*CG(tlm_d2.l, tlmo.l, -tlm_d2.m, tlmo.m, l, -m)*CG(tlmo.l, tlm_d1.l, -tlmo.m, tlm_d1.m, l, m)*_o[k2]->getNorm(ir1, tlm_d2.l, tlm_d2.m, *_g)*_o[ko]->getNorm(ir1, tlmo.l, tlmo.m, *_g)*_o[ko]->getNorm(ir2, tlm_d2.l, tlm_d2.m, *_g)*_o[k1]->getNorm(ir2, tlm_d1.l, tlm_d1.m, *_g)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
+                dH(k1, k2) += -std::pow(-1, m + tlm_d2.m + tlmo.m)*(2.0*tlm_d2.l+1.0)*(2.0*tlmo.l+1.0)/std::pow(2.0*l+1.0, 2)*CG(tlm_d2.l, tlmo.l, 0, 0, l, 0)*CG(tlmo.l, tlm_d1.l, 0, 0, l, 0)*CG(tlm_d2.l, tlmo.l, -tlm_d2.m, tlmo.m, l, -m)*CG(tlmo.l, tlm_d1.l, -tlmo.m, tlm_d1.m, l, m)*_o[k2]->getNorm(ir1, tlm_d2.l, tlm_d2.m, *_g)*_o[ko]->getNorm(ir1, tlmo.l, tlmo.m, *_g)*_o[ko]->getNorm(ir2, tlmo.l, tlmo.m, *_g)*_o[k1]->getNorm(ir2, tlm_d1.l, tlm_d1.m, *_g)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
               }
             }
           }
