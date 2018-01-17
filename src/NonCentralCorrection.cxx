@@ -132,28 +132,30 @@ void NonCentralCorrection::correct() {
       // int dO2 Y*_ko(O2) Y_ko(O2) Y_lm(O2) = (-1)^(m_ko) int dO2 Y_(l_ko, -m_ko)(O2) Y_(l_ko, m_ko)(O2) Y_(l,m)(O1) = (-1)^(m+m_ko) (2l_ko+1)/sqrt(4pi(2l+1)) CG(l_ko, l_ko, 0, 0, l, 0) CG(l_ko, l_ko, -m_ko, m_ko, l, -m)
       // Term = sum_ko int dr1 int dr2 sum_l=0^inf sum_m=-l^+l [ sqrt((2*l_a+1)*(2l_b+1)) * (2*l_ko+1) / (2*l+1)^2 (-1)^(m+m_a+m_ko) CG(l_a, l_b, 0, 0, l, 0) * CG(l_ko, l_ko, 0, 0, l, 0) * CG(l_a, l_b, -m_a, m_b, l, m) * CG(l_ko, l_ko, -m_ko, m_ko, l, -m) ] * [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_a(r1) psi_b(r1) psi_ko(r2)^2 ]
       //
-      for (int ko = 0; ko < _o.size(); ++ko) {
-        lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          ldouble r1 = (*_g)(ir1);
-          ldouble dr1 = 0;
-          if (ir1 < _g->N()-1) dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+      if (_o[k1]->spin()*_o[k2]->spin() > 0) {
+        for (int ko = 0; ko < _o.size(); ++ko) {
+          lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble dr1 = 0;
+            if (ir1 < _g->N()-1) dr1 = (*_g)(ir1+1) - (*_g)(ir1);
     
-          for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
-            ldouble r2 = (*_g)(ir2);
-            ldouble dr2 = 0;
-            if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
+            for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
+              ldouble r2 = (*_g)(ir2);
+              ldouble dr2 = 0;
+              if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
     
-            ldouble rsmall = r1;
-            ldouble rlarge = r2;
-            if (r2 < r1) {
-              rsmall = r2;
-              rlarge = r1;
-            }
+              ldouble rsmall = r1;
+              ldouble rlarge = r2;
+              if (r2 < r1) {
+                rsmall = r2;
+                rlarge = r1;
+              }
     
-            for (int l = 0; l <= lmax; ++l) {
-              for (int m = -l; m <= l; ++m) {
-                dH(k1, k2) += std::pow(-1, m+tlm_d1.m+tlmo.m)*(2.0*tlmo.l+1.0)*std::sqrt((2.0*tlm_d1.l+1.0)*(2.0*tlm_d2.l+1.0))/std::pow(2.0*l+1.0, 2)*CG(tlm_d1.l, tlm_d2.l, 0, 0, l, 0)*CG(tlmo.l, tlmo.l, 0, 0, l, 0)*CG(tlm_d1.l, tlm_d2.l, -tlm_d1.m, tlm_d2.m, l, m)*CG(tlmo.l, tlmo.l, -tlmo.m, tlmo.m, l, -m)*_o[k1]->getNorm(ir1, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir1, tlm_d2.l, tlm_d2.m, *_g)*std::pow(_o[ko]->getNorm(ir2, tlmo.l, tlmo.m, *_g), 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
+              for (int l = 0; l <= lmax; ++l) {
+                for (int m = -l; m <= l; ++m) {
+                  dH(k1, k2) += std::pow(-1, m+tlm_d1.m+tlmo.m)*(2.0*tlmo.l+1.0)*std::sqrt((2.0*tlm_d1.l+1.0)*(2.0*tlm_d2.l+1.0))/std::pow(2.0*l+1.0, 2)*CG(tlm_d1.l, tlm_d2.l, 0, 0, l, 0)*CG(tlmo.l, tlmo.l, 0, 0, l, 0)*CG(tlm_d1.l, tlm_d2.l, -tlm_d1.m, tlm_d2.m, l, m)*CG(tlmo.l, tlmo.l, -tlmo.m, tlmo.m, l, -m)*_o[k1]->getNorm(ir1, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir1, tlm_d2.l, tlm_d2.m, *_g)*std::pow(_o[ko]->getNorm(ir2, tlmo.l, tlmo.m, *_g), 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
+                }
               }
             }
           }
@@ -181,6 +183,7 @@ void NonCentralCorrection::correct() {
       for (int ko = 0; ko < _o.size(); ++ko) {
         lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
         if (_o[ko]->spin()*_o[k1]->spin() < 0) continue; // spin component dot product
+        if (_o[k2]->spin()*_o[ko]->spin() < 0) continue; // spin component dot product
         for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
           ldouble r1 = (*_g)(ir1);
           ldouble dr1 = 0;

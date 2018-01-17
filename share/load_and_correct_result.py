@@ -50,6 +50,10 @@ print coeff
 #E0 = h.getE0()
 #print "Total ground energy: %10.6f Hartree = %15.8f eV" % (E0, E0*eV)
 
+m = next(i for i,v in enumerate(r) if v >= 10)
+
+style = ['r-', 'b-', 'm-', 'c-', 'k-', 'g-']
+
 # show orbitals
 f = plt.figure()
 i = 0
