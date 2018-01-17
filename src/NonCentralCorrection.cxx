@@ -99,21 +99,25 @@ void NonCentralCorrection::correct() {
       // now calculate dH, where the effect of all degenerate states is considered
       // the current inaccurate result follows
       // - vd
-      for (int ir = 0; ir < _g->N(); ++ir) {
-        ldouble r = (*_g)(ir);
-        ldouble dr = 0;
-        if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
-        dH(k1, k2) += -_vd[k1][ir]*_o[k1]->getNorm(ir, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 2)*dr;
+      if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() > 0) {
+        for (int ir = 0; ir < _g->N(); ++ir) {
+          ldouble r = (*_g)(ir);
+          ldouble dr = 0;
+          if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
+          dH(k1, k2) += -_vd[k1][ir]*_o[k1]->getNorm(ir, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 2)*dr;
+        }
       }
 
       // + vex
       for (int ko = 0; ko < _o.size(); ++ko) {
         lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
-        for (int ir = 0; ir < _g->N(); ++ir) {
-          ldouble r = (*_g)(ir);
-          ldouble dr = 0;
-          if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
-          dH(k1, k2) += _vex[std::pair<int, int>(k1, ko)][ir]*_o[ko]->getNorm(ir, tlmo.l, tlmo.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 2)*dr;
+        if (tlmo.l == tlm_d2.l && tlmo.m == tlm_d2.m && _o[ko]->spin()*_o[k2]->spin() > 0) {
+          for (int ir = 0; ir < _g->N(); ++ir) {
+            ldouble r = (*_g)(ir);
+            ldouble dr = 0;
+            if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
+            dH(k1, k2) += _vex[std::pair<int, int>(k1, ko)][ir]*_o[ko]->getNorm(ir, tlmo.l, tlmo.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 2)*dr;
+          }
         }
       }
 
@@ -239,9 +243,25 @@ void NonCentralCorrection::correct() {
     }
 
     MatrixXld SidH = S_deg.inverse()*dH_deg;
+
+    std::cout << "About to calculate eigenvalues for the following states: ";
+    std::cout << "States: ";
+    for (auto &o : deg[deg_idx]) std::cout << " " << o;
+    std::cout << std::endl;
+    std::cout << "dH: " << std::endl;
+    std::cout << dH << std::endl;
+    std::cout << "S: " << std::endl;
+    std::cout << S << std::endl;
+    std::cout << "S^-1 H: " << std::endl;
+    std::cout << SidH << std::endl;
+    std::cout << "det(S^-1 H): " << std::endl;
+    std::cout << SidH.determinant() << std::endl;
+
     EigenSolver<MatrixXld> solver(SidH);
     // translate indices to idx, idx+1, etc.
     if (solver.info() == Eigen::Success) {
+      std::cout << "Found eigenvalues for idx = " << idx << " "<< solver.eigenvalues() << std::endl;
+      std::cout << "Eigenvectors = " << solver.eigenvectors() << std::endl;
       for (int k = 0; k < deg_order; ++k) {
         _Ec[idx+k] = solver.eigenvalues()(k).real();
       }
