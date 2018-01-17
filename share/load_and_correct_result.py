@@ -51,6 +51,9 @@ print coeff
 #print "Total ground energy: %10.6f Hartree = %15.8f eV" % (E0, E0*eV)
 
 m = next(i for i,v in enumerate(r) if v >= 10)
+o = []
+for n in range(0, h.getNOrbitals()):
+  o.append(np.asarray(h.getCentral(n)))
 
 style = ['r-', 'b-', 'm-', 'c-', 'k-', 'g-']
 
