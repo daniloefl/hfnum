@@ -80,7 +80,7 @@ void NonCentralCorrection::correct() {
   MatrixXld S(_o.size(), _o.size());
   S.setZero();
 
-  int lmax = 1; // approximated here
+  int lmax = 2; // approximated here
   // define delta V = (full Vd - full Vex) - (Vd - Vex)
   // this is defined separately for each orbital equation: we want the error in the eigenenergies
   for (int k1 = 0; k1 < _o.size(); ++k1) {
