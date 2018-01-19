@@ -80,7 +80,7 @@ void NonCentralCorrection::correct() {
   MatrixXld S(_o.size(), _o.size());
   S.setZero();
 
-  int lmax = 2; // approximated here
+  int lmax = 1; // approximated here
   // define delta V = (full Vd - full Vex) - (Vd - Vex)
   // this is defined separately for each orbital equation: we want the error in the eigenenergies
   for (int k1 = 0; k1 < _o.size(); ++k1) {
@@ -98,6 +98,10 @@ void NonCentralCorrection::correct() {
 
       // now calculate dH, where the effect of all degenerate states is considered
       // the current inaccurate result follows
+      // remember, in the central approximation: <r,s|vd(k1)|u_k1(r),l1,m1,s1> = vd(k1) * u_k1(r) Y_l1,m1(phi, theta) * delta(s == s1)
+      // the angular and spin parts are the ones of k1, which is the orbital equation on which this operator acts
+      // this is obviously wrong, but it is part of the assumption in the central approximation in HF.cxx
+      // here we calculate <u_k2,l2,m2,s2|vd(k1)|u_k1,l1,m1,s1> = int_r u_k2(r) Vex(k1,ko)(r) u_k1(r) r^2 dr delta(l1 == l2, m1 == m2, s1 == s2)
       // - vd
       if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() > 0) {
         for (int ir = 0; ir < _g->N(); ++ir) {
@@ -109,15 +113,23 @@ void NonCentralCorrection::correct() {
       }
 
       // + vex
-      for (int ko = 0; ko < _o.size(); ++ko) {
-        lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
-        if (tlmo.l != tlm_d2.l || tlmo.m != tlm_d2.m || _o[ko]->spin()*_o[k2]->spin() < 0) continue;
-        if (tlmo.l != tlm_d1.l || tlmo.m != tlm_d1.m || _o[ko]->spin()*_o[k1]->spin() < 0) continue;
-        for (int ir = 0; ir < _g->N(); ++ir) {
-          ldouble r = (*_g)(ir);
-          ldouble dr = 0;
-          if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
-          dH(k1, k2) += _vex[std::pair<int, int>(k1, ko)][ir]*_o[ko]->getNorm(ir, tlmo.l, tlmo.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 2)*dr;
+      // remember, in the central approximation: <r,spin|vex(k1,ko)|u_k1(r),l,m,s> = vex(k1,ko) * u_ko(r) Y_k1(phi, theta) * delta(spin == spin_k1)
+      // the angular and spin parts are the ones of k1, which is the orbital equation on which this operator acts
+      // this is obviously wrong, but it is part of the assumption in the central approximation in HF.cxx
+      // to correct for it the vex calculation in the end of this function treats the angular component correctly, but to calculate the correction, the incorrect
+      // component needs to be calculated here and subtracted later, so that dH = variation in the Hamiltonian is consistent
+      // here we calculate <u_k2,l2,m2,s2|vex(k1,ko)|u_k1,l1,m1,s1> = sum_ko int_r u_k2(r) Vex(k1,ko)(r) u_ko(r) r^2 dr delta(l1 == l2, m1 == m2, s1 == s2)
+      // as we know vex(k1,ko)(r) == 0 if s1 != so, so we can use this simplification to speed things up
+      if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k2]->spin()*_o[k1]->spin() > 0) {
+        for (int ko = 0; ko < _o.size(); ++ko) {
+          lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
+          if (_o[ko]->spin()*_o[k1]->spin() < 0) continue; // vex == 0 here
+          for (int ir = 0; ir < _g->N(); ++ir) {
+            ldouble r = (*_g)(ir);
+            ldouble dr = 0;
+            if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
+            dH(k1, k2) += _vex[std::pair<int, int>(k1, ko)][ir]*_o[ko]->getNorm(ir, tlmo.l, tlmo.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 2)*dr;
+          }
         }
       }
 
@@ -127,8 +139,8 @@ void NonCentralCorrection::correct() {
       // dH(a,b) term will be: Term = sum_ko [int dr1 dOmega1 r1^2 psi_a(r1) psi_b(r1) Y*_a(O1) Y_b(O1) { int dr2 dOmega2 r2^2 psi_ko(r2)^2 Y_ko(Omega2)^2 1/|r1 - r2| } ]
       // Term = sum_ko int dr1 int dOmega1 int dr2 int dOmega2 [ r1^2 psi_a(r1) psi_b(r1) Y*_a(O1) Y_b(O1) r2^2 psi_ko(r2)^2 Y_ko(Omega2)^2 1/|r1 - r2| ]
       // 1/|r1 - r2| = sum_l=0^inf sum_m=-l^+l 4 pi/(2*l+1) r_<^l/r_>^(l+1) Y_lm*(Omega1) Y_lm(Omega2)
-      // Term = sum_ko int dr1 int dOmega1 int dr2 int dOmega2 sum_l=0^inf sum_m=-l^+l 4 pi/(2*l+1) [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_a(r1) psi_b(r1) psi_ko(r2)^2 Y*_a(O1) Y_b(O1) Y_ko(O2)^2 Y_lm(O1) Y_lm*(O2) ]
-      // int dO1 Y*_a(O1) Y_b(O1) Y_lm*(O1) = (-1)^(m+m_a) int dO1 Y_(l_a, -m_a)(O1) Y_(l_b, m_b)(O1) Y_(l,-m)(O1) = (-1)^(m_ka sqrt((2l_a+1)*(2l_b+1))/sqrt(4pi(2l+1)) CG(l_a, l_b, 0, 0, l, 0) CG(l_a, l_b, -m_a, m_b, l, m)
+      // Term = sum_ko int dr1 int dOmega1 int dr2 int dOmega2 sum_l=0^inf sum_m=-l^+l 4 pi/(2*l+1) [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_a(r1) psi_b(r1) psi_ko(r2)^2 Y*_a(O1) Y_b(O1) |Y_ko(O2)|^2 Y_lm(O1) Y_lm*(O2) ]
+      // int dO1 Y*_a(O1) Y_b(O1) Y_lm*(O1) = (-1)^(m+m_a) int dO1 Y_(l_a, -m_a)(O1) Y_(l_b, m_b)(O1) Y_(l,-m)(O1) = (-1)^(m_ka) sqrt((2l_a+1)*(2l_b+1))/sqrt(4pi(2l+1)) CG(l_a, l_b, 0, 0, l, 0) CG(l_a, l_b, -m_a, m_b, l, m)
       // int dO2 Y*_ko(O2) Y_ko(O2) Y_lm(O2) = (-1)^(m_ko) int dO2 Y_(l_ko, -m_ko)(O2) Y_(l_ko, m_ko)(O2) Y_(l,m)(O1) = (-1)^(m+m_ko) (2l_ko+1)/sqrt(4pi(2l+1)) CG(l_ko, l_ko, 0, 0, l, 0) CG(l_ko, l_ko, -m_ko, m_ko, l, -m)
       // Term = sum_ko int dr1 int dr2 sum_l=0^inf sum_m=-l^+l [ sqrt((2*l_a+1)*(2l_b+1)) * (2*l_ko+1) / (2*l+1)^2 (-1)^(m+m_a+m_ko) CG(l_a, l_b, 0, 0, l, 0) * CG(l_ko, l_ko, 0, 0, l, 0) * CG(l_a, l_b, -m_a, m_b, l, m) * CG(l_ko, l_ko, -m_ko, m_ko, l, -m) ] * [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_a(r1) psi_b(r1) psi_ko(r2)^2 ]
       //
@@ -154,7 +166,7 @@ void NonCentralCorrection::correct() {
     
               for (int l = 0; l <= lmax; ++l) {
                 for (int m = -l; m <= l; ++m) {
-                  dH(k1, k2) += std::pow(-1, m+tlm_d1.m+tlmo.m)*(2.0*tlmo.l+1.0)*std::sqrt((2.0*tlm_d1.l+1.0)*(2.0*tlm_d2.l+1.0))/std::pow(2.0*l+1.0, 2)*CG(tlm_d1.l, tlm_d2.l, 0, 0, l, 0)*CG(tlmo.l, tlmo.l, 0, 0, l, 0)*CG(tlm_d1.l, tlm_d2.l, -tlm_d1.m, tlm_d2.m, l, m)*CG(tlmo.l, tlmo.l, -tlmo.m, tlmo.m, l, -m)*_o[k1]->getNorm(ir1, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir1, tlm_d2.l, tlm_d2.m, *_g)*std::pow(_o[ko]->getNorm(ir2, tlmo.l, tlmo.m, *_g), 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
+                  dH(k1, k2) += std::pow(-1, m+tlm_d1.m+tlmo.m)*(2.0*tlmo.l+1.0)*std::sqrt((2.0*tlm_d1.l+1.0)*(2.0*tlm_d2.l+1.0))*std::pow(2.0*l+1.0, -2)*CG(tlm_d1.l, tlm_d2.l, 0, 0, l, 0)*CG(tlmo.l, tlmo.l, 0, 0, l, 0)*CG(tlm_d1.l, tlm_d2.l, -tlm_d1.m, tlm_d2.m, l, m)*CG(tlmo.l, tlmo.l, -tlmo.m, tlmo.m, l, -m)*_o[k1]->getNorm(ir1, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir1, tlm_d2.l, tlm_d2.m, *_g)*std::pow(_o[ko]->getNorm(ir2, tlmo.l, tlmo.m, *_g), 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
                 }
               }
             }
@@ -203,7 +215,7 @@ void NonCentralCorrection::correct() {
     
             for (int l = 0; l <= lmax; ++l) {
               for (int m = -l; m <= l; ++m) {
-                dH(k1, k2) += -std::pow(-1, m + tlm_d2.m + tlmo.m)*(2.0*tlm_d2.l+1.0)*(2.0*tlmo.l+1.0)/std::pow(2.0*l+1.0, 2)*CG(tlm_d2.l, tlmo.l, 0, 0, l, 0)*CG(tlmo.l, tlm_d1.l, 0, 0, l, 0)*CG(tlm_d2.l, tlmo.l, -tlm_d2.m, tlmo.m, l, -m)*CG(tlmo.l, tlm_d1.l, -tlmo.m, tlm_d1.m, l, m)*_o[k2]->getNorm(ir1, tlm_d2.l, tlm_d2.m, *_g)*_o[ko]->getNorm(ir1, tlmo.l, tlmo.m, *_g)*_o[ko]->getNorm(ir2, tlmo.l, tlmo.m, *_g)*_o[k1]->getNorm(ir2, tlm_d1.l, tlm_d1.m, *_g)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
+                dH(k1, k2) += -std::pow(-1, m + tlm_d2.m + tlmo.m)*(2.0*tlm_d2.l+1.0)*(2.0*tlmo.l+1.0)*std::pow(2.0*l+1.0, -2)*CG(tlm_d2.l, tlmo.l, 0, 0, l, 0)*CG(tlmo.l, tlm_d1.l, 0, 0, l, 0)*CG(tlm_d2.l, tlmo.l, -tlm_d2.m, tlmo.m, l, -m)*CG(tlmo.l, tlm_d1.l, -tlmo.m, tlm_d1.m, l, m)*_o[k2]->getNorm(ir1, tlm_d2.l, tlm_d2.m, *_g)*_o[ko]->getNorm(ir1, tlmo.l, tlmo.m, *_g)*_o[ko]->getNorm(ir2, tlmo.l, tlmo.m, *_g)*_o[k1]->getNorm(ir2, tlm_d1.l, tlm_d1.m, *_g)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
               }
             }
           }
