@@ -5,6 +5,7 @@
 #include "Grid.h"
 #include "Orbital.h"
 #include "NonCentralCorrection.h"
+#include "SpinOrbitCorrection.h"
 
 using namespace boost::python;
 
@@ -64,6 +65,23 @@ BOOST_PYTHON_MODULE(hfnum)
     .def("getCorrectedE", &NonCentralCorrection::getCorrectedEPython)
     .def("getCoefficients", &NonCentralCorrection::getCoefficientsPython)
     .def("load", &NonCentralCorrection::load)
+  ;
+  class_<SpinOrbitCorrection>("SpinOrbitCorrection", init<>())
+    .def(init<>())
+    .def("Z", &SpinOrbitCorrection::Z)
+    .def("getR", &SpinOrbitCorrection::getR)
+    .def("correct", &SpinOrbitCorrection::correct)
+    .def("getNOrbitals", &SpinOrbitCorrection::getNOrbitals)
+    .def("getOrbital_n", &SpinOrbitCorrection::getOrbital_n)
+    .def("getOrbital_l", &SpinOrbitCorrection::getOrbital_l)
+    .def("getOrbital_m", &SpinOrbitCorrection::getOrbital_m)
+    .def("getOrbital_s", &SpinOrbitCorrection::getOrbital_s)
+    .def("getOrbital_E", &SpinOrbitCorrection::getOrbital_E)
+    .def("getOrbitalName", &SpinOrbitCorrection::getOrbitalName)
+    .def("getCentral", &SpinOrbitCorrection::getOrbitalCentralPython)
+    .def("getCorrectedE", &SpinOrbitCorrection::getCorrectedEPython)
+    .def("getCoefficients", &SpinOrbitCorrection::getCoefficientsPython)
+    .def("load", &SpinOrbitCorrection::load)
   ;
   class_<DFT>("DFT", init<>())
     .def(init<>())

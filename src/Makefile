@@ -422,6 +422,33 @@ SCF.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/SCF.cxx.s
 .PHONY : SCF.cxx.s
 
+SpinOrbitCorrection.o: SpinOrbitCorrection.cxx.o
+
+.PHONY : SpinOrbitCorrection.o
+
+# target to build an object file
+SpinOrbitCorrection.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/SpinOrbitCorrection.cxx.o
+.PHONY : SpinOrbitCorrection.cxx.o
+
+SpinOrbitCorrection.i: SpinOrbitCorrection.cxx.i
+
+.PHONY : SpinOrbitCorrection.i
+
+# target to preprocess a source file
+SpinOrbitCorrection.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/SpinOrbitCorrection.cxx.i
+.PHONY : SpinOrbitCorrection.cxx.i
+
+SpinOrbitCorrection.s: SpinOrbitCorrection.cxx.s
+
+.PHONY : SpinOrbitCorrection.s
+
+# target to generate assembly for a file
+SpinOrbitCorrection.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/SpinOrbitCorrection.cxx.s
+.PHONY : SpinOrbitCorrection.cxx.s
+
 StateReader.o: StateReader.cxx.o
 
 .PHONY : StateReader.o
@@ -545,6 +572,9 @@ help:
 	@echo "... SCF.o"
 	@echo "... SCF.i"
 	@echo "... SCF.s"
+	@echo "... SpinOrbitCorrection.o"
+	@echo "... SpinOrbitCorrection.i"
+	@echo "... SpinOrbitCorrection.s"
 	@echo "... StateReader.o"
 	@echo "... StateReader.i"
 	@echo "... StateReader.s"
