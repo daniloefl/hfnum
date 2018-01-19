@@ -1,14 +1,15 @@
 <map id="hfnum.cxx" name="hfnum.cxx">
-<area shape="rect" id="node4" href="$HF_8h.html" title="HF.h" alt="" coords="1580,80,1631,107"/>
-<area shape="rect" id="node5" href="$Grid_8h.html" title="Grid.h" alt="" coords="1786,379,1843,405"/>
-<area shape="rect" id="node10" href="$Orbital_8h.html" title="Orbital.h" alt="" coords="1561,379,1631,405"/>
-<area shape="rect" id="node24" href="$DFT_8h.html" title="DFT.h" alt="" coords="1272,80,1331,107"/>
-<area shape="rect" id="node25" href="$NonCentralCorrection_8h.html" title="NonCentralCorrection.h" alt="" coords="254,229,413,256"/>
-<area shape="rect" id="node13" href="$utils_8h.html" title="utils.h" alt="" coords="593,453,650,480"/>
-<area shape="rect" id="node19" href="$SCF_8h.html" title="SCF.h" alt="" coords="1491,155,1551,181"/>
-<area shape="rect" id="node20" href="$LinearSystemBuilder_8h.html" title="LinearSystemBuilder.h" alt="" coords="1275,229,1429,256"/>
-<area shape="rect" id="node21" href="$OrbitalMapper_8h.html" title="OrbitalMapper.h" alt="" coords="1757,304,1872,331"/>
-<area shape="rect" id="node22" href="$IterativeRenormalisedSolver_8h.html" title="IterativeRenormalisedSolver.h" alt="" coords="1053,229,1251,256"/>
-<area shape="rect" id="node23" href="$IterativeGordonSolver_8h.html" title="IterativeGordonSolver.h" alt="" coords="1555,229,1714,256"/>
-<area shape="rect" id="node26" href="$PerturbativeCorrection_8h.html" title="PerturbativeCorrection.h" alt="" coords="1115,304,1277,331"/>
+<area shape="rect" id="node4" href="$HF_8h.html" title="HF.h" alt="" coords="1055,80,1105,107"/>
+<area shape="rect" id="node5" href="$Grid_8h.html" title="Grid.h" alt="" coords="807,379,865,405"/>
+<area shape="rect" id="node10" href="$Orbital_8h.html" title="Orbital.h" alt="" coords="1077,379,1147,405"/>
+<area shape="rect" id="node24" href="$DFT_8h.html" title="DFT.h" alt="" coords="1365,80,1424,107"/>
+<area shape="rect" id="node25" href="$NonCentralCorrection_8h.html" title="NonCentralCorrection.h" alt="" coords="2378,229,2537,256"/>
+<area shape="rect" id="node28" href="$SpinOrbitCorrection_8h.html" title="SpinOrbitCorrection.h" alt="" coords="2140,229,2287,256"/>
+<area shape="rect" id="node13" href="$utils_8h.html" title="utils.h" alt="" coords="1906,453,1963,480"/>
+<area shape="rect" id="node19" href="$SCF_8h.html" title="SCF.h" alt="" coords="1003,155,1063,181"/>
+<area shape="rect" id="node20" href="$LinearSystemBuilder_8h.html" title="LinearSystemBuilder.h" alt="" coords="1343,229,1497,256"/>
+<area shape="rect" id="node21" href="$OrbitalMapper_8h.html" title="OrbitalMapper.h" alt="" coords="633,304,748,331"/>
+<area shape="rect" id="node22" href="$IterativeRenormalisedSolver_8h.html" title="IterativeRenormalisedSolver.h" alt="" coords="684,229,881,256"/>
+<area shape="rect" id="node23" href="$IterativeGordonSolver_8h.html" title="IterativeGordonSolver.h" alt="" coords="1058,229,1217,256"/>
+<area shape="rect" id="node26" href="$PerturbativeCorrection_8h.html" title="PerturbativeCorrection.h" alt="" coords="1481,304,1644,331"/>
 </map>

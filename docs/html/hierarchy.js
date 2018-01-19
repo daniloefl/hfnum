@@ -8,7 +8,8 @@ var hierarchy =
     [ "Orbital", "classOrbital.html", null ],
     [ "OrbitalMapper", "classOrbitalMapper.html", null ],
     [ "PerturbativeCorrection", "classPerturbativeCorrection.html", [
-      [ "NonCentralCorrection", "classNonCentralCorrection.html", null ]
+      [ "NonCentralCorrection", "classNonCentralCorrection.html", null ],
+      [ "SpinOrbitCorrection", "classSpinOrbitCorrection.html", null ]
     ] ],
     [ "SCF", "classSCF.html", [
       [ "DFT", "classDFT.html", null ],

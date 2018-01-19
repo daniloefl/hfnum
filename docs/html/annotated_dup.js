@@ -12,5 +12,6 @@ var annotated_dup =
     [ "OrbitalMapper", "classOrbitalMapper.html", "classOrbitalMapper" ],
     [ "PerturbativeCorrection", "classPerturbativeCorrection.html", "classPerturbativeCorrection" ],
     [ "SCF", "classSCF.html", "classSCF" ],
+    [ "SpinOrbitCorrection", "classSpinOrbitCorrection.html", "classSpinOrbitCorrection" ],
     [ "StateReader", "classStateReader.html", "classStateReader" ]
 ];

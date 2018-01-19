@@ -46,6 +46,10 @@ var files =
     [ "SCF.h", "SCF_8h.html", [
       [ "SCF", "classSCF.html", "classSCF" ]
     ] ],
+    [ "SpinOrbitCorrection.cxx", "SpinOrbitCorrection_8cxx.html", null ],
+    [ "SpinOrbitCorrection.h", "SpinOrbitCorrection_8h.html", [
+      [ "SpinOrbitCorrection", "classSpinOrbitCorrection.html", "classSpinOrbitCorrection" ]
+    ] ],
     [ "StateReader.cxx", "StateReader_8cxx.html", null ],
     [ "StateReader.h", "StateReader_8h.html", [
       [ "StateReader", "classStateReader.html", "classStateReader" ]
