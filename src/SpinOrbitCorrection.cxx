@@ -80,7 +80,6 @@ void SpinOrbitCorrection::correct() {
   MatrixXld S(_o.size(), _o.size());
   S.setZero();
 
-  int lmax = 2; // approximated here
   // define delta V = (full Vd - full Vex) - (Vd - Vex)
   // this is defined separately for each orbital equation: we want the error in the eigenenergies
   for (int k1 = 0; k1 < _o.size(); ++k1) {
@@ -102,12 +101,25 @@ void SpinOrbitCorrection::correct() {
         for (int ir = 0; ir < _g->N()-1; ++ir) {
           ldouble r = (*_g)(ir);
           ldouble dr = (*_g)(ir+1) - (*_g)(ir);
-          ldouble dvdr = _Z*std::pow(r, -2) + (_vd[k1][ir+1] - _vd[k1][ir])/dr;
+          ldouble dvdr = _Z*std::pow(r, -2);
           ldouble s1 = 0.5;
           ldouble l1 = tlm_d1.l;
           ldouble j1 = l1 + s1;
           ldouble coeff = j1*(j1+1) - l1*(l1+1) - s1*(s1+1);
-          dH(k1, k2) += 0.25*dvdr*coeff*_o[k1]->getNorm(ir, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 1)*dr;
+          dH(k1, k2) += 0.25*std::pow(137.035999139, -2)*dvdr*coeff*_o[k1]->getNorm(ir, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 1)*dr;
+        }
+      }
+
+      if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() > 0) {
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+          ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+          ldouble dvdr = (_vd[k1][ir+1] - _vd[k1][ir])/dr;
+          ldouble s1 = 0.5;
+          ldouble l1 = tlm_d1.l;
+          ldouble j1 = l1 + s1;
+          ldouble coeff = j1*(j1+1) - l1*(l1+1) - s1*(s1+1);
+          dH(k1, k2) += 0.25*std::pow(137.035999139, -2)*dvdr*coeff*_o[k1]->getNorm(ir, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 1)*dr;
         }
       }
 
@@ -118,12 +130,12 @@ void SpinOrbitCorrection::correct() {
           for (int ir = 0; ir < _g->N()-1; ++ir) {
             ldouble r = (*_g)(ir);
             ldouble dr = (*_g)(ir+1) - (*_g)(ir);
-            ldouble dvdr = (_vex[std::pair<int,int>(k1, ko)][ir+1] - _vex[std::pair<int,int>(k1, ko)][ir])/dr;
+            ldouble dvdr = -(_vex[std::pair<int,int>(k1, ko)][ir+1] - _vex[std::pair<int,int>(k1, ko)][ir])/dr;
             ldouble s1 = 0.5;
             ldouble l1 = tlm_d1.l;
             ldouble j1 = l1 + s1;
             ldouble coeff = j1*(j1+1) - l1*(l1+1) - s1*(s1+1);
-            dH(k1, k2) += 0.25*dvdr*coeff*_o[ko]->getNorm(ir, tlmo.l, tlmo.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 1)*dr;
+            dH(k1, k2) += 0.25*std::pow(137.035999139, -2)*dvdr*coeff*_o[ko]->getNorm(ir, tlmo.l, tlmo.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 1)*dr;
           }
         }
       }
