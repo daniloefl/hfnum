@@ -13,9 +13,7 @@
 #include <map>
 
 #include "utils.h"
-
-#include <Python.h>
-using namespace boost;
+#include "Basis.h"
 
 class OrbitalQuantumNumbers {
   public:

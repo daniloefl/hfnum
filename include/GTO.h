@@ -11,3 +11,5 @@ class GTO : public Basis {
     virtual ~GTO();
 
 };
+
+#endif

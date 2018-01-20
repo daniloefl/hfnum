@@ -125,6 +125,33 @@ hfnum/fast:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/build
 .PHONY : hfnum/fast
 
+Basis.o: Basis.cxx.o
+
+.PHONY : Basis.o
+
+# target to build an object file
+Basis.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/Basis.cxx.o
+.PHONY : Basis.cxx.o
+
+Basis.i: Basis.cxx.i
+
+.PHONY : Basis.i
+
+# target to preprocess a source file
+Basis.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/Basis.cxx.i
+.PHONY : Basis.cxx.i
+
+Basis.s: Basis.cxx.s
+
+.PHONY : Basis.s
+
+# target to generate assembly for a file
+Basis.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/Basis.cxx.s
+.PHONY : Basis.cxx.s
+
 DFT.o: DFT.cxx.o
 
 .PHONY : DFT.o
@@ -151,6 +178,33 @@ DFT.s: DFT.cxx.s
 DFT.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/DFT.cxx.s
 .PHONY : DFT.cxx.s
+
+GTO.o: GTO.cxx.o
+
+.PHONY : GTO.o
+
+# target to build an object file
+GTO.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/GTO.cxx.o
+.PHONY : GTO.cxx.o
+
+GTO.i: GTO.cxx.i
+
+.PHONY : GTO.i
+
+# target to preprocess a source file
+GTO.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/GTO.cxx.i
+.PHONY : GTO.cxx.i
+
+GTO.s: GTO.cxx.s
+
+.PHONY : GTO.s
+
+# target to generate assembly for a file
+GTO.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/GTO.cxx.s
+.PHONY : GTO.cxx.s
 
 Grid.o: Grid.cxx.o
 
@@ -286,6 +340,33 @@ LinearSystemBuilder.s: LinearSystemBuilder.cxx.s
 LinearSystemBuilder.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/LinearSystemBuilder.cxx.s
 .PHONY : LinearSystemBuilder.cxx.s
+
+MatrixSCF.o: MatrixSCF.cxx.o
+
+.PHONY : MatrixSCF.o
+
+# target to build an object file
+MatrixSCF.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/MatrixSCF.cxx.o
+.PHONY : MatrixSCF.cxx.o
+
+MatrixSCF.i: MatrixSCF.cxx.i
+
+.PHONY : MatrixSCF.i
+
+# target to preprocess a source file
+MatrixSCF.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/MatrixSCF.cxx.i
+.PHONY : MatrixSCF.cxx.i
+
+MatrixSCF.s: MatrixSCF.cxx.s
+
+.PHONY : MatrixSCF.s
+
+# target to generate assembly for a file
+MatrixSCF.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/MatrixSCF.cxx.s
+.PHONY : MatrixSCF.cxx.s
 
 NonCentralCorrection.o: NonCentralCorrection.cxx.o
 
@@ -539,9 +620,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... hfnum"
+	@echo "... Basis.o"
+	@echo "... Basis.i"
+	@echo "... Basis.s"
 	@echo "... DFT.o"
 	@echo "... DFT.i"
 	@echo "... DFT.s"
+	@echo "... GTO.o"
+	@echo "... GTO.i"
+	@echo "... GTO.s"
 	@echo "... Grid.o"
 	@echo "... Grid.i"
 	@echo "... Grid.s"
@@ -557,6 +644,9 @@ help:
 	@echo "... LinearSystemBuilder.o"
 	@echo "... LinearSystemBuilder.i"
 	@echo "... LinearSystemBuilder.s"
+	@echo "... MatrixSCF.o"
+	@echo "... MatrixSCF.i"
+	@echo "... MatrixSCF.s"
 	@echo "... NonCentralCorrection.o"
 	@echo "... NonCentralCorrection.i"
 	@echo "... NonCentralCorrection.s"
