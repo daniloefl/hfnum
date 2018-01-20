@@ -49,7 +49,7 @@ class MatrixSCF {
 
     /// \brief Set Z.
     /// \param Z Z value.
-    void setZ(ldouble Z);
+    virtual void setZ(ldouble Z);
 
     /// \brief Add an orbital in internal _o list.
     /// \param n Quantum number n

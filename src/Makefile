@@ -476,6 +476,33 @@ PerturbativeCorrection.cxx.s:
 	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/PerturbativeCorrection.cxx.s
 .PHONY : PerturbativeCorrection.cxx.s
 
+RHF.o: RHF.cxx.o
+
+.PHONY : RHF.o
+
+# target to build an object file
+RHF.cxx.o:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/RHF.cxx.o
+.PHONY : RHF.cxx.o
+
+RHF.i: RHF.cxx.i
+
+.PHONY : RHF.i
+
+# target to preprocess a source file
+RHF.cxx.i:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/RHF.cxx.i
+.PHONY : RHF.cxx.i
+
+RHF.s: RHF.cxx.s
+
+.PHONY : RHF.s
+
+# target to generate assembly for a file
+RHF.cxx.s:
+	cd /home/daniloefl/workspace/hfnum && $(MAKE) -f src/CMakeFiles/hfnum.dir/build.make src/CMakeFiles/hfnum.dir/RHF.cxx.s
+.PHONY : RHF.cxx.s
+
 SCF.o: SCF.cxx.o
 
 .PHONY : SCF.o
@@ -659,6 +686,9 @@ help:
 	@echo "... PerturbativeCorrection.o"
 	@echo "... PerturbativeCorrection.i"
 	@echo "... PerturbativeCorrection.s"
+	@echo "... RHF.o"
+	@echo "... RHF.i"
+	@echo "... RHF.s"
 	@echo "... SCF.o"
 	@echo "... SCF.i"
 	@echo "... SCF.s"
