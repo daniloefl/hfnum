@@ -17,6 +17,9 @@
 #include "MatrixSCF.h"
 #include "GTO.h"
 
+#include <Eigen/Sparse>
+#include <Eigen/Core>
+
 class RHF : public MatrixSCF {
   public:
 
@@ -44,6 +47,12 @@ class RHF : public MatrixSCF {
 
     /// Basis
     GTO _g;
+
+    /// Fock matrix
+    MatrixXld _F;
+
+    /// Overlap matrix
+    MatrixXld _S;
 };
 
 #endif

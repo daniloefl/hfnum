@@ -18,6 +18,7 @@ class Basis {
     virtual ldouble J(int i, int j) = 0;
     virtual ldouble K(int i, int j) = 0;
 
+    virtual int N() = 0;
 };
 
 #endif

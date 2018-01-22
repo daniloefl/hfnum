@@ -29,6 +29,10 @@ MatrixSCF::MatrixSCF() {
   _gamma_scf = 0.3;
 }
 
+void MatrixSCF::setBasis(Basis *b) {
+  _b = b;
+}
+
 void MatrixSCF::setZ(ldouble Z) {
   _Z = Z;
 }

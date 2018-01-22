@@ -6,6 +6,7 @@
 #include "Orbital.h"
 #include "NonCentralCorrection.h"
 #include "SpinOrbitCorrection.h"
+#include "RHF.h"
 
 using namespace boost::python;
 
@@ -15,6 +16,12 @@ BOOST_PYTHON_MODULE(hfnum)
   //  .def(init<bool, double, int, double>())
   //  .def("getR", &Grid::getR)
   //;
+  class_<RHF>("RHF", init<>())
+    .def(init<>())
+    .def("solve", &RHF::solve)
+    .def("setZ", &RHF::setZ)
+    .def("loadBasis", &RHF::loadBasis)
+  ;
   class_<Orbital>("Orbital", init<int, int, int, int>())
     .def(init<int, int, int, int>())
     //.def("addSphHarm", &Orbital::addSphHarm)

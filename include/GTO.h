@@ -27,6 +27,8 @@ class GTO : public Basis {
     ldouble J(int i, int j);
     ldouble K(int i, int j);
 
+    int N();
+
   protected:
 
     std::vector<GTOUnit> _u;
