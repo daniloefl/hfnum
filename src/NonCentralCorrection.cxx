@@ -92,6 +92,9 @@ void NonCentralCorrection::correct() {
     lm tlm_d1(_o[k1]->initialL(), _o[k1]->initialM());
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       lm tlm_d2(_o[k2]->initialL(), _o[k2]->initialM());
+      std::cout << "Calculating matrix elements for element " << k1 << ", " << k2 << std::endl;
+
+      std::cout << "Calculating matrix element <" << k1 << "|S|" << k2 << ">" << std::endl;
       if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() > 0) {
         for (int ir = 0; ir < _g->N(); ++ir) {
           ldouble r = (*_g)(ir);
@@ -101,6 +104,7 @@ void NonCentralCorrection::correct() {
         }
       }
 
+      std::cout << "Calculating matrix element <" << k1 << "|Vd_old|" << k2 << ">" << std::endl;
       // now calculate dH, where the effect of all degenerate states is considered
       // the current inaccurate result follows
       // remember, in the central approximation: <r,s|vd(k1)|u_k1(r),l1,m1,s1> = vd(k1) * u_k1(r) Y_l1,m1(phi, theta) * delta(s == s1)
@@ -117,6 +121,7 @@ void NonCentralCorrection::correct() {
         }
       }
 
+      std::cout << "Calculating matrix element <" << k1 << "|Vex_old|" << k2 << ">" << std::endl;
       // + vex
       // remember, in the central approximation: <r,spin|vex(k1,ko)|u_k1(r),l,m,s> = vex(k1,ko) * u_ko(r) Y_k1(phi, theta) * delta(spin == spin_k1)
       // the angular and spin parts are the ones of k1, which is the orbital equation on which this operator acts
@@ -139,6 +144,7 @@ void NonCentralCorrection::correct() {
       }
 
 
+      std::cout << "Calculating matrix element <" << k1 << "|Vd|" << k2 << ">" << std::endl;
       // + full vd
       // vd(r1) = sum_ko int |psi_ko(r2) Y_ko(Omega2)|^2 1/|r1 - r2| dOmega2 r2^2 dr2
       // dH(a,b) term will be: Term = sum_ko [int dr1 dOmega1 r1^2 psi_a(r1) psi_b(r1) Y*_a(O1) Y_b(O1) { int dr2 dOmega2 r2^2 psi_ko(r2)^2 Y_ko(Omega2)^2 1/|r1 - r2| } ]
@@ -181,6 +187,7 @@ void NonCentralCorrection::correct() {
         }
       }
 
+      std::cout << "Calculating matrix element <" << k1 << "|Vex|" << k2 << ">" << std::endl;
       // - full vex
       // vex|u_k1> = sum_ko psi_ko(r1) Y_ko(r1) int psi_ko(r2) psi_k1(r2) Y*_ko(Omega2) Y_k1(Omega2) 1/|r1 - r2| dOmega2 r2^2 dr2
       //
@@ -235,6 +242,7 @@ void NonCentralCorrection::correct() {
     }
   }
 
+  std::cout << "Calculating eigenvalues ..." << std::endl;
   for (int deg_idx = 0; deg_idx < E.size(); ++deg_idx) {
     int deg_order = deg[deg_idx].size();
 
