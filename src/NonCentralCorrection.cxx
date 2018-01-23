@@ -345,7 +345,7 @@ void NonCentralCorrection::correct() {
   }
   for (int i = 0; i < _o.size(); ++i) {
     for (int j = 0; j < _o.size(); ++j) {
-      E0 += 0.5*(_J(i, j) - _K(i, j));
+      E0 += -0.5*(_J(i, j) - _K(i, j));
     }
   }
   std::cout << E0 << std::endl;
