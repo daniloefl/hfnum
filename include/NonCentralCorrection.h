@@ -44,6 +44,9 @@ class NonCentralCorrection : public PerturbativeCorrection {
 
     MatrixXld _J;
     MatrixXld _K;
+
+    MatrixXld _Jcorr;
+    MatrixXld _Kcorr;
 };
 
 #endif

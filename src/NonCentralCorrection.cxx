@@ -49,6 +49,11 @@ void NonCentralCorrection::correct() {
   _J.setZero();
   _K.setZero();
 
+  _Jcorr.resize(_o.size(), _o.size());
+  _Kcorr.resize(_o.size(), _o.size());
+  _Jcorr.setZero();
+  _Kcorr.setZero();
+
   MatrixXcld cdeg(_o.size(), _o.size());
   cdeg.setZero();
 
@@ -346,6 +351,120 @@ void NonCentralCorrection::correct() {
   std::cout << "K:" << std::endl;
   std::cout << _K << std::endl;
 
+
+  std::cout << "Recalculating J and K after correction" << std::endl;
+
+  // now recalculate J and K with corrected orbitals
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    lm tlm_d1(_o[k1]->initialL(), _o[k1]->initialM());
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      lm tlm_d2(_o[k2]->initialL(), _o[k2]->initialM());
+      std::cout << "Calculating matrix elements for element " << k1 << ", " << k2 << std::endl;
+
+      std::cout << "Calculating matrix element <" << k1 << "|Vd|" << k2 << ">" << std::endl;
+      if (_o[k1]->spin()*_o[k2]->spin() > 0) {
+        for (int ko = 0; ko < _o.size(); ++ko) {
+          lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble dr1 = 0;
+            if (ir1 < _g->N()-1) dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+    
+            for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
+              ldouble r2 = (*_g)(ir2);
+              ldouble dr2 = 0;
+              if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
+    
+              ldouble rsmall = r1;
+              ldouble rlarge = r2;
+              if (r2 < r1) {
+                rsmall = r2;
+                rlarge = r1;
+              }
+    
+              for (int l = 0; l <= lmax; ++l) {
+                for (int m = -l; m <= l; ++m) {
+
+                  ldouble v = 0;
+                  for (int k1c = 0; k1c < _o.size(); ++k1c) {
+                    lm tlm_d1c(_o[k1c]->initialL(), _o[k1c]->initialM());
+                    ldouble ok1 = _c(k1, k1c).real()*_o[k1c]->getNorm(ir1, tlm_d1c.l, tlm_d1c.m, *_g);
+
+                    for (int k2c = 0; k2c < _o.size(); ++k2c) {
+                      lm tlm_d2c(_o[k2c]->initialL(), _o[k2c]->initialM());
+                      ldouble ok2 = _c(k2, k2c).real()*_o[k2c]->getNorm(ir1, tlm_d2c.l, tlm_d2c.m, *_g);
+
+                      for (int koc = 0; koc < _o.size(); ++koc) {
+                        lm tlm_doc(_o[koc]->initialL(), _o[koc]->initialM());
+                        ldouble oko = _c(ko, koc).real()*_o[koc]->getNorm(ir2, tlm_doc.l, tlm_doc.m, *_g);
+
+                        v += std::pow(-1, m+tlm_d1c.m+tlm_doc.m)*(2.0*tlm_doc.l+1.0)*std::sqrt((2.0*tlm_d1c.l+1.0)*(2.0*tlm_d2c.l+1.0))*std::pow(2.0*l+1.0, -2)*CG(tlm_d1c.l, tlm_d2c.l, 0, 0, l, 0)*CG(tlm_doc.l, tlm_doc.l, 0, 0, l, 0)*CG(tlm_d1c.l, tlm_d2c.l, -tlm_d1c.m, tlm_d2c.m, l, m)*CG(tlm_doc.l, tlm_doc.l, -tlm_doc.m, tlm_doc.m, l, -m)*ok1*ok2*std::pow(oko, 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
+                      }
+                    }
+                  }
+
+                  _Jcorr(k1, k2) += v;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      std::cout << "Calculating matrix element <" << k1 << "|Vex|" << k2 << ">" << std::endl;
+      for (int ko = 0; ko < _o.size(); ++ko) {
+        lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
+        if (_o[ko]->spin()*_o[k1]->spin() < 0) continue; // spin component dot product
+        if (_o[k2]->spin()*_o[ko]->spin() < 0) continue; // spin component dot product
+        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+          ldouble r1 = (*_g)(ir1);
+          ldouble dr1 = 0;
+          if (ir1 < _g->N()-1) dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+    
+          for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
+            ldouble r2 = (*_g)(ir2);
+            ldouble dr2 = 0;
+            if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
+    
+            ldouble rsmall = r1;
+            ldouble rlarge = r2;
+            if (r2 < r1) {
+              rsmall = r2;
+              rlarge = r1;
+            }
+    
+            for (int l = 0; l <= lmax; ++l) {
+              for (int m = -l; m <= l; ++m) {
+
+                ldouble v = 0;
+                for (int k1c = 0; k1c < _o.size(); ++k1c) {
+                  lm tlm_d1c(_o[k1c]->initialL(), _o[k1c]->initialM());
+                  ldouble ok1 = _c(k1, k1c).real()*_o[k1c]->getNorm(ir2, tlm_d1c.l, tlm_d1c.m, *_g);
+
+                  for (int k2c = 0; k2c < _o.size(); ++k2c) {
+                    lm tlm_d2c(_o[k2c]->initialL(), _o[k2c]->initialM());
+                    ldouble ok2 = _c(k2, k2c).real()*_o[k2c]->getNorm(ir1, tlm_d2c.l, tlm_d2c.m, *_g);
+
+                    for (int koc = 0; koc < _o.size(); ++koc) {
+                      lm tlm_doc(_o[koc]->initialL(), _o[koc]->initialM());
+                      ldouble okor1 = _c(ko, koc).real()*_o[koc]->getNorm(ir1, tlm_doc.l, tlm_doc.m, *_g);
+                      ldouble okor2 = _c(ko, koc).real()*_o[koc]->getNorm(ir2, tlm_doc.l, tlm_doc.m, *_g);
+
+                      v += std::pow(-1, m + tlm_d2c.m + tlm_doc.m)*(2.0*tlm_d2c.l+1.0)*(2.0*tlm_doc.l+1.0)*std::pow(2.0*l+1.0, -2)*CG(tlm_d2c.l, tlm_doc.l, 0, 0, l, 0)*CG(tlm_doc.l, tlm_d1c.l, 0, 0, l, 0)*CG(tlm_d2c.l, tlm_doc.l, -tlm_d2c.m, tlm_doc.m, l, -m)*CG(tlm_doc.l, tlm_d1c.l, -tlm_doc.m, tlm_d1c.m, l, m)*ok2*okor1*okor2*ok1*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;;
+                    }
+                  }
+                }
+                _Kcorr(k1, k2) += v;
+              }
+            }
+          }
+        }
+      }
+
+
+    }
+  }
+
   std::cout << "Corrected E0:" << std::endl;
   ldouble E0 = 0;
   for (int k = 0; k < _o.size(); ++k) {
@@ -353,7 +472,7 @@ void NonCentralCorrection::correct() {
   }
   for (int i = 0; i < _o.size(); ++i) {
     for (int j = 0; j < _o.size(); ++j) {
-      E0 += -0.5*(_J(i, j) - _K(i, j));
+      E0 += -0.5*(_Jcorr(i, j) - _Kcorr(i, j));
     }
   }
   std::cout << E0 << std::endl;
@@ -366,7 +485,7 @@ ldouble NonCentralCorrection::getE0() {
   }
   for (int i = 0; i < _o.size(); ++i) {
     for (int j = 0; j < _o.size(); ++j) {
-      E0 += -0.5*(_J(i, j) - _K(i, j));
+      E0 += -0.5*(_Jcorr(i, j) - _Kcorr(i, j));
     }
   }
   return E0;
