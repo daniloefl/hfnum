@@ -26,7 +26,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "Basis_8cxx.html",
-"classOrbital.html#a8b82f88d3c433719bf28c0fd4e61e86d"
+"classOrbital.html#a7ac573120d40e298f0c923a993c78282"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

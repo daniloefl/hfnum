@@ -1,5 +1,7 @@
 var NAVTREEINDEX1 =
 {
+"classOrbital.html#a7ac573120d40e298f0c923a993c78282":[0,0,12,32],
+"classOrbital.html#a8382ed20e0b9bd76602afb84c3b3c5da":[0,0,12,8],
 "classOrbital.html#a8b82f88d3c433719bf28c0fd4e61e86d":[0,0,12,34],
 "classOrbital.html#a8d8b14b60faa4db9e73c9a054a53c3b5":[0,0,12,14],
 "classOrbital.html#a8e7b1b187f953f03b221cd6059d84a74":[0,0,12,3],
