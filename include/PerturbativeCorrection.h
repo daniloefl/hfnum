@@ -106,6 +106,14 @@ class PerturbativeCorrection {
     /// \return Atomic number
     ldouble Z();
 
+    /// \brief Get corrected full atom energy level
+    /// \return Corrected energy level
+    virtual ldouble getE0() = 0;
+
+    /// \brief Get original full atom energy level
+    /// \return Original energy level
+    virtual ldouble getE0Uncorrected() = 0;
+
   protected:
     /// List of owned Orbital pointers
     std::vector<Orbital *> _o;

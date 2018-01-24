@@ -46,9 +46,9 @@ for n in range(0, h.getNOrbitals()):
 print "Coefficients of orbitals:"
 print coeff
 
-# to implement
-#E0 = h.getE0()
-#print "Total ground energy: %10.6f Hartree = %15.8f eV" % (E0, E0*eV)
+E0 = h.getE0()
+E0uncorr = h.getE0Uncorrected()
+print "Total ground energy -- before correction: %10.6f Hartree = %15.8f eV, after correction: %10.6f Hartree = %15.8f eV" % (E0uncorr, E0uncorr*eV, E0, E0*eV)
 
 m = next(i for i,v in enumerate(r) if v >= 10)
 o = []

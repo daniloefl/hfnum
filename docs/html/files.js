@@ -1,5 +1,9 @@
 var files =
 [
+    [ "Basis.cxx", "Basis_8cxx.html", null ],
+    [ "Basis.h", "Basis_8h.html", [
+      [ "Basis", "classBasis.html", "classBasis" ]
+    ] ],
     [ "DFT.cxx", "DFT_8cxx.html", null ],
     [ "DFT.h", "DFT_8h.html", [
       [ "DFT", "classDFT.html", "classDFT" ]
@@ -8,6 +12,11 @@ var files =
     [ "Grid.cxx", "Grid_8cxx.html", null ],
     [ "Grid.h", "Grid_8h.html", [
       [ "Grid", "classGrid.html", "classGrid" ]
+    ] ],
+    [ "GTO.cxx", "GTO_8cxx.html", "GTO_8cxx" ],
+    [ "GTO.h", "GTO_8h.html", [
+      [ "GTOUnit", "structGTOUnit.html", "structGTOUnit" ],
+      [ "GTO", "classGTO.html", "classGTO" ]
     ] ],
     [ "HF.cxx", "HF_8cxx.html", null ],
     [ "HF.h", "HF_8h.html", [
@@ -26,6 +35,11 @@ var files =
     [ "LinearSystemBuilder.h", "LinearSystemBuilder_8h.html", [
       [ "LinearSystemBuilder", "classLinearSystemBuilder.html", "classLinearSystemBuilder" ]
     ] ],
+    [ "MatrixSCF.cxx", "MatrixSCF_8cxx.html", null ],
+    [ "MatrixSCF.h", "MatrixSCF_8h.html", [
+      [ "OrbitalQuantumNumbers", "classOrbitalQuantumNumbers.html", "classOrbitalQuantumNumbers" ],
+      [ "MatrixSCF", "classMatrixSCF.html", "classMatrixSCF" ]
+    ] ],
     [ "NonCentralCorrection.cxx", "NonCentralCorrection_8cxx.html", null ],
     [ "NonCentralCorrection.h", "NonCentralCorrection_8h.html", [
       [ "NonCentralCorrection", "classNonCentralCorrection.html", "classNonCentralCorrection" ]
@@ -41,6 +55,10 @@ var files =
     [ "PerturbativeCorrection.cxx", "PerturbativeCorrection_8cxx.html", null ],
     [ "PerturbativeCorrection.h", "PerturbativeCorrection_8h.html", [
       [ "PerturbativeCorrection", "classPerturbativeCorrection.html", "classPerturbativeCorrection" ]
+    ] ],
+    [ "RHF.cxx", "RHF_8cxx.html", null ],
+    [ "RHF.h", "RHF_8h.html", [
+      [ "RHF", "classRHF.html", "classRHF" ]
     ] ],
     [ "SCF.cxx", "SCF_8cxx.html", null ],
     [ "SCF.h", "SCF_8h.html", [

@@ -7,6 +7,8 @@ var classPerturbativeCorrection =
     [ "getCoefficientsPython", "classPerturbativeCorrection.html#a2d8b4b66b6a53f8e5ca77d395d57cb91", null ],
     [ "getCorrectedE", "classPerturbativeCorrection.html#af2ddd2e0848ecaf170a1640994b31ab1", null ],
     [ "getCorrectedEPython", "classPerturbativeCorrection.html#a2d3e70f8f9caf0f27a2ee70ce5e338f8", null ],
+    [ "getE0", "classPerturbativeCorrection.html#a604a788fd399b553030beacd2875ba17", null ],
+    [ "getE0Uncorrected", "classPerturbativeCorrection.html#aa430da55765a4355f99b8ff29c303da4", null ],
     [ "getNOrbitals", "classPerturbativeCorrection.html#a1151f29e9d40b29a04f0f4342ffbb29a", null ],
     [ "getOrbital_E", "classPerturbativeCorrection.html#a21dfa3483aa8f58a3916e2a0fa1011b1", null ],
     [ "getOrbital_l", "classPerturbativeCorrection.html#aea29b0caaee25d1e1537b42e3fca466a", null ],

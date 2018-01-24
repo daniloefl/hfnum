@@ -29,6 +29,14 @@ class NonCentralCorrection : public PerturbativeCorrection {
 
     /// \brief Function to be implemented to calculate perturbative correction
     void correct();
+
+    /// \brief Get corrected full atom energy level
+    /// \return Corrected energy level
+    ldouble getE0();
+
+    /// \brief Get original full atom energy level
+    /// \return Original energy level
+    ldouble getE0Uncorrected();
     
   protected:
     std::map<int, std::vector<ldouble> > _vd;
