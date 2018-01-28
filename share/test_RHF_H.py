@@ -25,7 +25,8 @@ o_up.append(h.getOrbital(0, 1, 0, 0, r))
 
 m = next(i for i,v in enumerate(r) if v >= 10)
 f = plt.figure()
-plt.plot(r[:m], o_up[0][:m], 'r-',  linewidth = 2, label = 'Orbital 0 (s)')
+plt.plot(r[:m], 2*np.exp(-np.asarray(r[:m])), 'b:',  linewidth = 2, label = 'H 1s')
+plt.plot(r[:m], o_up[0][:m], 'r--',  linewidth = 2, label = 'Orbital 0 (s)')
 plt.legend()
 plt.show()
 

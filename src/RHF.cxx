@@ -30,14 +30,11 @@ boost::python::list RHF::getOrbital(int no, int s, int l_proj, int m_proj, boost
   // coefficients in _c_up/dw(:, no)
   MatrixXld c;
   c.resize(_g.N(), 1);
-  std::cout << "Getting coefs" << std::endl;
   if (s > 0) {
     c = _c_up.block(0, no, _g.N(), 1);
   } else {
     c = _c_dw.block(0, no, _g.N(), 1);
   }
-  std::cout << "Got coefs" << std::endl;
-  std::cout << c.transpose() << std::endl;
   int N = _g.N();
   for (int i = 0; i < boost::python::len(r); ++i) {
     ldouble val = 0;
@@ -157,12 +154,22 @@ void RHF::solveRoothan() {
   // sum_ij c(i, k)*c(j, k) int GTO(i)*GTO(j) r^2 dr dOmega = 1
   // sum_ij c(i, k)*c(j, k) _g.dot(i, j) = 1
   // so calculate N(k) = sum_ij c(i, k)*c(j, k) _g.dot(i, j) and divide c(:, k) by sqrt(N(k))
-  MatrixXld N_up, N_dw;
+  MatrixXld N_up, N_dw, Nint_up, Nint_dw;
   N_up.resize(1, _Nfilled_up);
   N_dw.resize(1, _Nfilled_up);
+  Nint_up.resize(1, _Nfilled_up);
+  Nint_dw.resize(1, _Nfilled_up);
   N_up.setZero();
   N_dw.setZero();
+  Nint_up.setZero();
+  Nint_dw.setZero();
   for (int i = 0; i < N; ++i) {
+    for (int k = 0; k < _Nfilled_up; ++k) {
+      Nint_up(0, k) += _c_up(i, k);
+    }
+    for (int k = 0; k < _Nfilled_dw; ++k) {
+      Nint_dw(0, k) += _c_dw(i, k);
+    }
     for (int j = 0; j < N; ++j) {
       for (int k = 0; k < _Nfilled_up; ++k) {
         N_up(0, k) += _c_up(i, k)*_c_up(j, k)*_S(i, j);
@@ -172,12 +179,23 @@ void RHF::solveRoothan() {
       }
     }
   }
+  for (int k = 0; k < _Nfilled_up; ++k) {
+    if (N_up(0, k) < 0) N_up(0, k) *= -1;
+  }
+  for (int k = 0; k < _Nfilled_dw; ++k) {
+    if (N_dw(0, k) < 0) N_dw(0, k) *= -1;
+  }
+  std::vector<ldouble> r(1, 0);
   for (int i = 0; i < N; ++i) {
     for (int k = 0; k < _Nfilled_up; ++k) {
-      _c_up(i, k) *= 1.0/std::sqrt(N_up(0, k));
+      ldouble s = 1;
+      if (Nint_up(0, k) < 0) s = -1;
+      _c_up(i, k) *= s/std::sqrt(N_up(0, k));
     }
     for (int k = 0; k < _Nfilled_dw; ++k) {
-      _c_dw(i, k) *= 1.0/std::sqrt(N_dw(0, k));
+      ldouble s = 1;
+      if (Nint_dw(0, k) < 0) s = -1;
+      _c_dw(i, k) *= s/std::sqrt(N_dw(0, k));
     }
   }
   if (_Nfilled_up > 0) {
