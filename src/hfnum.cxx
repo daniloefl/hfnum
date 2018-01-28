@@ -30,6 +30,7 @@ BOOST_PYTHON_MODULE(hfnum)
     .def("getOrbital_E", &RHF::getOrbital_E)
     .def("getOrbitalName", &RHF::getOrbitalName)
     .def("gammaSCF", &RHF::gammaSCF)
+    .def("Nscf", &RHF::Nscf)
     .def("loadBasis", &RHF::loadBasis)
     .def("getOrbital", &RHF::getOrbital)
   ;

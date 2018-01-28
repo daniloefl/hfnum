@@ -17,6 +17,8 @@ h.addOrbital(1, 0, 0,  1)
 h.addOrbital(1, 0, 0, -1)
 h.solve()
 
+h.Nscf(1)
+
 r = []
 for i in range(0, 130):
   r.append(np.exp(np.log(1e-4) + i*1e-1))

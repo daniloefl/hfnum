@@ -103,6 +103,10 @@ class MatrixSCF {
     /// \return Orbital energy
     ldouble getOrbital_E(int no, int s);
 
+    /// \brief Set number of SCF iterations
+    /// \param Nscf Number of iterations
+    void Nscf(int Nscf);
+
   protected:
 
     /// \brief Set basis
@@ -115,6 +119,9 @@ class MatrixSCF {
 
     /// Speed at which the new Vd and Vex are integrated into the next self-consistent step
     ldouble _gamma_scf;
+
+    /// Number of SCF iterations
+    int _Nscf_max;
 
     /// Orbital definition
     std::vector<OrbitalQuantumNumbers> _o_up;

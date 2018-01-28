@@ -28,6 +28,7 @@ MatrixSCF::MatrixSCF() {
   _o_up.clear();
   _o_dw.clear();
   _gamma_scf = 0.3;
+  _Nscf_max = 1;
 }
 
 void MatrixSCF::setBasis(Basis *b) {
@@ -103,6 +104,10 @@ int MatrixSCF::getOrbital_s(int no, int s) {
 
 void MatrixSCF::gammaSCF(ldouble g) {
   _gamma_scf = g;
+}
+
+void MatrixSCF::Nscf(int Nscf) {
+  _Nscf_max = Nscf;
 }
 
 

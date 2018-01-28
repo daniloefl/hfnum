@@ -198,6 +198,7 @@ void RHF::solveRoothan() {
       _c_dw(i, k) *= s/std::sqrt(N_dw(0, k));
     }
   }
+  /*
   if (_Nfilled_up > 0) {
     std::cout << "Coefficients for up orbital:" << std::endl;
     std::cout << _c_up.block(0,0,N,_Nfilled_up).transpose() << std::endl;
@@ -206,6 +207,7 @@ void RHF::solveRoothan() {
     std::cout << "Coefficients for down orbital:" << std::endl;
     std::cout << _c_dw.block(0,0,N,_Nfilled_dw).transpose() << std::endl;
   }
+  */
 }
 
 void RHF::solve() {
@@ -219,9 +221,13 @@ void RHF::solve() {
   _old_c_dw.resize(N, N);
   _old_c_dw.setZero();
 
-  solveRoothan();
+  int Nscf = 1;
+  do {
+    solveRoothan();
 
-  _old_c_up = _c_up;
-  _old_c_dw = _c_dw;
+    _old_c_up = _c_up;
+    _old_c_dw = _c_dw;
+  } while (Nscf++ < _Nscf_max);
+
 }
 
