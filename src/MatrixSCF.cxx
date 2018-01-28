@@ -25,7 +25,8 @@ using namespace boost;
 MatrixSCF::MatrixSCF() {
   _Z = 1;
   _b = 0;
-  _o.clear();
+  _o_up.clear();
+  _o_dw.clear();
   _gamma_scf = 0.3;
 }
 
@@ -44,20 +45,25 @@ ldouble MatrixSCF::Z() {
 MatrixSCF::~MatrixSCF() {
 }
 
-int MatrixSCF::getNOrbitals() {
-  return _o.size();
+int MatrixSCF::getNOrbitals(int s) {
+  if (s > 0) return _o_up.size();
+  return _o_dw.size();
 }
 
-int MatrixSCF::getOrbital_n(int no) {
-  return _o[no].n;
+int MatrixSCF::getOrbital_n(int no, int s) {
+  if (s > 0) return _o_up[no].n;
+  return _o_dw[no].n;
 }
 
-std::string MatrixSCF::getOrbitalName(int no) {
+std::string MatrixSCF::getOrbitalName(int no, int s) {
+  OrbitalQuantumNumbers o;
+  if (s > 0) o = _o_up[no];
+  else o = _o_dw[no];
+
   std::string name = "";
-  name += std::to_string(_o[no].n);
-  int l = _o[no].l;
-  int m = _o[no].m;
-  int s = _o[no].s;
+  name += std::to_string(o.n);
+  int l = o.l;
+  int m = o.m;
   if (l == 0) name += "s";
   else if (l == 1) name += "p";
   else if (l == 2) name += "d";
@@ -75,20 +81,24 @@ std::string MatrixSCF::getOrbitalName(int no) {
   return name;
 }
 
-ldouble MatrixSCF::getOrbital_E(int no) {
-  return _o[no].E;
+ldouble MatrixSCF::getOrbital_E(int no, int s) {
+  if (s > 0) _o_up[no].E;
+  return _o_dw[no].E;
 }
 
-int MatrixSCF::getOrbital_l(int no) {
-  return _o[no].l;
+int MatrixSCF::getOrbital_l(int no, int s) {
+  if (s > 0) _o_up[no].l;
+  return _o_dw[no].l;
 }
 
-int MatrixSCF::getOrbital_m(int no) {
-  return _o[no].m;
+int MatrixSCF::getOrbital_m(int no, int s) {
+  if (s > 0) _o_up[no].m;
+  return _o_dw[no].m;
 }
 
-int MatrixSCF::getOrbital_s(int no) {
-  return _o[no].s;
+int MatrixSCF::getOrbital_s(int no, int s) {
+  if (s > 0) _o_up[no].s;
+  return _o_dw[no].s;
 }
 
 void MatrixSCF::gammaSCF(ldouble g) {
@@ -97,7 +107,10 @@ void MatrixSCF::gammaSCF(ldouble g) {
 
 
 void MatrixSCF::addOrbital(int n, int l, int m, int s) {
-  _o.push_back(OrbitalQuantumNumbers(n, l, m, s, -_Z*_Z/std::pow(n, 2)*0.5));
+  if (s > 0)
+    _o_up.push_back(OrbitalQuantumNumbers(n, l, m, s, -_Z*_Z/std::pow(n, 2)*0.5));
+  else
+    _o_dw.push_back(OrbitalQuantumNumbers(n, l, m, s, -_Z*_Z/std::pow(n, 2)*0.5));
 }
 
 OrbitalQuantumNumbers::OrbitalQuantumNumbers(int in, int il, int im, int is, ldouble iE)

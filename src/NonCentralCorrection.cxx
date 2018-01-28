@@ -90,7 +90,7 @@ void NonCentralCorrection::correct() {
   MatrixXld S(_o.size(), _o.size());
   S.setZero();
 
-  int lmax = 2; // approximated here
+  int lmax = 1; // approximated here
   // define delta V = (full Vd - full Vex) - (Vd - Vex)
   // this is defined separately for each orbital equation: we want the error in the eigenenergies
   for (int k1 = 0; k1 < _o.size(); ++k1) {
@@ -343,7 +343,8 @@ void NonCentralCorrection::correct() {
   for (int i = 0; i < _o.size(); ++i) {
     _c(i, i) += 1.0;
   }
-  //std::cout << _c << std::endl;
+  std::cout << "Coefficients:" << std::endl;
+  std::cout << _c << std::endl;
 
   std::cout << "J:" << std::endl;
   std::cout << _J << std::endl;
@@ -389,14 +390,17 @@ void NonCentralCorrection::correct() {
                   for (int k1c = 0; k1c < _o.size(); ++k1c) {
                     lm tlm_d1c(_o[k1c]->initialL(), _o[k1c]->initialM());
                     ldouble ok1 = _c(k1, k1c).real()*_o[k1c]->getNorm(ir1, tlm_d1c.l, tlm_d1c.m, *_g);
+                    if (ok1 == 0) continue;
 
                     for (int k2c = 0; k2c < _o.size(); ++k2c) {
                       lm tlm_d2c(_o[k2c]->initialL(), _o[k2c]->initialM());
                       ldouble ok2 = _c(k2, k2c).real()*_o[k2c]->getNorm(ir1, tlm_d2c.l, tlm_d2c.m, *_g);
+                      if (ok2 == 0) continue;
 
                       for (int koc = 0; koc < _o.size(); ++koc) {
                         lm tlm_doc(_o[koc]->initialL(), _o[koc]->initialM());
                         ldouble oko = _c(ko, koc).real()*_o[koc]->getNorm(ir2, tlm_doc.l, tlm_doc.m, *_g);
+                        if (oko == 0) continue;
 
                         v += std::pow(-1, m+tlm_d1c.m+tlm_doc.m)*(2.0*tlm_doc.l+1.0)*std::sqrt((2.0*tlm_d1c.l+1.0)*(2.0*tlm_d2c.l+1.0))*std::pow(2.0*l+1.0, -2)*CG(tlm_d1c.l, tlm_d2c.l, 0, 0, l, 0)*CG(tlm_doc.l, tlm_doc.l, 0, 0, l, 0)*CG(tlm_d1c.l, tlm_d2c.l, -tlm_d1c.m, tlm_d2c.m, l, m)*CG(tlm_doc.l, tlm_doc.l, -tlm_doc.m, tlm_doc.m, l, -m)*ok1*ok2*std::pow(oko, 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
                       }
@@ -440,15 +444,18 @@ void NonCentralCorrection::correct() {
                 for (int k1c = 0; k1c < _o.size(); ++k1c) {
                   lm tlm_d1c(_o[k1c]->initialL(), _o[k1c]->initialM());
                   ldouble ok1 = _c(k1, k1c).real()*_o[k1c]->getNorm(ir2, tlm_d1c.l, tlm_d1c.m, *_g);
+                  if (ok1 == 0) continue;
 
                   for (int k2c = 0; k2c < _o.size(); ++k2c) {
                     lm tlm_d2c(_o[k2c]->initialL(), _o[k2c]->initialM());
                     ldouble ok2 = _c(k2, k2c).real()*_o[k2c]->getNorm(ir1, tlm_d2c.l, tlm_d2c.m, *_g);
+                    if (ok2 == 0) continue;
 
                     for (int koc = 0; koc < _o.size(); ++koc) {
                       lm tlm_doc(_o[koc]->initialL(), _o[koc]->initialM());
                       ldouble okor1 = _c(ko, koc).real()*_o[koc]->getNorm(ir1, tlm_doc.l, tlm_doc.m, *_g);
                       ldouble okor2 = _c(ko, koc).real()*_o[koc]->getNorm(ir2, tlm_doc.l, tlm_doc.m, *_g);
+                      if (okor1 == 0 || okor2 == 0) continue;
 
                       v += std::pow(-1, m + tlm_d2c.m + tlm_doc.m)*(2.0*tlm_d2c.l+1.0)*(2.0*tlm_doc.l+1.0)*std::pow(2.0*l+1.0, -2)*CG(tlm_d2c.l, tlm_doc.l, 0, 0, l, 0)*CG(tlm_doc.l, tlm_d1c.l, 0, 0, l, 0)*CG(tlm_d2c.l, tlm_doc.l, -tlm_d2c.m, tlm_doc.m, l, -m)*CG(tlm_doc.l, tlm_d1c.l, -tlm_doc.m, tlm_d1c.m, l, m)*ok2*okor1*okor2*ok1*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;;
                     }

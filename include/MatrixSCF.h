@@ -63,38 +63,45 @@ class MatrixSCF {
     void gammaSCF(ldouble g);
 
     /// \brief Get number of orbitals.
+    /// \param s Spin up or down.
     /// \return Number of orbitals.
-    int getNOrbitals();
+    int getNOrbitals(int s);
 
     /// \brief Get spectroscopic name of orbital.
     /// \param no Orbital index.
+    /// \param s Spin up or down.
     /// \return Orbital name
-    std::string getOrbitalName(int no);
+    std::string getOrbitalName(int no, int s);
 
     /// \brief Get orbital quantum number n.
     /// \param no Orbital index.
+    /// \param s Spin up or down.
     /// \return Orbital quantum number n
-    int getOrbital_n(int no);
+    int getOrbital_n(int no, int s);
 
     /// \brief Get orbital quantum number l.
     /// \param no Orbital index.
+    /// \param s Spin up or down.
     /// \return Orbital quantum number l
-    int getOrbital_l(int no);
+    int getOrbital_l(int no, int s);
 
     /// \brief Get orbital quantum number m.
     /// \param no Orbital index.
+    /// \param s Spin up or down.
     /// \return Orbital quantum number m
-    int getOrbital_m(int no);
+    int getOrbital_m(int no, int s);
 
     /// \brief Get orbital spin.
     /// \param no Orbital index.
+    /// \param s Spin up or down.
     /// \return Orbital spin
-    int getOrbital_s(int no);
+    int getOrbital_s(int no, int s);
 
     /// \brief Get orbital energy.
     /// \param no Orbital index.
+    /// \param s Spin up or down.
     /// \return Orbital energy
-    ldouble getOrbital_E(int no);
+    ldouble getOrbital_E(int no, int s);
 
   protected:
 
@@ -110,7 +117,8 @@ class MatrixSCF {
     ldouble _gamma_scf;
 
     /// Orbital definition
-    std::vector<OrbitalQuantumNumbers> _o;
+    std::vector<OrbitalQuantumNumbers> _o_up;
+    std::vector<OrbitalQuantumNumbers> _o_dw;
  
     /// Basis pointer
     Basis *_b;

@@ -22,12 +22,18 @@ class GTO : public Basis {
     void setZ(ldouble Z);
 
     ldouble dot(int i, int j);
+    ldouble RPower(int power, int i, int j);
+    ldouble R(int i, int j);
+    ldouble R2(int i, int j);
+    ldouble RMinus2(int i, int j);
+    ldouble RMinus1(int i, int j);
     ldouble T(int i, int j);
     ldouble V(int i, int j);
-    ldouble J(int i, int j);
-    ldouble K(int i, int j);
+    ldouble ABCD(int a, int b, int c, int d);
 
     int N();
+
+    ldouble value(int k, ldouble r, int l_proj, int m_proj);
 
   protected:
 
