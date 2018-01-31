@@ -17,7 +17,7 @@ h.addOrbital(1, 0, 0,  1)
 h.addOrbital(1, 0, 0, -1)
 h.solve()
 
-h.Nscf(1)
+h.Nscf(2)
 
 r = []
 for i in range(0, 130):

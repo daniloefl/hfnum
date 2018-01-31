@@ -71,16 +71,23 @@ void RHF::solveRoothan() {
       _F_up(i, j) += _g.T(i, j) + _g.V(i, j);
       _F_dw(i, j) += _g.T(i, j) + _g.V(i, j);
 
-      /*
       // add direct term
       // <i|Vd|j> = sum_k <i| int |phi_k|^2/r12 dV1 |j> = sum_k <i| <phi_k|1/r_12|phi_k> |j>
       // |phi_k> = sum_a c_ak |a>
       // <i|Vd|j> = sum_kab c_ak c_bk <i2|<a1|1/r12|b1>|j2> 
       // matrix _Vd(a, b) = sum_k c_ak c_bk
-      for (int k = 0; k < N; ++k) {
+      for (int k = 0; k < _Nfilled_up; ++k) {
         for (int a = 0; a < N; ++a) {
           for (int b = 0; b < N; ++b) {
             _F_up(i, j) += _old_c_up(a, k)*_old_c_up(b, k)*_g.ABCD(i, a, b, j);
+            _F_dw(i, j) += _old_c_up(a, k)*_old_c_up(b, k)*_g.ABCD(i, a, b, j);
+          }
+        }
+      }
+      for (int k = 0; k < _Nfilled_dw; ++k) {
+        for (int a = 0; a < N; ++a) {
+          for (int b = 0; b < N; ++b) {
+            _F_up(i, j) += _old_c_dw(a, k)*_old_c_dw(b, k)*_g.ABCD(i, a, b, j);
             _F_dw(i, j) += _old_c_dw(a, k)*_old_c_dw(b, k)*_g.ABCD(i, a, b, j);
           }
         }
@@ -90,14 +97,21 @@ void RHF::solveRoothan() {
       // <i|Vex|j> = sum_k <i| int phi*_k |j>/r12 dV1 |phi_k> = sum_k <i| <phi_k|1/r_12|j> |phi_k>
       // |phi_k> = sum_a c_ak |a>
       // <i|Vex|j> = sum_kab c_ak c_bk <i2|<a1|1/r12|j1>|b2> 
-      for (int k = 0; k < N; ++k) {
+      for (int k = 0; k < _Nfilled_up; ++k) {
         for (int a = 0; a < N; ++a) {
           for (int b = 0; b < N; ++b) {
             _F_up(i, j) += _old_c_up(a,k)*_old_c_up(b, k)*_g.ABCD(i, a, j, b);
-            _F_dw(i, j) += _old_c_dw(a,k)*_old_c_dw(b, k)*_g.ABCD(i, a, j, b);
           }
         }
-      }*/
+      }
+      for (int k = 0; k < _Nfilled_dw; ++k) {
+        for (int a = 0; a < N; ++a) {
+          for (int b = 0; b < N; ++b) {
+            _F_up(i, j) += _old_c_dw(a,k)*_old_c_dw(b, k)*_g.ABCD(i, a, j, b);
+          }
+        }
+      }
+
     }
   }
 
@@ -225,8 +239,8 @@ void RHF::solve() {
   do {
     solveRoothan();
 
-    _old_c_up = _c_up;
-    _old_c_dw = _c_dw;
+    _old_c_up = (1-_gamma_scf)*_old_c_up + _gamma_scf*_c_up;
+    _old_c_dw = (1-_gamma_scf)*_old_c_dw + _gamma_scf*_c_dw;
   } while (Nscf++ < _Nscf_max);
 
 }

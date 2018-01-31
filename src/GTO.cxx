@@ -154,9 +154,65 @@ ldouble GTO::V(int i, int j) {
   return -_Z*RMinus1(i, j);
 }
 
-// <a2| <b1| 1/r12 |c1> |d2> =
+// 1/|ra - rb| = \sum_l=0^inf \sum_m=-l^m=l 4 pi / (2l + 1) r<^l/r>^(l+1) Y*lm(Oa) Ylm(Ob)
+// <a2| <b1| 1/r12 |c1> |d2> = g
+// f(2) = <b1|1/r12|c1> = int r^(nb+nc+2) exp(-(ab+ac) r^2) Y_b(O1) Y_c(O1) 1/r12 dr1 dO1 = sum_lm 4 pi / (2l+1) int r^(nb+nc+2) exp(-(ab+ac) r^2) r<^l/r>^(l+1) Y_b(O1) Y_c(O1) Y*lm(O1) dr1 dO1 Ylm(O2)
+// g = sum_lm 4 pi / (2l+1) int_2 int_1 r1^(nb+nc+2) exp(-(ab+ac) r1^2) r<^l/r>^(l+1) Y_b(O1) Y_c(O1) Y*lm(O1) dr1 dO1 r2^(na+nd+2) exp(-(aa+ad) r2^2) Y_a(O2) Y_d(O2) Ylm(O2) dr2 dO2
+//   = sum_lm 4 pi / (2l+1) [ int_2 [ int_1 r1^(nb+nc+2) exp(-(ab+ac) r1^2) r<^l/r>^(l+1) dr1 ] r2^(na+nd+2) exp(-(aa+ad) r2^2) dr2] [int_O1 Y_b(O1) Y_c(O1) Y*lm(O1) dO1] [int_O2 Y_a(O2) Y_d(O2) Ylm(O2) dO2 ]
+// [int_O1 Y_b(O1) Y_c(O1) Y*lm(O1) dO1] = (-1)^m int_O1 Y_b(O1) Y_c(O1) Y_l,-m(O1) dO1 = std::sqrt((lb+1)*(lc+1)/(4*M_PI*(l+1)))*CG(lb, lc, 0, 0, l, 0)*CG(lb, lc, mb, mc, l, m)
+// [int_O2 Y_a(O2) Y_d(O2) Ylm(O2) dO2] = int_O2 Y_a(O2) Y_d(O2) Y_lm(O2) dO1 = std::pow(-1, m)*std::sqrt((la+1)*(ld+1)/(4*M_PI*(l+1)))*CG(la, ld, 0, 0, l, 0)*CG(la, ld, ma, md, l, -m)
+// int_1 r1^(nb+nc+2) exp(-(ab+ac) r1^2) r<^l/r>^(l+1) dr1 = int_r2^inf ... + int_0^r2 ...
+//
+// for r2 < r1:
+// [ int_r2^inf r1^(nb+nc+2) exp(-(ab+ac) r1^2) r<^l/r>^(l+1) dr1 ] = int_r2^inf r1^(nb+nc+2) exp(-(ab+ac) r1^2) r2^l/r1^(l+1) dr1 =
+//                                                             = r2^l int_r2^inf r1^(nb+nc+2-l-1) exp(-(ab+ac) r1^2) dr1
+//                                                             = r2^l sqrt(2*(ab+ac))^(-nb-nc-2+l+1) int_r2^inf (  sqrt(2*(ab+ac)) r1)^(nb+nc+2-l-1) exp(- ( sqrt(2*(ab+ac)) r1)^2/2 ) dr1
+//                                                             = r2^l sqrt(2*(ab+ac))^(-nb-nc-2+l+2) sqrt(2pi) int_(sqrt(2*(ab+ac)) r2)^inf 1/sqrt(2pi) x^(nb+nc+2-l-1) exp(- x^2/2 ) dx, with x = sqrt(2*(ab+ac)) r1
+//                                  if nb+nc+2-l-1 even        = r2^l sqrt(2*(ab+ac))^(-nb-nc-2+l+2) sqrt(2pi) [ (nb+nc+2-l-2)!! + ...
+// for r1 < r2:
+// [ int_0^r2 r1^(nb+nc+2) exp(-(ab+ac) r1^2) r<^l/r>^(l+1) dr1 ] = int_0^r2 r1^(nb+nc+2) exp(-(ab+ac) r1^2) r1^l/r2^(l+1) dr1 =
+//                                                             = r2^(-l-1) int_0^r2 r1^(nb+nc+2+l) exp(-(ab+ac) r1^2) dr1
+// Very long solution ...
+// 
+// Useful:
+// Y_a Y_b = sum_LM sqrt( (2la + 1) (2lb+1) / (2L+1) ) CG(la, lb, 0, 0, L, 0) CG(la, ma, lb, mb, L, M) Y_LM
+//
+// Try Fourier transform to avoid r< and r> ... 4 pi / (2pi)^3 int exp(i k.(r2 - r1))/k^2 dk = 1/r12
+// <b1|1/r12|c1> = int r^(nb+nc+2) exp(-(ab+ac) r^2) Y_b(O1) Y_c(O1) 1/r12 dr1 dO1
+//               = 4 pi / (2pi)^3 int_r int_k r^(nb+nc+2) exp(-(ab+ac) r^2) exp(i k . (r2 - r1))/k^2 Y_b(O1) Y_c(O1) dk dr1 dO1
+// <a2| <b1| 1/r12 |c1> |d2> = 4 pi / (2pi)^3 int_r1 int_r2 int_k r1^(nb+nc+2) exp(-(ab+ac) r1^2) exp(i k . (r2 - r1))/k^2 Y_b(O1) Y_c(O1) r2^(na+nd+2) exp(-(aa+ad) r2^2) Y_a(O2) Y_d(O2) dk dr1 dO1 dr2 dO2
+//                           = 4 pi / (2pi)^9 int_r1 int_r2
+//                                            int_k exp(i k . (r2 - r1))/k^2 dk
+//                                            int_k1 (i)^(nb+nc+2) deriv^(nb+nc+2) (exp (-k1^2 / ( 4 * (ab+ac)) )) sqrt(1/(2*(ab+ac))) exp(i k1 r1) dk1
+//                                            int_k2 (i)^(na+nd+2) deriv^(na+nd+2) (exp (-k2^2 / ( 4 * (aa+ad)) )) sqrt(1/(2*(aa+ad))) exp(i k2 r2) dk2
+//                                            Y_b(O1) Y_c(O1) Y_a(O2) Y_d(O2) dr1 dr2 --> ignoring this part for now to make it easier -> = 1/(4pi)^2
+//                           = 1 / (2 pi)^9 1/(4pi) (i)^(nb+nc+2) (i)^(na+nd+2) sqrt(1/(2*(ab+ac))) sqrt(1/(2*(aa+ad))) int_r1 int_r2 int_k int_k1 int_k2 dr1 dr2 dk dk1 dk2
+//                                            exp(i (k + k2) r2) exp (i (-k + k1) r1)
+//                                            1/k^2 deriv^(nb+nc+2) (exp (-k1^2 / ( 4 * (ab+ac)) )) deriv^(na+nd+2) (exp (-k2^2 / ( 4 * (aa+ad)) ))
+//                           = 1 / (2 pi)^9 1/(4pi) (i)^(nb+nc+2) (i)^(na+nd+2) sqrt(1/(2*(ab+ac))) sqrt(1/(2*(aa+ad))) int_k int_k1 int_k2 dk dk1 dk2
+//                                            delta(k2+k) delta(k1-k)
+//                                            1/k^2 deriv^(nb+nc+2) (exp (-k1^2 / ( 4 * (ab+ac)) )) deriv^(na+nd+2) (exp (-k2^2 / ( 4 * (aa+ad)) ))
+//                           = 1 / (2 pi)^3 1/(4pi) (i)^(nb+nc+2) (-i)^(na+nd+2) sqrt(1/(2*(ab+ac))) sqrt(1/(2*(aa+ad)))  int_k dk
+//                                            1/k^2 deriv^(nb+nc+2) (exp (-k^2 / ( 4 * (ab+ac)) )) deriv^(na+nd+2) (exp (-k^2 / ( 4 * (aa+ad)) ))
+//                           = 1 / (2 pi)^3 1/(4pi) (i)^(nb+nc+2) (-i)^(na+nd+2) sqrt(1/(2*(ab+ac))) sqrt(1/(2*(aa+ad)))  int_k dk
+//                                            1/k^2 deriv^(nb+nc+2) (exp (-k^2 / ( 4 * (ab+ac)) )) deriv^(na+nd+2) (exp (-k^2 / ( 4 * (aa+ad)) ))
+//
 ldouble GTO::ABCD(int a, int b, int c, int d) {
   if (a >= _u.size() || b >= _u.size() || c >= _u.size() || d >= _u.size()) return 0;
+  ldouble ret = 0;
+  int lmax = 2;
+  for (int l = 0; l < lmax; ++l) {
+    ldouble v = 4*M_PI/(2.0*l+1.0);
+    // TODO
+    // v *= [ int_2 [ int_1 r1^(nb+nc+2) exp(-(ab+ac) r1^2) r<^l/r>^(l+1) dr1 ] r2^(na+nd+2) exp(-(aa+ad) r2^2) dr2]
+
+    //
+    for (int m = -l; m <= l; ++m) {
+      v *= std::sqrt((lb+1)*(lc+1)/(4*M_PI*(l+1)))*CG(lb, lc, 0, 0, l, 0)*CG(lb, lc, mb, mc, l, m);
+      v *= std::pow(-1, m)*std::sqrt((la+1)*(ld+1)/(4*M_PI*(l+1)))*CG(la, ld, 0, 0, l, 0)*CG(la, ld, ma, md, l, -m);
+    }
+    ret += v;
+  }
   return 0;
 }
 
