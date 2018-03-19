@@ -13,7 +13,7 @@ var files =
     [ "Grid.h", "Grid_8h.html", [
       [ "Grid", "classGrid.html", "classGrid" ]
     ] ],
-    [ "GTO.cxx", "GTO_8cxx.html", "GTO_8cxx" ],
+    [ "GTO.cxx", "GTO_8cxx.html", null ],
     [ "GTO.h", "GTO_8h.html", [
       [ "GTOUnit", "structGTOUnit.html", "structGTOUnit" ],
       [ "GTO", "classGTO.html", "classGTO" ]

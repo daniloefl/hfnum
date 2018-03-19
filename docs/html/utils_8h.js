@@ -12,5 +12,6 @@ var utils_8h =
     [ "VectorXld", "utils_8h.html#a7c6892fef5f51fae1b62981a2b41f44c", null ],
     [ "Vradial", "utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53", null ],
     [ "CG", "utils_8h.html#ad8a5a66666d34aeddba5a86dee1d30aa", null ],
+    [ "F0", "utils_8h.html#a6b332c4f94244b3639e91f79eece5636", null ],
     [ "factorial", "utils_8h.html#a86b2afa43e68f1358917f965d699efbf", null ]
 ];
