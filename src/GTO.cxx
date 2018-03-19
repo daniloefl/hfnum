@@ -1,6 +1,9 @@
 #include "GTO.h"
 #include <fstream>
 #include <iostream>
+#include <cmath>
+
+using namespace std;
 
 GTO::GTO()
   : Basis() {
@@ -14,25 +17,34 @@ void GTO::setZ(ldouble Z) {
   _Z = Z;
   _u.clear();
   GTOUnit u;
-  // 1/sqrt(norm) r^n exp(-alpha r^2) Y_{lm}
-  // norm = int_0^inf r^2 r^n exp(-alpha r^2) dr = Gamma( (2+n+1)/2 )/ ( 2* alpha^((2+n+1)/2) )
-  // Y_{lm} assumed normalised spherical harmonics, so int |Y_lm|^2 dOmega = 1
-  for (int l = 0; l < 2; ++l) {
-    for (int m = -l; m <= l; ++m) {
-      for (int k = 0; k < 20; ++k) {
-        u.alpha = std::exp(std::log(0.01) + k);
-        u.n = l;
-        u.l = l;
-        u.m = m;
-        _u.push_back(u);
-      }
-    }
+  // u = r^l exp(-xi r^2) Y_lm(theta, phi)
+  //for (int k = 0; k < 20; ++k) {
+  //  u.xi = exp(log(0.1) + k);
+  double coeff[] = {3.42525091, 0.623913730, 0.168855400};
+  for (size_t k = 0; k < sizeof(coeff)/sizeof(double); ++k) {
+    u.xi = coeff[k];
+    u.l = 0;
+    u.m = 0;
+    _u.push_back(u);
   }
 }
 
+ldouble GTO::norm(int i) {
+  const int l = _u[i].l;
+  const int xi = _u[i].xi;
+  if (l == 0) {
+    return 1.0/(sqrt(2)*sqrt(M_PI)/(16*pow(xi, 1.5)));
+  } else if (l == 1) {
+    return 1.0/(3*sqrt(2)*sqrt(M_PI)/(64*pow(xi, 2.5)));
+  } else if (l == 2) {
+    return 1.0/(15*sqrt(2)*sqrt(M_PI)/(256*pow(xi, 3.5)));
+  }
+  return 0; // This will cause a crash due to division by zero if a certain l is not implemented ---> this is what we want to inform the user something is deeply wrong
+}
+
 ldouble GTO::value(int k, ldouble r, int l_proj, int m_proj) {
-  if (_u[k].l != l_proj || _u[k].m != m_proj) return 0;
-  return std::pow(r, _u[k].n)*std::exp(-_u[k].alpha*r*r)/std::sqrt(std::tgamma((2.0 + _u[k].n + 1.0)/2.0)/(2*std::pow(_u[k].alpha, (2.0 + _u[k].n + 1.0)/2.0)));
+  if (l_proj != _u[k].l || m_proj != _u[k].m) return 0;
+  return pow(r, _u[k].l)*exp(-_u[k].xi*r*r)*norm(k);
 }
 
 int GTO::N() {
@@ -49,109 +61,99 @@ void GTO::load(const std::string &fname) {
     std::stringstream ss;
     ss.str(line);
     GTOUnit u;
-    ss >> u.alpha >> u.n >> u.l >> u.m;
+    ss >> u.xi >> u.l >> u.m;
     _u.push_back(u);
   }
 }
 
-// int_0^inf exp(-a x^2) dx = 0.5 sqrt(pi/a)
-// d/da ( exp (-a x^2) ) = -x^2 exp(-a x^2)
-// int_0^inf x^2 exp(-a x^2) dx = - int_0^inf d/da [exp (-a x^2) ] dx
-//                              = - d/da int_0^inf exp (-a x^2) dx
-//                              = - 0.5 sqrt(pi) d/da [a^-0.5]
-//                              = 1/4 sqrt(pi/(a^3)) = 1/(4pi) sqrt((pi/a)^3)
-// normalisation factor = 1/sqrt(
-// <i|j> = int r^2 exp(-(ai+aj) r^2) Y_i Y_j dr dOmega
-//       = 1/(4pi) sqrt((pi/(ai+aj))^3) delta(m_i - m_j) delta (l_i - l_j)
 ldouble GTO::dot(int i, int j) {
   if (i >= _u.size() || j >= _u.size()) return 0;
-  return RPower(0, i, j);
+  const ldouble xi1 = _u[i].xi;
+  const ldouble xi2 = _u[j].xi;
+  const int li1 = _u[i].l;
+  const int mi1 = _u[i].m;
+  const int li2 = _u[j].l;
+  const int mi2 = _u[j].m;
+  if (li1 == 0 && li2 == 0 && mi1 == 0 && mi2 == 0) {
+    return 32*pow(xi1, 3)/(sqrt(M_PI)*pow(xi1 + xi2, 1.5));
+  } else if (li1 == 1 && li2 == 1 && mi1 == -1 && mi2 == -1) {
+    return 256*pow(xi1, 5)/(3*sqrt(M_PI)*pow(xi1 + xi2, 2.5));
+  } else if (li1 == 1 && li2 == 1 && mi1 == 0 && mi2 == 0) {
+    return 256*pow(xi1, 5)/(3*sqrt(M_PI)*pow(xi1 + xi2, 2.5));
+  } else if (li1 == 1 && li2 == 1 && mi1 == 1 && mi2 == 1) {
+    return 256*pow(xi1, 5)/(3*sqrt(M_PI)*pow(xi1 + xi2, 2.5));
+  } else if (li1 == 2 && li2 == 2 && mi1 == -2 && mi2 == -2) {
+    return 2048*pow(xi1, 7)/(15*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
+  } else if (li1 == 2 && li2 == 2 && mi1 == -1 && mi2 == -1) {
+    return 2048*pow(xi1, 7)/(15*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
+  } else if (li1 == 2 && li2 == 2 && mi1 == 0 && mi2 == 0) {
+    return 2048*pow(xi1, 7)/(15*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
+  } else if (li1 == 2 && li2 == 2 && mi1 == 1 && mi2 == 1) {
+    return 2048*pow(xi1, 7)/(15*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
+  } else if (li1 == 2 && li2 == 2 && mi1 == 2 && mi2 == 2) {
+    return 2048*pow(xi1, 7)/(15*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
+  }
+  return 0;
 }
 
-// int_0^inf x^n exp(-a x^2) dx = Gamma((n+1)/2)/(2 a^((n+1)/2))
-// calculate int_0^inf x^2 x^n x^li x^lj exp(-ai x^2) exp(-aj x^2) dx
-ldouble GTO::RPower(int power, int i, int j) {
-  if (i >= _u.size() || j >= _u.size()) return 0;
-  if (_u[i].l != _u[j].l) return 0;
-  if (_u[i].m != _u[j].m) return 0;
-  ldouble p = _u[i].alpha + _u[j].alpha;
-  ldouble c = (power + 2.0 + _u[i].n + _u[j].n + 1.0)/2.0;
-  ldouble norm = std::tgamma((2.0 + _u[i].n + 1.0)/2.0)/(2*std::pow(_u[i].alpha, (2.0 + _u[i].n + 1.0)/2.0))*std::tgamma((2.0 + _u[j].n + 1.0)/2.0)/(2*std::pow(_u[j].alpha, (2.0 + _u[j].n + 1.0)/2.0));
-  return std::tgamma(c)/(2*std::pow(p, c))/std::sqrt(norm);
-}
-
-// int_0^inf x^2 exp(-a x^2) dx = 1/(4pi) sqrt((pi/a)^3)
-// d/da ( x^2 exp (-a x^2) ) = -x^4 exp(-a x^2)
-// int_0^inf x^4 exp(-a x^2) dx = - int_0^inf d/da [x^2 exp (-a x^2) ] dx
-//                              = - d/da int_0^inf x^2 exp (-a x^2) dx
-//                              = - 1/(4pi) d/da sqrt((pi/a)^3)
-//                              = 3/(8pi) sqrt(pi^3/a^5)
-//                              = 3/(8 pi^2) sqrt((pi/a)^5)
-// <i|r^2|j> = int r^4 exp(-(ai+aj) r^2) Y_i Y_j dr dOmega
-//       = 3/(8 pi^2) sqrt((pi/(ai+aj))^5) delta(m_i - m_j) delta (l_i - l_j)
-ldouble GTO::R2(int i, int j) {
-  if (i >= _u.size() || j >= _u.size()) return 0;
-  return RPower(2, i, j);
-}
-
-// int_0^inf x exp(-a x^2) dx = 1/2 int_0^inf exp(-a x^2) d(x^2)
-//                            = - 1/(2a) int_0^-inf exp(u) du
-//                            = - 1/(2a) [ exp(-inf) - exp(0) ]
-//                            = 1/(2a)
-// d/da ( x exp (-a x^2) ) = -x^3 exp(-a x^2)
-// int_0^inf x^3 exp(-a x^2) dx = - int_0^inf d/da [x exp (-a x^2) ] dx
-//                              = - d/da int_0^inf x exp (-a x^2) dx
-//                              = - 1/2 a^(-2)
-// <i|r|j> = int r^3 exp(-(ai+aj) r^2) Y_i Y_j dr dOmega
-//       = -1/2 (ai+aj)^(-2) delta(m_i - m_j) delta (l_i - l_j)
-ldouble GTO::R(int i, int j) {
-  if (i >= _u.size() || j >= _u.size()) return 0;
-  return RPower(1, i, j);
-}
-
-// int_0^inf exp(-a x^2) dx = 0.5 sqrt(pi/a)
-// <i|1/r^2|j> = int exp(-(ai+aj) r^2) Y_i Y_j dr dOmega
-//       = 1/2 sqrt(pi/(ai+aj)) delta(m_i - m_j) delta (l_i - l_j)
-ldouble GTO::RMinus2(int i, int j) {
-  if (i >= _u.size() || j >= _u.size()) return 0;
-  return RPower(-2, i, j);
-}
-
-// int_0^inf x exp(-a x^2) dx = 1/(2a)
-// <i|1/r|j> = int r exp(-(ai+aj) r^2) Y_i Y_j dr dOmega
-//       = 1/(2 (ai+aj)) delta(m_i - m_j) delta (l_i - l_j)
-ldouble GTO::RMinus1(int i, int j) {
-  if (i >= _u.size() || j >= _u.size()) return 0;
-  return RPower(-1, i, j);
-}
-
-// T|j> = -0.5 del^2 exp(-aj r^2) Y_j
-//      = -0.5 { 1/r^2 Y_j d/dr [ r^2 d/dr (exp -aj r^2) ] - lj (lj+1)/r^2 |j> }
-//      = -0.5 { Y_j 1/r^2 d/dr [ -2 aj r^3 exp(-aj r^2) ] - lj (lj+1)/r^2 |j> } 
-//      = -0.5 { Y_j (-2 aj) 1/r^2 [ 3 r^2 exp(-aj r^2) - 2 aj r^4 exp (-aj r^2) ] - lj (lj+1)/r^2 |j> }
-//      = -0.5 { -6 aj + 4 aj^2 r^2 - lj (lj+1)/r^2 } |j>
-//      = [3 aj - 2 aj^2 r^2 + lj (lj+1) / (2 r^2) ] |j>
-// <i|T|j> = 3 aj <i|j> - 2 aj^2 <i|r^2|j> + lj (lj+1)/2 <i|1/r^2|j>
-// for l = 0, m = 0, and multiplying by 4pi
-//         = 3 aj pi^(3/2) (ai+aj)^(-3/2) - 3/pi aj^2 sqrt((pi/(ai+aj))^5)
-//         = 3 pi^(3/2) aj (ai+aj)^(-3/2) - 3 pi^(3/2) aj^2 (ai+aj)^(-5/2)
-//         = [ 3 aj - 3 aj^2/(ai+aj) ] [pi/(ai+aj)]^(3/2)
-//         = [ 3 ai aj + 3 aj^2 - 3 aj^2]/(ai+aj) [pi/(ai+aj)]^(3/2)
-//         = 3 ai aj/(ai+aj) [pi/(ai+aj)]^(3/2)
 ldouble GTO::T(int i, int j) {
   if (i >= _u.size() || j >= _u.size()) return 0;
-  ldouble aj = _u[j].alpha;
-  ldouble lj = _u[j].l;
-  return 3*aj*dot(i, j) - 2*std::pow(aj, 2)*R2(i, j) + 0.5*lj*(lj+1)*RMinus2(i, j);
+  const ldouble xi1 = _u[i].xi;
+  const ldouble xi2 = _u[j].xi;
+  const int li1 = _u[i].l;
+  const int mi1 = _u[i].m;
+  const int li2 = _u[j].l;
+  const int mi2 = _u[j].m;
+  if (li1 == 0 && li2 == 0 && mi1 == 0 && mi2 == 0) {
+    return 96*pow(xi1, 4)*xi2/(sqrt(M_PI)*pow(xi1 + xi2, 2.5));
+  } else if (li1 == 1 && li2 == 1 && mi1 == -1 && mi2 == -1) {
+    return 1280*pow(xi1, 6)*xi2/(3*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
+  } else if (li1 == 1 && li2 == 1 && mi1 ==  0 && mi2 ==  0) {
+    return 1280*pow(xi1, 6)*xi2/(3*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
+  } else if (li1 == 1 && li2 == 1 && mi1 ==  1 && mi2 ==  1) {
+    return 1280*pow(xi1, 6)*xi2/(3*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
+  } else if (li1 == 2 && li2 == 2 && mi1 == -2 && mi2 == -2) {
+    return 14336*pow(xi1, 8)*xi2/(15*sqrt(M_PI)*pow(xi1 + xi2, 4.5));
+  } else if (li1 == 2 && li2 == 2 && mi1 == -1 && mi2 == -1) {
+    return 14336*pow(xi1, 8)*xi2/(15*sqrt(M_PI)*pow(xi1 + xi2, 4.5));
+  } else if (li1 == 2 && li2 == 2 && mi1 ==  0 && mi2 ==  0) {
+    return 14336*pow(xi1, 8)*xi2/(15*sqrt(M_PI)*pow(xi1 + xi2, 4.5));
+  } else if (li1 == 2 && li2 == 2 && mi1 ==  1 && mi2 ==  1) {
+    return 14336*pow(xi1, 8)*xi2/(15*sqrt(M_PI)*pow(xi1 + xi2, 4.5));
+  } else if (li1 == 2 && li2 == 2 && mi1 ==  2 && mi2 ==  2) {
+    return 14336*pow(xi1, 8)*xi2/(15*sqrt(M_PI)*pow(xi1 + xi2, 4.5));
+  }
+  return 0;
 }
 
-// -Z<i|1/r|j> =
-//             = - Z/(2 (ai+aj)) delta(m_i - m_j) delta (l_i - l_j)
-// multiplying by 4 pi and for l = m = 0:
-//             = - 2 pi Z/(ai+aj)
 ldouble GTO::V(int i, int j) {
   if (i >= _u.size() || j >= _u.size()) return 0;
-  return -_Z*RMinus1(i, j);
+  const ldouble xi1 = _u[i].xi;
+  const ldouble xi2 = _u[j].xi;
+  const int li1 = _u[i].l;
+  const int mi1 = _u[i].m;
+  const int li2 = _u[j].l;
+  const int mi2 = _u[j].m;
+  if (li1 == 0 && li2 == 0 && mi1 == 0 && mi2 == 0) {
+    return -64*_Z*pow(xi1, 3)/(M_PI*(xi1 + xi2));
+  } else if (li1 == 1 && li2 == 1 && mi1 == -1 && mi2 == -1) {
+    return -1024*_Z*pow(xi1, 5)/(9*M_PI*pow(xi1 + xi2, 2));
+  } else if (li1 == 1 && li2 == 1 && mi1 == 0 && mi2 == 0) {
+    return -1024*_Z*pow(xi1, 5)/(9*M_PI*pow(xi1 + xi2, 2));
+  } else if (li1 == 1 && li2 == 1 && mi1 == 1 && mi2 == 1) {
+    return -1024*_Z*pow(xi1, 5)/(9*M_PI*pow(xi1 + xi2, 2));
+  } else if (li1 == 2 && li2 == 2 && mi1 == -2 && mi2 == -2) {
+    return -32768*_Z*pow(xi1, 7)/(225*M_PI*pow(xi1 + xi2, 3));
+  } else if (li1 == 2 && li2 == 2 && mi1 == -1 && mi2 == -1) {
+    return -32768*_Z*pow(xi1, 7)/(225*M_PI*pow(xi1 + xi2, 3));
+  } else if (li1 == 2 && li2 == 2 && mi1 == 0 && mi2 == 0) {
+    return -32768*_Z*pow(xi1, 7)/(225*M_PI*pow(xi1 + xi2, 3));
+  } else if (li1 == 2 && li2 == 2 && mi1 == 1 && mi2 == 1) {
+    return -32768*_Z*pow(xi1, 7)/(225*M_PI*pow(xi1 + xi2, 3));
+  } else if (li1 == 2 && li2 == 2 && mi1 == 2 && mi2 == 2) {
+    return -32768*_Z*pow(xi1, 7)/(225*M_PI*pow(xi1 + xi2, 3));
+  }
+  return 0;
 }
 
 // 1/|ra - rb| = \sum_l=0^inf \sum_m=-l^m=l 4 pi / (2l + 1) r<^l/r>^(l+1) Y*lm(Oa) Ylm(Ob)
@@ -175,11 +177,12 @@ ldouble GTO::V(int i, int j) {
 // Very long solution ...
 // 
 // Useful:
-// Y_a Y_b = sum_LM sqrt( (2la + 1) (2lb+1) / (2L+1) ) CG(la, lb, 0, 0, L, 0) CG(la, ma, lb, mb, L, M) Y_LM
+// Y_a Y_b = sum_LM sqrt( (2la + 1) (2lb+1) / (2L+1) ) CG(la, lb, 0, 0, L, 0) CG(la, lb, ma, mb, L, M) Y_LM
 //
 // Try Fourier transform to avoid r< and r> ... 4 pi / (2pi)^3 int exp(i k.(r2 - r1))/k^2 dk = 1/r12
 // <b1|1/r12|c1> = int r^(nb+nc+2) exp(-(ab+ac) r^2) Y_b(O1) Y_c(O1) 1/r12 dr1 dO1
 //               = 4 pi / (2pi)^3 int_r int_k r^(nb+nc+2) exp(-(ab+ac) r^2) exp(i k . (r2 - r1))/k^2 Y_b(O1) Y_c(O1) dk dr1 dO1
+//               = 4 pi / (2pi)^3 sum_LM sqrt( (2lb + 1) (2lc+1) / (2L+1) ) CG(lb, lc, 0, 0, L, 0) CG(lb, lc, mb, mc, L, M) int_r int_k r^(nb+nc+2) exp(-(ab+ac) r^2) exp(i k . (r2 - r1))/k^2 Y_LM(O1) dk dr1 dO1
 // <a2| <b1| 1/r12 |c1> |d2> = 4 pi / (2pi)^3 int_r1 int_r2 int_k r1^(nb+nc+2) exp(-(ab+ac) r1^2) exp(i k . (r2 - r1))/k^2 Y_b(O1) Y_c(O1) r2^(na+nd+2) exp(-(aa+ad) r2^2) Y_a(O2) Y_d(O2) dk dr1 dO1 dr2 dO2
 //                           = 4 pi / (2pi)^9 int_r1 int_r2
 //                                            int_k exp(i k . (r2 - r1))/k^2 dk
@@ -197,21 +200,24 @@ ldouble GTO::V(int i, int j) {
 //                           = 1 / (2 pi)^3 1/(4pi) (i)^(nb+nc+2) (-i)^(na+nd+2) sqrt(1/(2*(ab+ac))) sqrt(1/(2*(aa+ad)))  int_k dk
 //                                            1/k^2 deriv^(nb+nc+2) (exp (-k^2 / ( 4 * (ab+ac)) )) deriv^(na+nd+2) (exp (-k^2 / ( 4 * (aa+ad)) ))
 //
+// Complicated to deal with spherical harmonics ... move to a different basis
 ldouble GTO::ABCD(int a, int b, int c, int d) {
   if (a >= _u.size() || b >= _u.size() || c >= _u.size() || d >= _u.size()) return 0;
-  ldouble ret = 0;
-  int lmax = 2;
-  for (int l = 0; l < lmax; ++l) {
-    ldouble v = 4*M_PI/(2.0*l+1.0);
-    // TODO
-    // v *= [ int_2 [ int_1 r1^(nb+nc+2) exp(-(ab+ac) r1^2) r<^l/r>^(l+1) dr1 ] r2^(na+nd+2) exp(-(aa+ad) r2^2) dr2]
-
-    //
-    for (int m = -l; m <= l; ++m) {
-      v *= std::sqrt((lb+1)*(lc+1)/(4*M_PI*(l+1)))*CG(lb, lc, 0, 0, l, 0)*CG(lb, lc, mb, mc, l, m);
-      v *= std::pow(-1, m)*std::sqrt((la+1)*(ld+1)/(4*M_PI*(l+1)))*CG(la, ld, 0, 0, l, 0)*CG(la, ld, ma, md, l, -m);
-    }
-    ret += v;
+  const ldouble xi_a = _u[a].xi;
+  const ldouble xi_b = _u[b].xi;
+  const ldouble xi_c = _u[c].xi;
+  const ldouble xi_d = _u[d].xi;
+  const int l_a = _u[a].l;
+  const int m_a = _u[a].m;
+  const int l_b = _u[b].l;
+  const int m_b = _u[b].m;
+  const int l_c = _u[c].l;
+  const int m_c = _u[c].m;
+  const int l_d = _u[d].l;
+  const int m_d = _u[d].m;
+  // not estimated yet in p or d states
+  if (l_a == 0 && l_b == 0 && l_c == 0 && l_d == 0) {
+    return 2*std::pow(M_PI, 2.5)/( (xi_a + xi_b) * (xi_c + xi_d) * std::sqrt(xi_a + xi_b + xi_c + xi_d) ) * F0( (xi_a + xi_b)*(xi_c + xi_d)/(xi_a + xi_b + xi_c + xi_d) )*norm(a)*norm(b)*norm(c)*norm(d);
   }
   return 0;
 }

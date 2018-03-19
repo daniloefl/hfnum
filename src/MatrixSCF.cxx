@@ -27,7 +27,7 @@ MatrixSCF::MatrixSCF() {
   _b = 0;
   _o_up.clear();
   _o_dw.clear();
-  _gamma_scf = 0.3;
+  _gamma_scf = 0.1;
   _Nscf_max = 1;
 }
 
@@ -83,22 +83,22 @@ std::string MatrixSCF::getOrbitalName(int no, int s) {
 }
 
 ldouble MatrixSCF::getOrbital_E(int no, int s) {
-  if (s > 0) _o_up[no].E;
+  if (s > 0) return _o_up[no].E;
   return _o_dw[no].E;
 }
 
 int MatrixSCF::getOrbital_l(int no, int s) {
-  if (s > 0) _o_up[no].l;
+  if (s > 0) return _o_up[no].l;
   return _o_dw[no].l;
 }
 
 int MatrixSCF::getOrbital_m(int no, int s) {
-  if (s > 0) _o_up[no].m;
+  if (s > 0) return _o_up[no].m;
   return _o_dw[no].m;
 }
 
 int MatrixSCF::getOrbital_s(int no, int s) {
-  if (s > 0) _o_up[no].s;
+  if (s > 0) return _o_up[no].s;
   return _o_dw[no].s;
 }
 

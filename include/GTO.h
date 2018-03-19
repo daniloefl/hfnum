@@ -5,8 +5,7 @@
 #include "utils.h"
 
 struct GTOUnit {
-    ldouble alpha;
-    int n;
+    ldouble xi;
     int l;
     int m;
 };
@@ -21,12 +20,8 @@ class GTO : public Basis {
 
     void setZ(ldouble Z);
 
+    ldouble norm(int i);
     ldouble dot(int i, int j);
-    ldouble RPower(int power, int i, int j);
-    ldouble R(int i, int j);
-    ldouble R2(int i, int j);
-    ldouble RMinus2(int i, int j);
-    ldouble RMinus1(int i, int j);
     ldouble T(int i, int j);
     ldouble V(int i, int j);
     ldouble ABCD(int a, int b, int c, int d);

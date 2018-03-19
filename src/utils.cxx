@@ -1,6 +1,10 @@
 #include "utils.h"
 #include <cmath>
 
+ldouble F0(ldouble x) {
+  return 0.5L * std::sqrt(M_PI/x) * std::erf(std::sqrt(x));
+}
+
 lm::lm(int li, int mi)
   : l(li), m(mi) {
 }

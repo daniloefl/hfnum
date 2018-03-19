@@ -112,8 +112,30 @@ void RHF::solveRoothan() {
         }
       }
 
+      for (int k = 0; k < _Nfilled_up; ++k) {
+        for (int a = 0; a < N; ++a) {
+          for (int b = 0; b < N; ++b) {
+            _F_dw(i, j) += _old_c_up(a,k)*_old_c_up(b, k)*_g.ABCD(i, a, j, b);
+          }
+        }
+      }
+      for (int k = 0; k < _Nfilled_dw; ++k) {
+        for (int a = 0; a < N; ++a) {
+          for (int b = 0; b < N; ++b) {
+            _F_dw(i, j) += _old_c_dw(a,k)*_old_c_dw(b, k)*_g.ABCD(i, a, j, b);
+          }
+        }
+      }
+
     }
   }
+
+  //std::cout << "S" << std::endl;
+  //std::cout << _S << std::endl;
+  //std::cout << "F_up" << std::endl;
+  //std::cout << _F_up << std::endl;
+  //std::cout << "F_dw" << std::endl;
+  //std::cout << _F_dw << std::endl;
 
   MatrixXld SiF_up = _S.inverse()*_F_up;
   MatrixXld SiF_dw = _S.inverse()*_F_dw;
@@ -212,7 +234,6 @@ void RHF::solveRoothan() {
       _c_dw(i, k) *= s/std::sqrt(N_dw(0, k));
     }
   }
-  /*
   if (_Nfilled_up > 0) {
     std::cout << "Coefficients for up orbital:" << std::endl;
     std::cout << _c_up.block(0,0,N,_Nfilled_up).transpose() << std::endl;
@@ -221,7 +242,6 @@ void RHF::solveRoothan() {
     std::cout << "Coefficients for down orbital:" << std::endl;
     std::cout << _c_dw.block(0,0,N,_Nfilled_dw).transpose() << std::endl;
   }
-  */
 }
 
 void RHF::solve() {
