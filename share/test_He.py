@@ -10,9 +10,9 @@ import seaborn
 import matplotlib.pyplot as plt
 
 Z = 2
-dx = 1e-2
-N = 2550
-rmin = 1e-10
+dx = 1e-1
+N = 120
+rmin = 1e-4
 h = hfnum.HF()
 h.resetGrid(True, dx, int(N), rmin)
 h.setZ(Z)
