@@ -544,6 +544,7 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
     std::cout << "SCF step " << nStepSCF << std::endl;
     solveForFixedPotentials(Niter, F0stop);
     nStepSCF++;
+    calculateY();
     calculateVex(_gamma_scf);
     calculateVd(_gamma_scf);
   }
@@ -594,6 +595,27 @@ void HF::calculateVex(ldouble gamma) {
       int m2 = _o[k2]->initialM();
       std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
 
+      for (int k = 0; k <= 5; k += 1) {
+        ldouble B = 0.0;
+        if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
+        if (k == 0 && l1 == 1 && l2 == 1 && m1 == m2) B = 1.0;
+        if (k == 0 && l1 == 2 && l2 == 2 && m1 == m2) B = 1.0;
+
+        if (k == 2 && l1 == 0 && l2 == 2 && m1 ==  0 && m2 ==  0) B =  0.1118033989;
+        if (k == 2 && l1 == 1 && l2 == 1 && m1 == -1 && m2 == -1) B = -0.05;
+        if (k == 2 && l1 == 1 && l2 == 1 && m1 ==  0 && m2 ==  0) B =  0.10;
+        if (k == 2 && l1 == 1 && l2 == 1 && m1 ==  1 && m2 ==  1) B = -0.05;
+
+        //B = 1.0/((ldouble) (2*k + 1))*std::pow(CG(l1p, l2p, 0, 0, k, 0), 2);
+        if (B == 0) continue;
+        // This is the extra k parts
+        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+          ldouble r1 = (*_g)(ir1);
+          _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
+        }
+      }
+
+      /*
       // temporary variable
       std::vector<ldouble> vex(_g->N(), 0); // calculate it here first
       for (int L = (int) std::fabs(l1 - l2); L <= l1 + l2; ++L) {
@@ -619,7 +641,7 @@ void HF::calculateVex(ldouble gamma) {
 
       for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
         _vexsum[std::pair<int,int>(k1, k2)][ir1] += vex[ir1];
-      }
+      }*/
     }
   }
 
@@ -653,13 +675,49 @@ void HF::calculateVex(ldouble gamma) {
 //
 // T2 = 1.0/(4*np.pi) int Ylm dOb
 //
+void HF::calculateY() {
+  std::cout << "Calculating Y" << std::endl;
+  // Calculating Y_k(orb1, orb2)[r]
+  // index in Y is 10000*k + 100*orb1 + orb2
+  for (int k = 0; k <= 6; ++k) {
+    std::cout << "Calculating Y for k "<< k << std::endl;
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      int l1 = _o[k1]->initialL();
+      int m1 = _o[k1]->initialM();
+      for (int k2 = 0; k2 < _o.size(); ++k2) {
+        int l2 = _o[k2]->initialL();
+        int m2 = _o[k2]->initialM();
+        _Y[10000*k + 100*k1 + 1*k2] = Vradial(_g->N(), 0);
+
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+
+          // integrate r1 from 0 to r
+          for (int ir1 = 0; ir1 < ir; ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+            _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, l1, m1, *_g) * _o[k2]->getNorm(ir1, l2, m2, *_g) * std::pow(r1/r, k)/r * r1 * r1 * dr1;
+          }
+
+          // integrate r1 from r to inf
+          for (int ir1 = ir; ir1 < _g->N()-1; ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+            _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, l1, m1, *_g) * _o[k2]->getNorm(ir1, l2, m2, *_g) * std::pow(r/r1, k)/r1 * r1 * r1 * dr1;
+          }
+        }
+
+      }
+    }
+  }
+}
+
 void HF::calculateVd(ldouble gamma) {
   std::cout << "Calculating Vd." << std::endl;
 
   for (int k = 0; k < _o.size(); ++k) {
     _vdsum[k] = Vradial(_g->N(), 0);
   }
-  int lmax = 2;
 
   // calculate it first with filled orbitals, dividing by the number of orbitals
   // this is exact if all 2(2*l+1) orbitals in this level are filled
@@ -668,8 +726,45 @@ void HF::calculateVd(ldouble gamma) {
     int m1 = _o[k1]->initialM();
     std::cout << "Calculating Vd term from k = " << k1 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
 
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      //if (k2 == k1) continue;
+      // This is the T part (the rest of T is just Z/r)
+      // The - Y_0 term is in Vex
+      for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+        _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
+      }
+    }
+
+    for (int k = 2; k <= 6; k += 2) {
+      ldouble A = 0.0;
+      if (k == 2 && l1 == 1 && m1 == -1) A = -0.05;
+      if (k == 2 && l1 == 1 && m1 == 0) A = 0.10;
+      if (k == 2 && l1 == 1 && m1 == 1) A = -0.05;
+
+      if (k == 2 && l1 == 2 && m1 == -2) A = -0.0714285714;
+      if (k == 2 && l1 == 2 && m1 == -1) A = 0.0357142857;
+      if (k == 2 && l1 == 2 && m1 == 0) A = 0.0714285714;
+      if (k == 2 && l1 == 2 && m1 == 1) A = 0.0357142857;
+      if (k == 2 && l1 == 2 && m1 == 2) A = -0.0714285714;
+
+      if (k == 4 && l1 == 2 && m1 == -2) A =  0.0066964286;
+      //if (k == 4 && l1 == 2 && m1 == -1) A =  0;
+      //if (k == 4 && l1 == 2 && m1 ==  0) A =  0;
+      //if (k == 4 && l1 == 2 && m1 ==  1) A =  0;
+      if (k == 4 && l1 == 2 && m1 ==  2) A =  0.0066964286;
+
+      if (A == 0) continue;
+      // This is the extra k parts
+      for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+        _vdsum[k1][ir1] += A * _Y[10000*k + 100*k1 + 1*k1][ir1];
+      }
+    }
+
+    /*
+    int lmax = 2;
     // temporary variable
     std::vector<ldouble> vd(_g->N(), 0); // calculate it here first
+
     for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
       ldouble r1 = (*_g)(ir1);
       for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
@@ -706,13 +801,11 @@ void HF::calculateVd(ldouble gamma) {
     }
 
     for (int ko = 0; ko < _o.size(); ++ko) {
-      //if (ko == k1) continue;
-      int lj = _o[ko]->initialL();
-      int mj = _o[ko]->initialM();
       for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
         _vdsum[ko][ir2] += vd[ir2];
       }
     }
+    */
   }
 
   for (int ko = 0; ko < _o.size(); ++ko) {

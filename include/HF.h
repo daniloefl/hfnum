@@ -112,6 +112,9 @@ class HF : public SCF {
 
   private:
 
+    /// \brief Calculate aux. variable Y.
+    void calculateY();
+
     /// \brief Calculate direct SCF potentials.
     /// \param gamma Parameter used to take a linear combination of previous potential and new one.
     void calculateVd(ldouble gamma);
@@ -120,6 +123,8 @@ class HF : public SCF {
     /// \param gamma Parameter used to take a linear combination of previous potential and new one.
     void calculateVex(ldouble gamma);
 
+    /// Auxiliary variable Y
+    std::map<int, Vradial> _Y;
 
     /// Direct potential
     std::map<int, Vradial>   _vd;
