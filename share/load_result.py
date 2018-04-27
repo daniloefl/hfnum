@@ -26,20 +26,20 @@ print('Examples are any result*.txt file in the output directory. The ones with 
 print('[feel free to use TAB to auto-complete]')
 fname = raw_input('')
 
-print "Loading result from file %s" % fname
+#print "Loading result from file %s" % fname
 
 # random initialisation
 h = hfnum.HF(fname)
 #h.load(fname)
 
 r = np.asarray(h.getR())
-print "r:", r
+#print "r:", r
 
 for n in range(0, h.getNOrbitals()):
-  print "Energy for orbital %10s (index=%2d, n=%2d, l=%2d, m=%2d, s=%2d): %10.6f Hartree = %15.8f eV" % (h.getOrbitalName(n), n, h.getOrbital_n(n), h.getOrbital_l(n), h.getOrbital_m(n), h.getOrbital_s(n), h.getOrbital_E(n), h.getOrbital_E(n)*eV)
+  print("Energy for orbital %10s (index=%2d, n=%2d, l=%2d, m=%2d, s=%2d): %10.6f Hartree = %15.8f eV" % (h.getOrbitalName(n), n, h.getOrbital_n(n), h.getOrbital_l(n), h.getOrbital_m(n), h.getOrbital_s(n), h.getOrbital_E(n), h.getOrbital_E(n)*eV))
 
 E0 = h.getE0()
-print "Total ground energy: %10.6f Hartree = %15.8f eV" % (E0, E0*eV)
+print("Total ground energy: %10.6f Hartree = %15.8f eV" % (E0, E0*eV))
 
 o = []
 v = h.getNucleusPotential()
