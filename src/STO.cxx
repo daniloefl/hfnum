@@ -82,7 +82,7 @@ ldouble STO::dot(int i, int j) {
   return 0;
 }
 
-ldouble GTO::T(int i, int j) {
+ldouble STO::T(int i, int j) {
   if (i >= _u.size() || j >= _u.size()) return 0;
   const ldouble xi1 = _u[i].xi;
   const ldouble xi2 = _u[j].xi;
@@ -92,11 +92,10 @@ ldouble GTO::T(int i, int j) {
   const int mi2 = _u[j].m;
   const int ni1 = _u[i].n;
   const int ni2 = _u[j].n;
-  }
   return 0;
 }
 
-ldouble GTO::V(int i, int j) {
+ldouble STO::V(int i, int j) {
   if (i >= _u.size() || j >= _u.size()) return 0;
   const ldouble xi1 = _u[i].xi;
   const ldouble xi2 = _u[j].xi;
