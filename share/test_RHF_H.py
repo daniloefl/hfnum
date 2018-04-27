@@ -15,7 +15,7 @@ h = hfnum.RHF()
 h.setZ(Z)
 h.addOrbital(1, 0, 0,  1)
 #h.addOrbital(1, 0, 0, -1)
-h.Nscf(10)
+h.Nscf(2)
 h.solve()
 
 r = []
@@ -30,12 +30,12 @@ for i in range(0, h.getNOrbitals(1)):
   o_up.append(h.getOrbital(i, 1, l, m, r))
   o_up[-1] = np.asarray(o_up[-1])
 
-o_dw = []
-for i in range(0, h.getNOrbitals(-1)):
-  l = h.getOrbital_l(i, -1)
-  m = h.getOrbital_m(i, -1)
-  o_dw.append(h.getOrbital(i, -1, l, m, r))
-  o_dw[-1] = np.asarray(o_dw[-1])
+#o_dw = []
+#for i in range(0, h.getNOrbitals(-1)):
+#  l = h.getOrbital_l(i, -1)
+#  m = h.getOrbital_m(i, -1)
+#  o_dw.append(h.getOrbital(i, -1, l, m, r))
+#  o_dw[-1] = np.asarray(o_dw[-1])
 
 r = np.asarray(r)
 

@@ -1,33 +1,32 @@
-#include "GTO.h"
+#include "STO.h"
 #include <fstream>
 #include <iostream>
 #include <cmath>
 
 using namespace std;
 
-GTO::GTO()
+STO::STO()
   : Basis() {
   setZ(1);
 }
 
-GTO::~GTO() {
+STO::~STO() {
 }
 
-void GTO::setZ(ldouble Z) {
+void STO::setZ(ldouble Z) {
   _Z = Z;
   _u.clear();
-  GTOUnit u;
-  // u = r^l exp(-xi r^2) Y_lm(theta, phi)
-  //double coeff[] = {3.42525091, 0.623913730, 0.168855400};
-  //for (size_t k = 0; k < sizeof(coeff)/sizeof(double); ++k) {
-  //  u.xi = coeff[k];
-  for (int k = 0; k < 7; ++k) {
-    u.xi = exp(log(0.1) + k);
+  STOUnit u;
+  // u = 1/(sqrt( (2*n)! )) (2*xi)^(n+0.5) r^(n-1) exp(-xi r) Y_lm (theta, phi)
+  double coeff[] = {1.0, 0.5, 2.0};
+  for (size_t k = 0; k < sizeof(coeff)/sizeof(double); ++k) {
+    u.xi = coeff[k];
+    u.n = 0;
     u.l = 0;
     u.m = 0;
     _u.push_back(u);
   }
-  std::cout << "Loaded GTOs with exponents: ";
+  std::cout << "Loaded STOs with exponents: ";
   for (auto &k : _u) {
     std::cout << k.xi << " ";
   }
@@ -35,29 +34,27 @@ void GTO::setZ(ldouble Z) {
 
 }
 
-ldouble GTO::norm(int i) {
+ldouble STO::norm(int i) {
   const int l = _u[i].l;
   const int xi = _u[i].xi;
   if (l == 0) {
-    return 1.0/(sqrt(2)*sqrt(M_PI)/(16*pow(xi, 1.5)));
+    return 1.0;
   } else if (l == 1) {
-    return 1.0/(3*sqrt(2)*sqrt(M_PI)/(64*pow(xi, 2.5)));
-  } else if (l == 2) {
-    return 1.0/(15*sqrt(2)*sqrt(M_PI)/(256*pow(xi, 3.5)));
+    return 1.0;
   }
   return 0; // This will cause a crash due to division by zero if a certain l is not implemented ---> this is what we want to inform the user something is deeply wrong
 }
 
-ldouble GTO::value(int k, ldouble r, int l_proj, int m_proj) {
+ldouble STO::value(int k, ldouble r, int l_proj, int m_proj) {
   if (l_proj != _u[k].l || m_proj != _u[k].m) return 0;
-  return pow(r, _u[k].l)*exp(-_u[k].xi*r*r)*norm(k);
+  return 1.0/sqrt(factorial(2*_u[k].n)) * pow(2*_u[k].xi, _u[k].n+0.5) * pow(r, _u[k].n-1)*exp(-_u[k].xi*r*r)*norm(k);
 }
 
-int GTO::N() {
+int STO::N() {
   return _u.size();
 }
 
-void GTO::load(const std::string &fname) {
+void STO::load(const std::string &fname) {
   _u.clear();
   std::ifstream f(fname.c_str());
   std::string line;
@@ -66,13 +63,13 @@ void GTO::load(const std::string &fname) {
     if (line.at(0) == '#') continue;
     std::stringstream ss;
     ss.str(line);
-    GTOUnit u;
-    ss >> u.xi >> u.l >> u.m;
+    STOUnit u;
+    ss >> u.xi >> u.n >> u.l >> u.m;
     _u.push_back(u);
   }
 }
 
-ldouble GTO::dot(int i, int j) {
+ldouble STO::dot(int i, int j) {
   if (i >= _u.size() || j >= _u.size()) return 0;
   const ldouble xi1 = _u[i].xi;
   const ldouble xi2 = _u[j].xi;
@@ -80,25 +77,8 @@ ldouble GTO::dot(int i, int j) {
   const int mi1 = _u[i].m;
   const int li2 = _u[j].l;
   const int mi2 = _u[j].m;
-  if (li1 == 0 && li2 == 0 && mi1 == 0 && mi2 == 0) {
-    return 32*pow(xi1, 3)/(sqrt(M_PI)*pow(xi1 + xi2, 1.5));
-  } else if (li1 == 1 && li2 == 1 && mi1 == -1 && mi2 == -1) {
-    return 256*pow(xi1, 5)/(3*sqrt(M_PI)*pow(xi1 + xi2, 2.5));
-  } else if (li1 == 1 && li2 == 1 && mi1 == 0 && mi2 == 0) {
-    return 256*pow(xi1, 5)/(3*sqrt(M_PI)*pow(xi1 + xi2, 2.5));
-  } else if (li1 == 1 && li2 == 1 && mi1 == 1 && mi2 == 1) {
-    return 256*pow(xi1, 5)/(3*sqrt(M_PI)*pow(xi1 + xi2, 2.5));
-  } else if (li1 == 2 && li2 == 2 && mi1 == -2 && mi2 == -2) {
-    return 2048*pow(xi1, 7)/(15*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
-  } else if (li1 == 2 && li2 == 2 && mi1 == -1 && mi2 == -1) {
-    return 2048*pow(xi1, 7)/(15*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
-  } else if (li1 == 2 && li2 == 2 && mi1 == 0 && mi2 == 0) {
-    return 2048*pow(xi1, 7)/(15*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
-  } else if (li1 == 2 && li2 == 2 && mi1 == 1 && mi2 == 1) {
-    return 2048*pow(xi1, 7)/(15*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
-  } else if (li1 == 2 && li2 == 2 && mi1 == 2 && mi2 == 2) {
-    return 2048*pow(xi1, 7)/(15*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
-  }
+  const int ni1 = _u[i].n;
+  const int ni2 = _u[j].n;
   return 0;
 }
 
@@ -110,24 +90,8 @@ ldouble GTO::T(int i, int j) {
   const int mi1 = _u[i].m;
   const int li2 = _u[j].l;
   const int mi2 = _u[j].m;
-  if (li1 == 0 && li2 == 0 && mi1 == 0 && mi2 == 0) {
-    return 96*pow(xi1, 4)*xi2/(sqrt(M_PI)*pow(xi1 + xi2, 2.5));
-  } else if (li1 == 1 && li2 == 1 && mi1 == -1 && mi2 == -1) {
-    return 1280*pow(xi1, 6)*xi2/(3*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
-  } else if (li1 == 1 && li2 == 1 && mi1 ==  0 && mi2 ==  0) {
-    return 1280*pow(xi1, 6)*xi2/(3*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
-  } else if (li1 == 1 && li2 == 1 && mi1 ==  1 && mi2 ==  1) {
-    return 1280*pow(xi1, 6)*xi2/(3*sqrt(M_PI)*pow(xi1 + xi2, 3.5));
-  } else if (li1 == 2 && li2 == 2 && mi1 == -2 && mi2 == -2) {
-    return 14336*pow(xi1, 8)*xi2/(15*sqrt(M_PI)*pow(xi1 + xi2, 4.5));
-  } else if (li1 == 2 && li2 == 2 && mi1 == -1 && mi2 == -1) {
-    return 14336*pow(xi1, 8)*xi2/(15*sqrt(M_PI)*pow(xi1 + xi2, 4.5));
-  } else if (li1 == 2 && li2 == 2 && mi1 ==  0 && mi2 ==  0) {
-    return 14336*pow(xi1, 8)*xi2/(15*sqrt(M_PI)*pow(xi1 + xi2, 4.5));
-  } else if (li1 == 2 && li2 == 2 && mi1 ==  1 && mi2 ==  1) {
-    return 14336*pow(xi1, 8)*xi2/(15*sqrt(M_PI)*pow(xi1 + xi2, 4.5));
-  } else if (li1 == 2 && li2 == 2 && mi1 ==  2 && mi2 ==  2) {
-    return 14336*pow(xi1, 8)*xi2/(15*sqrt(M_PI)*pow(xi1 + xi2, 4.5));
+  const int ni1 = _u[i].n;
+  const int ni2 = _u[j].n;
   }
   return 0;
 }
@@ -140,25 +104,8 @@ ldouble GTO::V(int i, int j) {
   const int mi1 = _u[i].m;
   const int li2 = _u[j].l;
   const int mi2 = _u[j].m;
-  if (li1 == 0 && li2 == 0 && mi1 == 0 && mi2 == 0) {
-    return -64*_Z*pow(xi1, 3)/(M_PI*(xi1 + xi2));
-  } else if (li1 == 1 && li2 == 1 && mi1 == -1 && mi2 == -1) {
-    return -1024*_Z*pow(xi1, 5)/(9*M_PI*pow(xi1 + xi2, 2));
-  } else if (li1 == 1 && li2 == 1 && mi1 == 0 && mi2 == 0) {
-    return -1024*_Z*pow(xi1, 5)/(9*M_PI*pow(xi1 + xi2, 2));
-  } else if (li1 == 1 && li2 == 1 && mi1 == 1 && mi2 == 1) {
-    return -1024*_Z*pow(xi1, 5)/(9*M_PI*pow(xi1 + xi2, 2));
-  } else if (li1 == 2 && li2 == 2 && mi1 == -2 && mi2 == -2) {
-    return -32768*_Z*pow(xi1, 7)/(225*M_PI*pow(xi1 + xi2, 3));
-  } else if (li1 == 2 && li2 == 2 && mi1 == -1 && mi2 == -1) {
-    return -32768*_Z*pow(xi1, 7)/(225*M_PI*pow(xi1 + xi2, 3));
-  } else if (li1 == 2 && li2 == 2 && mi1 == 0 && mi2 == 0) {
-    return -32768*_Z*pow(xi1, 7)/(225*M_PI*pow(xi1 + xi2, 3));
-  } else if (li1 == 2 && li2 == 2 && mi1 == 1 && mi2 == 1) {
-    return -32768*_Z*pow(xi1, 7)/(225*M_PI*pow(xi1 + xi2, 3));
-  } else if (li1 == 2 && li2 == 2 && mi1 == 2 && mi2 == 2) {
-    return -32768*_Z*pow(xi1, 7)/(225*M_PI*pow(xi1 + xi2, 3));
-  }
+  const int ni1 = _u[i].n;
+  const int ni2 = _u[j].n;
   return 0;
 }
 
@@ -207,7 +154,7 @@ ldouble GTO::V(int i, int j) {
 //                                            1/k^2 deriv^(nb+nc+2) (exp (-k^2 / ( 4 * (ab+ac)) )) deriv^(na+nd+2) (exp (-k^2 / ( 4 * (aa+ad)) ))
 //
 // Complicated to deal with spherical harmonics ... move to a different basis
-ldouble GTO::ABCD(int a, int b, int c, int d) {
+ldouble STO::ABCD(int a, int b, int c, int d) {
   if (a >= _u.size() || b >= _u.size() || c >= _u.size() || d >= _u.size()) return 0;
   const ldouble xi_a = _u[a].xi;
   const ldouble xi_b = _u[b].xi;

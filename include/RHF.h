@@ -16,6 +16,7 @@
 #include "Basis.h"
 #include "MatrixSCF.h"
 #include "GTO.h"
+#include "STO.h"
 
 #include <Eigen/Sparse>
 #include <Eigen/Core>
@@ -57,7 +58,7 @@ class RHF : public MatrixSCF {
   protected:
 
     /// Basis
-    GTO _g;
+    STO _g;
 
     /// Fock matrix
     MatrixXld _F_up;
