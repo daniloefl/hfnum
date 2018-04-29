@@ -15,10 +15,10 @@ Z = 5
 dx = 0.5*1e-1/Z
 N = 2*310*Z
 rmin = 1e-12
-dx = 1e-1/2.0
-N = 120*2.0
-rmin = 1e-4
-h = hfnum.HF()
+dx = 0.5e-1
+N = 210*2
+rmin = 1e-8
+h = hfnum.HFS()
 h.resetGrid(True, dx, int(N), rmin)
 h.setZ(Z)
 h.method(2)
@@ -36,11 +36,11 @@ h.addOrbital(orb4)
 
 NiterSCF = 40
 Niter = 1000
-F0stop = 1e-6
+F0stop = 1e-8
 r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
-h.gammaSCF(0.3)
+h.gammaSCF(0.2)
 h.solve(NiterSCF, Niter, F0stop)
 h.save("output/results_B.txt")
 
