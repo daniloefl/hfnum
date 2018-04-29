@@ -1,6 +1,7 @@
 #include <boost/python.hpp>
 #include <string>
 #include "HF.h"
+#include "HFS.h"
 #include "DFT.h"
 #include "Grid.h"
 #include "Orbital.h"
@@ -12,6 +13,32 @@ using namespace boost::python;
 
 BOOST_PYTHON_MODULE(hfnum)
 {
+  class_<HFS>("HFS", init<>())
+    .def(init<>())
+    .def(init<const std::string>())
+    .def("solve", &HFS::solve)
+    .def("addOrbital", &HFS::addOrbitalPython)
+    .def("gammaSCF", &HFS::gammaSCF)
+    .def("method", &HFS::method)
+    .def("resetGrid", &HFS::resetGrid)
+    .def("Z", &HFS::Z)
+    .def("setZ", &HFS::setZ)
+    .def("getR", &HFS::getR)
+    .def("getNucleusPotential", &HFS::getNucleusPotentialPython)
+    .def("getDirectPotential", &HFS::getDirectPotentialPython)
+    .def("getExchangePotential", &HFS::getExchangePotentialPython)
+    .def("getNOrbitals", &HFS::getNOrbitals)
+    .def("getOrbital_n", &HFS::getOrbital_n)
+    .def("getOrbital_l", &HFS::getOrbital_l)
+    .def("getOrbital_m", &HFS::getOrbital_m)
+    .def("getOrbital_s", &HFS::getOrbital_s)
+    .def("getOrbital_E", &HFS::getOrbital_E)
+    .def("getOrbitalName", &HFS::getOrbitalName)
+    .def("getCentral", &HFS::getOrbitalCentralPython)
+    .def("getE0", &HFS::getE0)
+    .def("save", &HFS::save)
+    .def("load", &HFS::load)
+  ;
   //class_<Grid>("Grid", init<bool, double, int, double>())
   //  .def(init<bool, double, int, double>())
   //  .def("getR", &Grid::getR)
