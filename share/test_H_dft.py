@@ -12,11 +12,8 @@ import matplotlib.pyplot as plt
 Z = 1
 
 # log grid
-dx = 1e-2
-N = 1900
-rmin = 1e-7
 dx = 0.5e-1
-N = 441
+N = 421
 rmin = 1e-8
 h = hfnum.DFT()
 h.resetGrid(True, dx, int(N), rmin)
