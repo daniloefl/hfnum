@@ -76,7 +76,7 @@ ldouble HFS::solveForFixedPotentials(int Niter, ldouble F0stop) {
   ldouble F = 0;
   int nStep = 0;
   while (nStep < Niter) {
-    gamma = 0.5*(1 - std::exp(-(nStep+1)/20.0));
+    gamma = 0.9*(1 - std::exp(-(nStep+1)/5.0));
     // compute sum of squares of F(x_old)
     nStep += 1;
     if (_method == 0) {
@@ -232,9 +232,11 @@ ldouble HFS::stepRenormalised(ldouble gamma) {
       _dE[k] = 0;
     }
     if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
-      _dE[k] = std::fabs(_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k]->initialN()+1, 2));
+      std::cout << "Too few nodes in orbital " << k << std::endl;
+      _dE[k] = 0.5*std::fabs(_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k]->initialN()+1, 2));
     } else if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
-      _dE[k] = -std::fabs(_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k]->initialN()+1, 2));
+      std::cout << "Too many nodes in orbital " << k << std::endl;
+      _dE[k] = -0.5*std::fabs(_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k]->initialN()+1, 2));
     }
     //_dE[k] = -gamma*grad(k); // for root finding
     //if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);
