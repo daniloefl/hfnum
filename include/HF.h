@@ -144,6 +144,9 @@ class HF : public SCF {
     /// temporary variable for the new Vex
     std::map<std::pair<int, int>, Vradial>  _vexsum;
 
+    /// temporary variable for standard solver
+    std::map<int, Vradial> matchedSt;
+
 
 };
 

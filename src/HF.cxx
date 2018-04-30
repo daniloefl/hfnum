@@ -370,8 +370,7 @@ ldouble HF::stepStandard(ldouble gamma) {
     l[k] = _o[k]->l();
   }
 
-  std::map<int, Vradial> matched;
-  ldouble Fn = _iss.solve(E, l, _vd, _vex, matched);
+  ldouble Fn = _iss.solve(E, l, _vd, _vex, matchedSt);
 
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
@@ -379,8 +378,8 @@ ldouble HF::stepStandard(ldouble gamma) {
     int m = _o[k]->m();
     int idx = _om.index(k);
     for (int i = 0; i < _g->N(); ++i) {
-      (*_o[k])(i) = matched[idx][i];
-      if (i >= 10 && i < _g->N() - 4 && matched[idx][i]*matched[idx][i-1] <= 0) {
+      (*_o[k])(i) = matchedSt[idx][i];
+      if (i >= 10 && i < _g->N() - 4 && matchedSt[idx][i]*matchedSt[idx][i-1] <= 0) {
         _nodes[k] += 1;
         std::cout << "Orbital " << k << ": Found node at i=" << i << ", r = " << (*_g)(i) << std::endl;
       }
@@ -392,8 +391,7 @@ ldouble HF::stepStandard(ldouble gamma) {
     std::vector<ldouble> EdE = E;
     EdE[k] += dE[k];
 
-    std::map<int, Vradial> matched;
-    ldouble Fd = _iss.solve(EdE, l, _vd, _vex, matched);
+    ldouble Fd = _iss.solve(EdE, l, _vd, _vex, matchedSt);
 
     grad[k] = (Fd - Fn)/dE[k];
   }
