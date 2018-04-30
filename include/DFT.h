@@ -117,6 +117,11 @@ class DFT : public SCF {
     /// \return Vector of electron density values for each Grid point.
     boost::python::list getDensityDownPython();
 
+    /// \brief Use a standard iterative Numerov method.
+    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
+    /// \return Minimisation function value at the end of the step.
+    ldouble stepStandard(ldouble gamma);
+
   private:
     /// \brief Calculate direct SCF potentials.
     /// \param gamma Parameter used to take a linear combination of previous potential and new one.
@@ -143,6 +148,9 @@ class DFT : public SCF {
     /// total potential
     std::vector<ldouble> _vsum_up;
     std::vector<ldouble> _vsum_dw;
+
+    /// temporary variable for standard solver
+    std::map<int, Vradial> matchedSt;
 };
 
 #endif

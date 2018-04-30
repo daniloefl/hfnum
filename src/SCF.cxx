@@ -35,7 +35,7 @@ SCF::SCF()
     _pot[k] = -_Z/(*_g)(k);
   }
   _gamma_scf = 0.5;
-  _method = 2;
+  _method = 3;
 }
 
 Grid &SCF::getGrid() {

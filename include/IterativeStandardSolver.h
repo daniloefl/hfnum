@@ -33,30 +33,33 @@ class IterativeStandardSolver {
 
     /// \brief Solve equation for a specific energy.
     /// \param E Trial energy.
-    /// \param l Spherical harmonic l parameters.
+    /// \param pot Nucleus potential.
     /// \param vd Direct potential for each orbital.
     /// \param vex Exchange potential for each orbital.
     /// \param matched To be returned by reference.
     /// \return Minimisation function based on matching at classical crossing for the trial energy.
-    ldouble solve(std::vector<ldouble> &E, std::vector<int> &l,  std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched);
+    ldouble solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched);
+
+    /// \brief Solve equation for a specific energy.
+    /// \param E Trial energy.
+    /// \param pot Nucleus potential.
+    /// \param vup Potential only on up electrons.
+    /// \param vdw Potential only on down electrons.
+    /// \param matched To be returned by reference.
+    /// \return Minimisation function based on matching at classical crossing for the trial energy.
+    ldouble solve(std::vector<ldouble> &E, Vradial &pot, Vradial &vup, Vradial &vdw, std::map<int, Vradial> &matched);
 
     /// \brief Solve assuming initial conditions at the 2 last grid points.
     /// \param E Trial energy.
-    /// \param l Spherical harmonic l parameters.
-    /// \param vd Direct potential for each orbital.
-    /// \param vex Exchange potential for each orbital.
     /// \param matched Previous orbitals to be used for non-homogenous term.
     /// \param idx Index of orbital to solve.
     /// \param solution To be returned by reference.
-    void solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched, int idx, Vradial &solution);
+    void solveInward(std::vector<ldouble> &E, std::map<int, Vradial> &matched, int idx, Vradial &solution);
 
     /// \brief Solve assuming initial conditions at the 2 first grid points.
     /// \param E Trial energy.
-    /// \param l Spherical harmonic l parameters.
-    /// \param vd Direct potential for each orbital.
-    /// \param vex Exchange potential for each orbital.
     /// \param matched To be returned by reference. Orbitals found.
-    void solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched, int idx, Vradial &solution);
+    void solveOutward(std::vector<ldouble> &E, std::map<int, Vradial> &matched, int idx, Vradial &solution);
 
     /// \brief Force continuity by taking ratio of inward and outward solutions at the matching point and scaling the solutions appropriately.
     /// \param k Index of the orbital.

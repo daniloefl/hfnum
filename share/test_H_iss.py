@@ -37,7 +37,7 @@ o = [np.asarray(orb.getCentral())]
 v = h.getNucleusPotential()
 H1s = 2*np.exp(-r)
 
-m = next(i for i,v in enumerate(r) if v >= 10)
+m = -1 #next(i for i,v in enumerate(r) if v >= 10)
 f = plt.figure()
 plt.plot(r[:m], r[:m]*o[0][:m], 'r-',  linewidth = 2, label = 'r*Orbital 0 (s)')
 plt.plot(r[:m], r[:m]*H1s[:m], 'g--', linewidth = 2, label = 'r*Hydrogen 1s')

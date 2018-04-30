@@ -248,6 +248,8 @@ ldouble DFT::solveForFixedPotentials(int Niter, ldouble F0stop) {
         F = stepGordon(gamma);
       } else if (_method == 2) {
         F = stepRenormalised(gamma);
+      } else if (_method == 3) {
+        F = stepStandard(gamma);
       }
 
       // change orbital energies
@@ -399,6 +401,78 @@ ldouble DFT::stepRenormalised(ldouble gamma) {
     }
     //if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);
     std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
+  }
+
+  return F;
+}
+
+// solve for a fixed energy and calculate _dE for the next step
+ldouble DFT::stepStandard(ldouble gamma) {
+  int N = _om.N();
+
+  std::vector<ldouble> E(_o.size(), 0);
+  std::vector<int> l(_o.size(), 0);
+
+  std::vector<ldouble> dE(_o.size(), 0);
+  for (int k = 0; k < _o.size(); ++k) {
+    dE[k] = 1e-5;
+    E[k] = _o[k]->E();
+    l[k] = _o[k]->l();
+  }
+
+  ldouble Fn = _iss.solve(E, _pot, _vsum_up, _vsum_dw, matchedSt);
+
+  for (int k = 0; k < _o.size(); ++k) {
+    _nodes[k] = 0;
+    int l = _o[k]->l();
+    int m = _o[k]->m();
+    int idx = _om.index(k);
+    for (int i = 0; i < _g->N(); ++i) {
+      (*_o[k])(i) = matchedSt[idx][i];
+      if (i >= 10 && i < _g->N() - 4 && matchedSt[idx][i]*matchedSt[idx][i-1] <= 0) {
+        _nodes[k] += 1;
+        std::cout << "Orbital " << k << ": Found node at i=" << i << ", r = " << (*_g)(i) << std::endl;
+      }
+    }
+  }
+
+  std::vector<ldouble> grad(_o.size());
+  for (int k = 0; k < _o.size(); ++k) {
+    std::vector<ldouble> EdE = E;
+    EdE[k] += dE[k];
+
+    ldouble Fd = _iss.solve(EdE, _pot, _vsum_up, _vsum_dw, matchedSt);
+
+    grad[k] = (Fd - Fn)/dE[k];
+  }
+
+  ldouble F = Fn;
+  for (int k = 0; k < _o.size(); ++k) {
+    if (grad[k] != 0) {
+      _dE[k] = Fn/grad[k]; // for root finding
+      _dE[k] *= -gamma;
+    } else {
+      _dE[k] = 0;
+    }
+    if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
+    std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
+    if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emin[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emax[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else {
+      if (_dE[k] > 0) {
+        _Emin[k] = _o[k]->E();
+      } else if (_dE[k] < 0) {
+        _Emax[k] = _o[k]->E();
+      }
+    }
   }
 
   return F;

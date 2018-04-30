@@ -100,9 +100,15 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
       std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << newE << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
       _o[k]->E(newE);
     }
-
-    if (std::fabs(*std::max_element(_dE.begin(), _dE.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop) break;
-    //if (std::fabs(F) < F0stop) break;
+    if (_method == 3) {
+      std::vector<ldouble> Ediff;
+      std::transform(_Emax.begin(), _Emax.end(), _Emin.begin(), std::back_inserter(Ediff),
+                     [](ldouble a, ldouble b) { return std::fabs(a-b); });
+      if (std::fabs(*std::max_element(Ediff.begin(), Ediff.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop) break;
+    } else {
+      if (std::fabs(*std::max_element(_dE.begin(), _dE.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop) break;
+      //if (std::fabs(F) < F0stop) break;
+    }
   }
 
   return F;
@@ -365,12 +371,12 @@ ldouble HF::stepStandard(ldouble gamma) {
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = 1e-3;
+    dE[k] = 1e-5;
     E[k] = _o[k]->E();
     l[k] = _o[k]->l();
   }
 
-  ldouble Fn = _iss.solve(E, l, _vd, _vex, matchedSt);
+  ldouble Fn = _iss.solve(E, _pot, _vd, _vex, matchedSt);
 
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
@@ -391,7 +397,7 @@ ldouble HF::stepStandard(ldouble gamma) {
     std::vector<ldouble> EdE = E;
     EdE[k] += dE[k];
 
-    ldouble Fd = _iss.solve(EdE, l, _vd, _vex, matchedSt);
+    ldouble Fd = _iss.solve(EdE, _pot, _vd, _vex, matchedSt);
 
     grad[k] = (Fd - Fn)/dE[k];
   }
