@@ -36,7 +36,7 @@ h.addOrbital(orb4)
 
 NiterSCF = 40
 Niter = 1000
-F0stop = 1e-8
+F0stop = 1e-6
 r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
