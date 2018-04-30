@@ -18,6 +18,7 @@ IterativeStandardSolver::~IterativeStandardSolver() {
 
 ldouble IterativeStandardSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched) {
   int M = _om.N();
+  ldouble F = 0;
 
   for (int idx = 0; idx < M; ++idx) {
     if (matched.find(idx) == matched.end()) matched.insert(std::pair<int, Vradial>(idx, Vradial()));
@@ -27,11 +28,11 @@ ldouble IterativeStandardSolver::solve(std::vector<ldouble> &E, std::vector<int>
     if (s.find(idx) == s.end()) s.insert(std::pair<int, Vradial>(idx, Vradial()));
   }
   for (int idx = 0; idx < M; ++idx) {
-    matched[idx].resize(_g.N());
-    inward[idx].resize(_g.N());
-    outward[idx].resize(_g.N());
-    f[idx].resize(_g.N());
-    s[idx].resize(_g.N());
+    matched[idx].resize(_g.N(), 0);
+    inward[idx].resize(_g.N(), 0);
+    outward[idx].resize(_g.N(), 0);
+    f[idx].resize(_g.N(), 0);
+    s[idx].resize(_g.N(), 0);
   }
 
   for (int idx = 0; idx < M; ++idx) {
@@ -66,6 +67,7 @@ ldouble IterativeStandardSolver::solve(std::vector<ldouble> &E, std::vector<int>
 
     }
   }
+  /*
   // solve in inverse order
   for (int idx = M-1; idx >= 0; --idx) {
     solveOutward(E, l, vd, vex, matched, idx, outward[idx]);
@@ -86,16 +88,17 @@ ldouble IterativeStandardSolver::solve(std::vector<ldouble> &E, std::vector<int>
 
     }
   }
+  */
 
   // calculate first derivative in icl[idx]
-  ldouble F = 0;
   for (int idx = 0; idx < M; ++idx) {
     F += std::fabs( (12 - 10*f[idx][icl[idx]])*matched[idx][icl[idx]] 
                     - f[idx][icl[idx]-1]*matched[idx][icl[idx]-1]
                     - f[idx][icl[idx]+1]*matched[idx][icl[idx]+1]
-                    + s[idx][icl[idx]-1]
-                    + s[idx][icl[idx]]
-                    + s[idx][icl[idx]+1] );
+                  //  + s[idx][icl[idx]-1]
+                  //  + s[idx][icl[idx]]
+                  //  + s[idx][icl[idx]+1]
+                  );
   }
 
   return F;
@@ -106,10 +109,11 @@ ldouble IterativeStandardSolver::solve(std::vector<ldouble> &E, std::vector<int>
 void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched, int idx, Vradial &solution) {
   int N = _g.N();
   solution.resize(N);
-  solution[N-1] = std::exp(-std::sqrt(2*E[idx])*_g(N-1));
-  solution[N-2] = std::exp(-std::sqrt(2*E[idx])*_g(N-2));
+  solution[N-1] = std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-1));
+  solution[N-2] = std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
   for (int k = N-2; k >= 0; --k) {
     solution[k-1] = ((12 - f[idx][k]*10)*solution[k] - f[idx][k+1]*solution[k+1] + s[idx][k])/f[idx][k-1];
+    //std::cout << "inward " << solution[k-1] << std::endl;
   }
 }
 
@@ -125,6 +129,7 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::vector<
 
   for (int k = 0; k < N; ++k) {
     solution[k+1] = ((12 - f[idx][k]*10)*solution[k] - f[idx][k-1]*solution[k-1] + s[idx][k])/f[idx][k+1];
+    //std::cout << "outward " << solution[k+1] << std::endl;
   }
 }
 
@@ -151,6 +156,7 @@ void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial 
     //o_untransformed[i] = ov;
     norm += std::pow(ov*r, 2)*dr;
   }
+  std::cout << "norm " << norm << std::endl;
   norm = 1.0/std::sqrt(norm);
   for (int i = 0; i < _g.N(); ++i) {
     o[i] *= norm;
