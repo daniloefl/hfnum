@@ -13,8 +13,8 @@ Z = 1
 
 # log grid
 dx = 1e-1
-N = 150
-rmin = 1e-3
+N = 120
+rmin = 1e-4
 h = hfnum.HF()
 h.resetGrid(True, dx, int(N), rmin)
 h.setZ(Z)
@@ -28,6 +28,7 @@ NiterSCF = 1
 Niter = 1
 F0stop = 1e-6
 r = np.asarray(h.getR())
+print(r)
 h.solve(NiterSCF, Niter, F0stop)
 
 h.save('output/results_H_iss.txt')
