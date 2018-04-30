@@ -231,16 +231,18 @@ ldouble HFS::stepRenormalised(ldouble gamma) {
     } else {
       _dE[k] = 0;
     }
-    if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
-      std::cout << "Too few nodes in orbital " << k << std::endl;
-      _dE[k] = 0.5*std::fabs(_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k]->initialN()+1, 2));
-    } else if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
-      std::cout << "Too many nodes in orbital " << k << std::endl;
-      _dE[k] = -0.5*std::fabs(_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k]->initialN()+1, 2));
-    }
     //_dE[k] = -gamma*grad(k); // for root finding
-    //if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);
+    if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);
     std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
+    if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
+      std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _dE[k] = std::fabs(_Z*_Z*0.5/std::pow(_nodes[k], 2) - _Z*_Z*0.5/std::pow(_nodes[k]+1, 2));
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
+      std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _dE[k] = -std::fabs(_Z*_Z*0.5/std::pow(_nodes[k], 2) - _Z*_Z*0.5/std::pow(_nodes[k]+1, 2));
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    }
   }
 
   return F;
