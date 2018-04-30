@@ -1,5 +1,6 @@
 #include "IterativeStandardSolver.h"
 
+#include <iostream>
 #include <vector>
 #include "Orbital.h"
 #include "Grid.h"
@@ -8,22 +9,32 @@
 
 IterativeStandardSolver::IterativeStandardSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om)
   : _g(g), _o(o), icl(i), _om(om) {
+
 }
 
 IterativeStandardSolver::~IterativeStandardSolver() {
 }
 
 
-ldouble IterativeStandardSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::vector<Vradial> &matched) {
+ldouble IterativeStandardSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched) {
   int M = _om.N();
 
-  std::vector<Vradial> inward(M);
-  std::vector<Vradial> outward(M);
-  matched.resize(M);
+  for (int idx = 0; idx < M; ++idx) {
+    if (matched.find(idx) == matched.end()) matched.insert(std::pair<int, Vradial>(idx, Vradial()));
+    if (inward.find(idx) == inward.end()) inward.insert(std::pair<int, Vradial>(idx, Vradial()));
+    if (outward.find(idx) == outward.end()) outward.insert(std::pair<int, Vradial>(idx, Vradial()));
+    if (f.find(idx) == f.end()) f.insert(std::pair<int, Vradial>(idx, Vradial()));
+    if (s.find(idx) == s.end()) s.insert(std::pair<int, Vradial>(idx, Vradial()));
+  }
+  for (int idx = 0; idx < M; ++idx) {
+    matched[idx].resize(_g.N());
+    inward[idx].resize(_g.N());
+    outward[idx].resize(_g.N());
+    f[idx].resize(_g.N());
+    s[idx].resize(_g.N());
+  }
 
   for (int idx = 0; idx < M; ++idx) {
-    f[idx] = Vradial(_g.N(), 0);
-    s[idx] = Vradial(_g.N(), 0);
     if (_g.isLog()) {
       for (int k = 0; k < _g.N(); ++k) {
         f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*2*std::pow(_g(k), 2)*(E[idx] - vd[idx][k]) - std::pow(l[idx] - 0.5, 2);
@@ -35,20 +46,14 @@ ldouble IterativeStandardSolver::solve(std::vector<ldouble> &E, std::vector<int>
     }
   }
 
-  for (int idx = 0; idx < M; ++idx) {
-    matched[idx] = Vradial(_g.N(), 0);
-  }
   // solve in direct order
   for (int idx = 0; idx < M; ++idx) {
-    inward[idx] = Vradial(_g.N(), 0);
-    outward[idx] = Vradial(_g.N(), 0);
     solveOutward(E, l, vd, vex, matched, idx, outward[idx]);
     solveInward(E, l, vd, vex, matched, idx, inward[idx]);
     match(idx, matched[idx], inward[idx], outward[idx]);
 
-
     for (int idx1 = 0; idx1 < M; ++idx1) {
-      s[idx1] = Vradial(_g.N(), 0);
+      std::fill(s[idx1].begin(), s[idx1].end(), 0);
       for (int idx2 = 0; idx2 < M; ++idx2) {
         for (int k = 0; k < _g.N(); ++k) {
           if (_g.isLog()) {
@@ -62,15 +67,13 @@ ldouble IterativeStandardSolver::solve(std::vector<ldouble> &E, std::vector<int>
     }
   }
   // solve in inverse order
-  for (int idx = M; idx >= 0; --idx) {
-    inward[idx] = Vradial(_g.N(), 0);
-    outward[idx] = Vradial(_g.N(), 0);
+  for (int idx = M-1; idx >= 0; --idx) {
     solveOutward(E, l, vd, vex, matched, idx, outward[idx]);
     solveInward(E, l, vd, vex, matched, idx, inward[idx]);
     match(idx, matched[idx], inward[idx], outward[idx]);
 
     for (int idx1 = 0; idx1 < M; ++idx1) {
-      s[idx1] = Vradial(_g.N(), 0);
+      std::fill(s[idx1].begin(), s[idx1].end(), 0);
       for (int idx2 = 0; idx2 < M; ++idx2) {
         for (int k = 0; k < _g.N(); ++k) {
           if (_g.isLog()) {
@@ -100,7 +103,7 @@ ldouble IterativeStandardSolver::solve(std::vector<ldouble> &E, std::vector<int>
 
 
 
-void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::vector<Vradial> &matched, int idx, Vradial &solution) {
+void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched, int idx, Vradial &solution) {
   int N = _g.N();
   solution.resize(N);
   solution[N-1] = std::exp(-std::sqrt(2*E[idx])*_g(N-1));
@@ -110,7 +113,7 @@ void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::vector<i
   }
 }
 
-void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::vector<Vradial> &matched, int idx, Vradial &solution) {
+void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::vector<int> &l, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched, int idx, Vradial &solution) {
   int N = _g.N();
   solution.resize(N);
   solution[0] = std::pow(_g(0), l[idx]+0.5);

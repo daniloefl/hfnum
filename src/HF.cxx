@@ -370,7 +370,7 @@ ldouble HF::stepStandard(ldouble gamma) {
     l[k] = _o[k]->l();
   }
 
-  std::vector<Vradial> matched;
+  std::map<int, Vradial> matched;
   ldouble Fn = _iss.solve(E, l, _vd, _vex, matched);
 
   for (int k = 0; k < _o.size(); ++k) {
@@ -392,7 +392,7 @@ ldouble HF::stepStandard(ldouble gamma) {
     std::vector<ldouble> EdE = E;
     EdE[k] += dE[k];
 
-    std::vector<Vradial> matched;
+    std::map<int, Vradial> matched;
     ldouble Fd = _iss.solve(EdE, l, _vd, _vex, matched);
 
     grad[k] = (Fd - Fn)/dE[k];
