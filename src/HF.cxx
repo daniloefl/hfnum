@@ -544,7 +544,7 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
     std::cout << "SCF step " << nStepSCF << std::endl;
     solveForFixedPotentials(Niter, F0stop);
     nStepSCF++;
-    calculateY();
+    //calculateY();
     calculateVex(_gamma_scf);
     calculateVd(_gamma_scf);
   }
@@ -595,7 +595,7 @@ void HF::calculateVex(ldouble gamma) {
       int m2 = _o[k2]->initialM();
       std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
 
-      for (int k = 0; k <= 5; k += 1) {
+      /*for (int k = 0; k <= 5; k += 1) {
         ldouble B = 0.0;
         if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
         if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/3.0;
@@ -616,9 +616,8 @@ void HF::calculateVex(ldouble gamma) {
           ldouble r1 = (*_g)(ir1);
           _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
         }
-      }
+      }*/
 
-      /*
       // temporary variable
       std::vector<ldouble> vex(_g->N(), 0); // calculate it here first
       for (int L = (int) std::fabs(l1 - l2); L <= l1 + l2; ++L) {
@@ -644,7 +643,7 @@ void HF::calculateVex(ldouble gamma) {
 
       for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
         _vexsum[std::pair<int,int>(k1, k2)][ir1] += vex[ir1];
-      }*/
+      }
     }
   }
 
@@ -729,14 +728,14 @@ void HF::calculateVd(ldouble gamma) {
     int m1 = _o[k1]->initialM();
     std::cout << "Calculating Vd term from k = " << k1 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
 
-    for (int k2 = 0; k2 < _o.size(); ++k2) {
-      //if (k2 == k1) continue;
-      // This is the T part (the rest of T is just Z/r)
-      // The - Y_0 term is in Vex
-      for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-        _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
-      }
-    }
+    //for (int k2 = 0; k2 < _o.size(); ++k2) {
+    //  //if (k2 == k1) continue;
+    //  // This is the T part (the rest of T is just Z/r)
+    //  // The - Y_0 term is in Vex
+    //  for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+    //    _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
+    //  }
+    //}
 
     //for (int k = 2; k <= 6; k += 2) {
     //  ldouble A = 0.0;
@@ -763,7 +762,6 @@ void HF::calculateVd(ldouble gamma) {
     //  }
     //}
 
-    /*
     int lmax = 2;
     // temporary variable
     std::vector<ldouble> vd(_g->N(), 0); // calculate it here first
@@ -808,7 +806,6 @@ void HF::calculateVd(ldouble gamma) {
         _vdsum[ko][ir2] += vd[ir2];
       }
     }
-    */
   }
 
   for (int ko = 0; ko < _o.size(); ++ko) {
