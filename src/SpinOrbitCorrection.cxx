@@ -83,15 +83,15 @@ void SpinOrbitCorrection::correct() {
   // define delta V = (full Vd - full Vex) - (Vd - Vex)
   // this is defined separately for each orbital equation: we want the error in the eigenenergies
   for (int k1 = 0; k1 < _o.size(); ++k1) {
-    lm tlm_d1(_o[k1]->initialL(), _o[k1]->initialM());
+    lm tlm_d1(_o[k1]->l(), _o[k1]->m());
     for (int k2 = 0; k2 < _o.size(); ++k2) {
-      lm tlm_d2(_o[k2]->initialL(), _o[k2]->initialM());
+      lm tlm_d2(_o[k2]->l(), _o[k2]->m());
       if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() > 0) {
         for (int ir = 0; ir < _g->N(); ++ir) {
           ldouble r = (*_g)(ir);
           ldouble dr = 0;
           if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
-          S(k1, k2) += _o[k1]->getNorm(ir, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 2)*dr;
+          S(k1, k2) += _o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2)*dr;
         }
       }
 
@@ -106,7 +106,7 @@ void SpinOrbitCorrection::correct() {
           ldouble l1 = tlm_d1.l;
           ldouble j1 = l1 + s1;
           ldouble coeff = j1*(j1+1) - l1*(l1+1) - s1*(s1+1);
-          dH(k1, k2) += 0.25*std::pow(137.035999139, -2)*dvdr*coeff*_o[k1]->getNorm(ir, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 1)*dr;
+          dH(k1, k2) += 0.25*std::pow(137.035999139, -2)*dvdr*coeff*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 1)*dr;
         }
       }
 
@@ -119,13 +119,13 @@ void SpinOrbitCorrection::correct() {
           ldouble l1 = tlm_d1.l;
           ldouble j1 = l1 + s1;
           ldouble coeff = j1*(j1+1) - l1*(l1+1) - s1*(s1+1);
-          dH(k1, k2) += 0.25*std::pow(137.035999139, -2)*dvdr*coeff*_o[k1]->getNorm(ir, tlm_d1.l, tlm_d1.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 1)*dr;
+          dH(k1, k2) += 0.25*std::pow(137.035999139, -2)*dvdr*coeff*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 1)*dr;
         }
       }
 
       if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() > 0) {
         for (int ko = 0; ko < _o.size(); ++ko) {
-          lm tlmo(_o[ko]->initialL(), _o[ko]->initialM());
+          lm tlmo(_o[ko]->l(), _o[ko]->m());
           if (_o[ko]->spin()*_o[k1]->spin() < 0) continue; // vex == 0 here
           for (int ir = 0; ir < _g->N()-1; ++ir) {
             ldouble r = (*_g)(ir);
@@ -135,7 +135,7 @@ void SpinOrbitCorrection::correct() {
             ldouble l1 = tlm_d1.l;
             ldouble j1 = l1 + s1;
             ldouble coeff = j1*(j1+1) - l1*(l1+1) - s1*(s1+1);
-            dH(k1, k2) += 0.25*std::pow(137.035999139, -2)*dvdr*coeff*_o[ko]->getNorm(ir, tlmo.l, tlmo.m, *_g)*_o[k2]->getNorm(ir, tlm_d2.l, tlm_d2.m, *_g)*std::pow(r, 1)*dr;
+            dH(k1, k2) += 0.25*std::pow(137.035999139, -2)*dvdr*coeff*_o[ko]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 1)*dr;
           }
         }
       }
@@ -155,10 +155,10 @@ void SpinOrbitCorrection::correct() {
     // and calculate dH = <d1|deltaV|d2>
     for (int d1 = 0; d1 < deg_order; ++d1) {
       int k1 = deg[deg_idx][d1];
-      lm tlm_d1(_o[k1]->initialL(), _o[k1]->initialM());
+      lm tlm_d1(_o[k1]->l(), _o[k1]->m());
       for (int d2 = 0; d2 < deg_order; ++d2) {
         int k2 = deg[deg_idx][d2];
-        lm tlm_d2(_o[k2]->initialL(), _o[k2]->initialM());
+        lm tlm_d2(_o[k2]->l(), _o[k2]->m());
         S_deg(d1, d2) = S(k1, k2);
         dH_deg(d1, d2) = dH(k1, k2);
       }
@@ -252,29 +252,29 @@ ldouble SpinOrbitCorrection::getE0() {
   ldouble K = 0;
   for (auto &vditm : _vd) {
     int k = vditm.first;
-    int l = _o[k]->initialL();
-    int m = _o[k]->initialM();
+    int l = _o[k]->l();
+    int m = _o[k]->m();
     for (int ir = 0; ir < _g->N(); ++ir) {
       ldouble r = (*_g)(ir);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      J += _vd[k][ir]*std::pow(_o[k]->getNorm(ir, l, m, *_g), 2)*std::pow(r, 2)*dr;
+      J += _vd[k][ir]*std::pow(_o[k]->getNorm(ir, *_g), 2)*std::pow(r, 2)*dr;
     }
   }
   for (auto &vexitm : _vex) {
     const int k1 = vexitm.first.first;
     const int k2 = vexitm.first.second;
-    int l1 = _o[k1]->initialL();
-    int m1 = _o[k1]->initialM();
-    int l2 = _o[k2]->initialL();
-    int m2 = _o[k2]->initialM();
+    int l1 = _o[k1]->l();
+    int m1 = _o[k1]->m();
+    int l2 = _o[k2]->l();
+    int m2 = _o[k2]->m();
     for (int ir = 0; ir < _g->N(); ++ir) {
       ldouble r = (*_g)(ir);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      K += _vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, l1, m1, *_g)*_o[k2]->getNorm(ir, l2, m2, *_g)*std::pow(r, 2)*dr;
+      K += _vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2)*dr;
     }
   }
   E0 += -0.5*(J - K);
@@ -290,29 +290,29 @@ ldouble SpinOrbitCorrection::getE0Uncorrected() {
   ldouble K = 0;
   for (auto &vditm : _vd) {
     int k = vditm.first;
-    int l = _o[k]->initialL();
-    int m = _o[k]->initialM();
+    int l = _o[k]->l();
+    int m = _o[k]->m();
     for (int ir = 0; ir < _g->N(); ++ir) {
       ldouble r = (*_g)(ir);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      J += _vd[k][ir]*std::pow(_o[k]->getNorm(ir, l, m, *_g), 2)*std::pow(r, 2)*dr;
+      J += _vd[k][ir]*std::pow(_o[k]->getNorm(ir, *_g), 2)*std::pow(r, 2)*dr;
     }
   }
   for (auto &vexitm : _vex) {
     const int k1 = vexitm.first.first;
     const int k2 = vexitm.first.second;
-    int l1 = _o[k1]->initialL();
-    int m1 = _o[k1]->initialM();
-    int l2 = _o[k2]->initialL();
-    int m2 = _o[k2]->initialM();
+    int l1 = _o[k1]->l();
+    int m1 = _o[k1]->m();
+    int l2 = _o[k2]->l();
+    int m2 = _o[k2]->m();
     for (int ir = 0; ir < _g->N(); ++ir) {
       ldouble r = (*_g)(ir);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      K += _vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, l1, m1, *_g)*_o[k2]->getNorm(ir, l2, m2, *_g)*std::pow(r, 2)*dr;
+      K += _vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2)*dr;
     }
   }
   E0 += -0.5*(J - K);

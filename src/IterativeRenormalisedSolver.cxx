@@ -14,7 +14,7 @@ IterativeRenormalisedSolver::IterativeRenormalisedSolver(const Grid &g, std::vec
 IterativeRenormalisedSolver::~IterativeRenormalisedSolver() {
 }
 
-ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched) {
+ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &Cm, std::vector<VectorXld> &matched) {
   int M = _om.N();
   kl = _o.size()-1;
 
@@ -24,8 +24,8 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   std::vector<VectorXld> fix_outward(_g.N());
   matched.resize(_g.N());
 
-  solveOutward(E, l, Fm, Km, Ro);
-  solveInward(E, l, Fm, Km, Ri);
+  solveOutward(E, l, Fm, Km, Cm, Ro);
+  solveInward(E, l, Fm, Km, Cm, Ri);
 
   // originally the paper proposes to use the determinant
   // however, if there is perfect agreement in some orbitals
@@ -63,7 +63,6 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
     int k = _om.orbital(idx);
     int l = _om.l(idx);
     int m = _om.m(idx);
-    bool isPrimary = (l == _o[k]->initialL() && m == _o[k]->initialM());
     if (dec_Mm.singularValues()(idx) != 0) {
       fm += dec_Mm.matrixV().block(0, idx, M, 1)/dec_Mm.singularValues()(idx);
     }
@@ -111,7 +110,7 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   return F; //std::fabs(F);
 }
 
-void IterativeRenormalisedSolver::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &R) {
+void IterativeRenormalisedSolver::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &Cm, std::vector<MatrixXld> &R) {
   int N = _g.N();
   int M = _om.N();
   R.resize(N);
@@ -122,10 +121,11 @@ void IterativeRenormalisedSolver::solveInward(std::vector<ldouble> &E, std::vect
   for (int i = N-1; i >= icl[kl]-1; --i) {
     R[i-1] = Km[i-1]*(MatrixXld::Identity(M, M)*12 - Fm[i-1]*10);
     if (i < N-1 && R[i].determinant() != 0) R[i-1] -= R[i].inverse();
+    R[i-1] -= Cm[i-1];
   }
 }
 
-void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &R) {
+void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &Cm, std::vector<MatrixXld> &R) {
   int N = _g.N();
   int M = _om.N();
   R.resize(N);
@@ -162,6 +162,7 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
   for (int i = 1; i <= icl[kl]+1; ++i) {
     R[i] = Km[i]*(MatrixXld::Identity(M, M)*12 - Fm[i]*10);
     if (R[i-1].determinant() != 0) R[i] -= R[i-1].inverse();
+    R[i] -= Cm[i];
   }
 }
 void IterativeRenormalisedSolver::match(std::vector<VectorXld> &o, std::vector<VectorXld> &inward, std::vector<VectorXld> &outward) {

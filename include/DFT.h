@@ -81,8 +81,9 @@ class DFT : public SCF {
     /// \brief Calculate F matrix, which represents the Hamiltonian using the Numerov method. K is the inverse of F. This is used for the Gordon and renormalised methods, since these matrices are calculated per Grid point. The sparse method uses a large matrix solving all points simultaneously.
     /// \param F To be returned by reference. Matrix F for each Grid point.
     /// \param K To be returned by reference. Inverse of F.
+    /// \param C To be returned by reference. Independent term.
     /// \param E Values of energy in each orbital.
-    void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E);
+    void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<MatrixXld> &C, std::vector<ldouble> &E);
 
     /// \brief Add an orbital in internal _o list.
     /// \param o Pointer to orbital.

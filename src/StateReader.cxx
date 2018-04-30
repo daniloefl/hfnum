@@ -76,31 +76,18 @@ void StateReader::load(const std::string &fin) {
       int k = _o.size()-1;
       _o[k]->N(_i["grid.N"]);
       _o[k]->E(o_E);
-      int sphSize = 1;
-      ss >> trash >> sphSize;
-      for (int idx = 0; idx < sphSize; ++idx) {
-        int l;
-        int m;
-        ss >> trash >> l >> trash >> m;
+      ss >> trash;
 
-        if (l != o_L && m != o_M) _o[k]->addSphHarm(l, m);
-
-        ss >> trash;
-
-        ldouble read_value;
-        for (int ir = 0; ir < _i["grid.N"]; ++ir) { // for each radial point
-          ss >> read_value;
-          (*_o[k])(ir, l, m) = read_value;
-        }
+      ldouble read_value;
+      for (int ir = 0; ir < _i["grid.N"]; ++ir) { // for each radial point
+        ss >> read_value;
+        (*_o[k])(ir) = read_value;
       }
     } else if (mode == "vd") {
       int io;
       ss >> io;
 
       std::string trash;
-
-      int v_l, v_m;
-      ss >> trash >> v_l >> trash >> v_m;
 
       ss >> trash;
 
@@ -115,9 +102,6 @@ void StateReader::load(const std::string &fin) {
       ss >> io1 >> io2;
 
       std::string trash;
-
-      int v_l, v_m;
-      ss >> trash >> v_l >> trash >> v_m;
 
       ss >> trash;
 

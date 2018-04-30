@@ -13,6 +13,9 @@ Z = 5
 dx = 0.5*1e-1/Z
 N = 2*225*Z
 rmin = 1e-8
+dx = 0.5e-1
+N = 441
+rmin = 1e-8
 h = hfnum.DFT()
 h.resetGrid(True, dx, int(N), rmin)
 h.setZ(Z)

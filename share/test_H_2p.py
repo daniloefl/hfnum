@@ -15,6 +15,9 @@ Z = 1
 dx = 1e-2
 N = 1900
 rmin = 1e-7
+dx = 0.5e-1
+N = 441
+rmin = 1e-8
 h = hfnum.HF()
 h.resetGrid(True, dx, int(N), rmin)
 h.setZ(Z)

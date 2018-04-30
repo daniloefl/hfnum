@@ -55,7 +55,7 @@ std::vector<ldouble> PerturbativeCorrection::getOrbitalCentral(int no) {
   Orbital *o = _o[no];
   std::vector<ldouble> res;
   for (int k = 0; k < _g->N(); ++k) {
-    res.push_back(o->getNorm(k, o->initialL(), o->initialM(), *_g));
+    res.push_back(o->getNorm(k, *_g));
   }
   return res;
 }
@@ -72,14 +72,14 @@ int PerturbativeCorrection::getNOrbitals() {
 }
 
 int PerturbativeCorrection::getOrbital_n(int no) {
-  return _o[no]->initialN();
+  return _o[no]->n();
 }
 
 std::string PerturbativeCorrection::getOrbitalName(int no) {
   std::string name = "";
-  name += std::to_string(_o[no]->initialN());
-  int l = _o[no]->initialL();
-  int m = _o[no]->initialM();
+  name += std::to_string(_o[no]->n());
+  int l = _o[no]->l();
+  int m = _o[no]->m();
   int s = _o[no]->spin();
   if (l == 0) name += "s";
   else if (l == 1) name += "p";
@@ -103,11 +103,11 @@ ldouble PerturbativeCorrection::getOrbital_E(int no) {
 }
 
 int PerturbativeCorrection::getOrbital_l(int no) {
-  return _o[no]->initialL();
+  return _o[no]->l();
 }
 
 int PerturbativeCorrection::getOrbital_m(int no) {
-  return _o[no]->initialM();
+  return _o[no]->m();
 }
 
 int PerturbativeCorrection::getOrbital_s(int no) {

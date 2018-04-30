@@ -77,10 +77,8 @@ class SCF {
 
     /// \brief Get value of orbital component for orbital no, in spherical harmonic given by lo and mo.
     /// \param no Orbital identification.
-    /// \param lo Spherical harmonic parameter l.
-    /// \param mo Spherical harmonic parameter m.
     /// \return Vector of orbital values for each Grid point, in that spherical harmonic component.
-    std::vector<ldouble> getOrbital(int no, int mo, int lo);
+    std::vector<ldouble> getOrbital(int no);
 
     /// \brief Get value of orbital component for orbital no, assuming a central potential.
     /// \param no Orbital identification.

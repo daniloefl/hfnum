@@ -18,6 +18,13 @@ rmin = 1e-12
 dx = 0.5e-1
 N = 210*2
 rmin = 1e-8
+dx = 0.4e-1
+N = 260*2
+rmin = 1e-8
+
+dx = 0.5e-1
+N = 441
+rmin = 1e-8
 h = hfnum.HF()
 h.resetGrid(True, dx, int(N), rmin)
 h.setZ(Z)

@@ -24,23 +24,19 @@ class OrbitalMapper {
     /// \brief Destructor
     virtual ~OrbitalMapper();
 
-    /// \brief Convert orbital index, quantum number l and m and the grid index i into a general index
+    /// \brief Convert orbital index and the grid index i into a general index
     /// \param k Orbital index.
-    /// \param l l.
-    /// \param m m.
     /// \param i Grid index.
-    int sparseIndex(int k, int l, int m, int i);
+    int sparseIndex(int k, int i);
 
     /// \brief Getter for number of indices for a sparse matrix
     /// \return Number of indices for a sparse matrix.
     int sparseN();
 
-    /// \brief Convert orbital index, quantum number l and m in a general index, assuming no indices are needed for the Grid
+    /// \brief Convert orbital index in a general index, assuming no indices are needed for the Grid
     /// \param k Orbital index.
-    /// \param l l.
-    /// \param m m.
     /// \return Index.
-    int index(int k, int l, int m);
+    int index(int k);
 
     /// \brief Number of non-sparse indices
     /// \return Number of indices

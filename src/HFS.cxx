@@ -76,7 +76,7 @@ ldouble HFS::solveForFixedPotentials(int Niter, ldouble F0stop) {
   ldouble F = 0;
   int nStep = 0;
   while (nStep < Niter) {
-    gamma = 0.9*(1 - std::exp(-(nStep+1)/5.0));
+    gamma = 0.5*(1 - std::exp(-(nStep+1)/5.0));
     // compute sum of squares of F(x_old)
     nStep += 1;
     if (_method == 0) {
@@ -105,10 +105,7 @@ ldouble HFS::solveForFixedPotentials(int Niter, ldouble F0stop) {
 
 // solve for a fixed energy and calculate _dE for the next step
 ldouble HFS::stepGordon(ldouble gamma) {
-  int N = 0;
-  for (int k = 0; k < _o.size(); ++k) {
-    N += _o[k]->getSphHarm().size();
-  }
+  int N = _o.size();
 
   std::vector<ldouble> E(_o.size(), 0);
   std::vector<int> l(_o.size(), 0);
@@ -117,23 +114,24 @@ ldouble HFS::stepGordon(ldouble gamma) {
   for (int k = 0; k < _o.size(); ++k) {
     dE[k] = -1e-3;
     E[k] = _o[k]->E();
-    l[k] = _o[k]->initialL();
+    l[k] = _o[k]->l();
   }
 
   std::vector<MatrixXld> Fmn;
   std::vector<MatrixXld> Kmn;
+  std::vector<MatrixXld> Cmn;
   std::vector<VectorXld> matched;
-  calculateFMatrix(Fmn, Kmn, E);
+  calculateFMatrix(Fmn, Kmn, Cmn, E);
 
-  ldouble Fn = _igs.solve(E, l, Fmn, Kmn, matched);
+  ldouble Fn = _igs.solve(E, l, Fmn, Kmn, Cmn, matched);
 
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
-    int l = _o[k]->initialL();
-    int m = _o[k]->initialM();
-    int idx = _om.index(k, l, m);
+    int l = _o[k]->l();
+    int m = _o[k]->m();
+    int idx = _om.index(k);
     for (int i = 0; i < _g->N(); ++i) {
-      (*_o[k])(i, l, m) = matched[i](idx);
+      (*_o[k])(i) = matched[i](idx);
       if (i >= 10 && (*_g)(i) < std::pow(_o.size(),2) && i < _g->N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
         _nodes[k] += 1;
       }
@@ -149,9 +147,10 @@ ldouble HFS::stepGordon(ldouble gamma) {
 
     std::vector<MatrixXld> Fmd;
     std::vector<MatrixXld> Kmd;
-    calculateFMatrix(Fmd, Kmd, EdE);
+    std::vector<MatrixXld> Cmd;
+    calculateFMatrix(Fmd, Kmd, Cmd, EdE);
 
-    ldouble Fd = _igs.solve(EdE, l, Fmd, Kmd, matched);
+    ldouble Fd = _igs.solve(EdE, l, Fmd, Kmd, Cmd, matched);
     J(k2) = (Fd - Fn)/dE[k2];
 
   }
@@ -180,23 +179,24 @@ ldouble HFS::stepRenormalised(ldouble gamma) {
   for (int k = 0; k < _o.size(); ++k) {
     dE[k] = 1e-3;
     E[k] = _o[k]->E();
-    l[k] = _o[k]->initialL();
+    l[k] = _o[k]->l();
   }
 
   std::vector<MatrixXld> Fmn;
   std::vector<MatrixXld> Kmn;
+  std::vector<MatrixXld> Cmn;
   std::vector<VectorXld> matched;
-  calculateFMatrix(Fmn, Kmn, E);
+  calculateFMatrix(Fmn, Kmn, Cmn, E);
 
-  ldouble Fn = _irs.solve(E, l, Fmn, Kmn, matched);
+  ldouble Fn = _irs.solve(E, l, Fmn, Kmn, Cmn, matched);
 
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
-    int l = _o[k]->initialL();
-    int m = _o[k]->initialM();
-    int idx = _om.index(k, l, m);
+    int l = _o[k]->l();
+    int m = _o[k]->m();
+    int idx = _om.index(k);
     for (int i = 0; i < _g->N(); ++i) {
-      (*_o[k])(i, l, m) = matched[i](idx);
+      (*_o[k])(i) = matched[i](idx);
       if (i >= 10 && i < _g->N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
         //ldouble deriv = (matched[i](idx) - matched[i-1](idx))/(_g(i) - _g(i-1));
         //if (std::fabs(deriv) > 1e-2) {
@@ -215,9 +215,10 @@ ldouble HFS::stepRenormalised(ldouble gamma) {
 
     std::vector<MatrixXld> Fmd;
     std::vector<MatrixXld> Kmd;
-    calculateFMatrix(Fmd, Kmd, EdE);
+    std::vector<MatrixXld> Cmd;
+    calculateFMatrix(Fmd, Kmd, Cmd, EdE);
 
-    ldouble Fd = _irs.solve(EdE, l, Fmd, Kmd, matched);
+    ldouble Fd = _irs.solve(EdE, l, Fmd, Kmd, Cmd, matched);
     grad(k) = (Fd - Fn)/dE[k];
   }
 
@@ -235,23 +236,21 @@ ldouble HFS::stepRenormalised(ldouble gamma) {
     //_dE[k] = -gamma*grad(k); // for root finding
     if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
     std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
-    if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
+    if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
       std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
-      _Emax[k] = _o[k]->E();
-      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
-      //std::fabs(_Z*_Z*0.5/std::pow(_nodes[k], 2) - _Z*_Z*0.5/std::pow(_nodes[k]+1, 2));
-      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
-    } else if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
-      std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
       _Emin[k] = _o[k]->E();
       _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
-      //-std::fabs(_Z*_Z*0.5/std::pow(_nodes[k], 2) - _Z*_Z*0.5/std::pow(_nodes[k]+1, 2));
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emax[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
       std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
     } else {
       if (_dE[k] > 0) {
-        _Emax[k] = _o[k]->E() + _dE[k];
+        _Emin[k] = _o[k]->E();
       } else if (_dE[k] < 0) {
-        _Emin[k] = _o[k]->E() + _dE[k];
+        _Emax[k] = _o[k]->E();
       }
     }
   }
@@ -292,18 +291,32 @@ ldouble HFS::stepSparse(ldouble gamma) {
   // count nodes for monitoring
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
-    int l = _o[k]->initialL();
-    int m = _o[k]->initialM();
+    int l = _o[k]->l();
+    int m = _o[k]->m();
     for (int i = 0; i < _g->N(); ++i) {
-      if (i >= 10 && (*_g)(i) < std::pow(_o.size(),2) && i < _g->N() - 4 && (*_o[k])(i, l, m)*(*_o[k])(i-1, l, m) <= 0) {
+      if (i >= 10 && (*_g)(i) < std::pow(_o.size(),2) && i < _g->N() - 4 && (*_o[k])(i)*(*_o[k])(i-1) <= 0) {
         _nodes[k] += 1;
       }
     }
-    //if (_nodes[k] < _o[k].initialN() - _o[k].initialL() - 1) {
-    //  _dE[k] = std::fabs(_Z*_Z*0.5/std::pow(_o[k].initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k].initialN()+1, 2));
-    //} else if (_nodes[k] > _o[k].initialN() - _o[k].initialL() - 1) {
-    //  _dE[k] = -std::fabs(_Z*_Z*0.5/std::pow(_o[k].initialN(), 2) - _Z*_Z*0.5/std::pow(_o[k].initialN()+1, 2));
-    //}
+    if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
+    std::cout << "Orbital " << k << ", dE = " << _dE[k] << std::endl;
+    if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emin[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emax[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else {
+      if (_dE[k] > 0) {
+        _Emin[k] = _o[k]->E();
+      } else if (_dE[k] < 0) {
+        _Emax[k] = _o[k]->E();
+      }
+    }
   }
 
   // 6) calculate F = sum _b[k]^2
@@ -326,20 +339,15 @@ void HFS::save(const std::string fout) {
   f << std::setw(10) << "grid.rmin" << " " << std::setw(10) << (*_g)(0) << std::endl;
   for (int i = 0; i < _o.size(); ++i) {
     f << std::setw(10) << "orbital" << " " << std::setw(10) << i;
-    f << " " << std::setw(5) << "n" << " " << std::setw(5) << _o[i]->initialN();
-    f << " " << std::setw(5) << "l" << " " << std::setw(5) << _o[i]->initialL();
-    f << " " << std::setw(5) << "m" << " " << std::setw(5) << _o[i]->initialM();
+    f << " " << std::setw(5) << "n" << " " << std::setw(5) << _o[i]->n();
+    f << " " << std::setw(5) << "l" << " " << std::setw(5) << _o[i]->l();
+    f << " " << std::setw(5) << "m" << " " << std::setw(5) << _o[i]->m();
     f << " " << std::setw(5) << "s" << " " << std::setw(5) << _o[i]->spin();
     f << " " << std::setw(5) << "E" << " " << std::setw(64) << std::setprecision(60) << _o[i]->E();
-    f << " " << std::setw(10) << "sph_size" << " " << std::setw(5) << _o[i]->getSphHarm().size();
-    for (int idx = 0; idx < _o[i]->getSphHarm().size(); ++idx) {
-      f << " " << std::setw(5) << "sph_l" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].l;
-      f << " " << std::setw(5) << "sph_m" << " " << std::setw(5) << _o[i]->getSphHarm()[idx].m;
-      f << " " << std::setw(5) << "value";
-      for (int ir = 0; ir < _g->N(); ++ir) {
-        const ldouble v = ((const Orbital) (*_o[i]))(ir, _o[i]->getSphHarm()[idx].l, _o[i]->getSphHarm()[idx].m);
-        f << " " << std::setw(64) << std::setprecision(60) << v;
-      }
+    f << " " << std::setw(5) << "value";
+    for (int ir = 0; ir < _g->N(); ++ir) {
+      const ldouble v = ((const Orbital) (*_o[i]))(ir);
+      f << " " << std::setw(64) << std::setprecision(60) << v;
     }
     f << std::endl;
   }
@@ -347,8 +355,6 @@ void HFS::save(const std::string fout) {
     const int &k = i.first;
     const Vradial &vradial = i.second;
     f << std::setw(10) << "vd" << " " << std::setw(10) << k;
-    f << " " << std::setw(5) << "l" << " " << std::setw(5) << 0;
-    f << " " << std::setw(5) << "m" << " " << std::setw(5) << 0;
     f << " " << std::setw(5) << "value";
     for (int ir = 0; ir < vradial.size(); ++ir) {
       f << " " << std::setw(64) << std::setprecision(60) << vradial[ir];
@@ -360,8 +366,6 @@ void HFS::save(const std::string fout) {
     const int &k2 = i.first.second;
     const Vradial &vradial = i.second;
     f << std::setw(10) << "vex" << " " << std::setw(10) << k1 << " " << std::setw(10) << k2;
-    f << " " << std::setw(5) << "l" << " " << std::setw(5) << 0;
-    f << " " << std::setw(5) << "m" << " " << std::setw(5) << 0;
     f << " " << std::setw(5) << "value";
     for (int ir = 0; ir < vradial.size(); ++ir) {
       f << " " << std::setw(64) << std::setprecision(60) << vradial[ir];
@@ -419,29 +423,23 @@ ldouble HFS::getE0() {
   ldouble K = 0;
   for (auto &vditm : _vd) {
     int k = vditm.first;
-    int l = _o[k]->initialL();
-    int m = _o[k]->initialM();
     for (int ir = 0; ir < _g->N(); ++ir) {
       ldouble r = (*_g)(ir);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      J += _vd[k][ir]*std::pow(_o[k]->getNorm(ir, l, m, *_g), 2)*std::pow(r, 2)*dr;
+      J += _vd[k][ir]*std::pow(_o[k]->getNorm(ir, *_g), 2)*std::pow(r, 2)*dr;
     }
   }
   for (auto &vexitm : _vex) {
     const int k1 = vexitm.first.first;
     const int k2 = vexitm.first.second;
-    int l1 = _o[k1]->initialL();
-    int m1 = _o[k1]->initialM();
-    int l2 = _o[k2]->initialL();
-    int m2 = _o[k2]->initialM();
     for (int ir = 0; ir < _g->N(); ++ir) {
       ldouble r = (*_g)(ir);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      K += _vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, l1, m1, *_g)*_o[k2]->getNorm(ir, l2, m2, *_g)*std::pow(r, 2)*dr;
+      K += _vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2)*dr;
     }
   }
   E0 += -0.5*(J - K);
@@ -461,9 +459,9 @@ void HFS::solve(int NiterSCF, int Niter, ldouble F0stop) {
     for (int k = 0; k < _o.size(); ++k) {
       icl[k] = -1;
 
-      ldouble lmain_eq = _o[k]->initialL();
-      int lmain = _o[k]->initialL();
-      int mmain = _o[k]->initialM();
+      ldouble lmain_eq = _o[k]->l();
+      int lmain = _o[k]->l();
+      int mmain = _o[k]->m();
       // calculate crossing of potential at zero for lmain,mmain
       ldouble a_m1 = 0;
       //for (int i = 3; i < _g->N()-3; ++i) {
@@ -518,8 +516,8 @@ void HFS::calculateVd(ldouble gamma) {
   // calculate it first with filled orbitals, dividing by the number of orbitals
   // this is exact if all 2(2*l+1) orbitals in this level are filled
   for (int k1 = 0; k1 < _o.size(); ++k1) {
-    int l1 = _o[k1]->initialL();
-    int m1 = _o[k1]->initialM();
+    int l1 = _o[k1]->l();
+    int m1 = _o[k1]->m();
     std::cout << "Calculating Vd term from k = " << k1 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
 
     int lmax = 2;
@@ -541,7 +539,7 @@ void HFS::calculateVd(ldouble gamma) {
         }
         int l = 0;
         int m = 0;
-        vd[ir1] += (2*l1+1.0)/std::sqrt(2*l+1.0)*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, m1, m1, l, m)*(1.0/(2*l+1.0))*std::pow(_o[k1]->getNorm(ir2, l1, m1, *_g), 2)*std::pow(r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr;
+        vd[ir1] += (2*l1+1.0)/std::sqrt(2*l+1.0)*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, m1, m1, l, m)*(1.0/(2*l+1.0))*std::pow(_o[k1]->getNorm(ir2, *_g), 2)*std::pow(r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr;
       }
     }
 
@@ -553,10 +551,10 @@ void HFS::calculateVd(ldouble gamma) {
   }
 
   for (int ko = 0; ko < _o.size(); ++ko) {
-    int lo = _o[ko]->initialL();
-    int mo = _o[ko]->initialM();
+    int lo = _o[ko]->l();
+    int mo = _o[ko]->m();
     for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
-      vex[ir2] += std::pow(_o[ko]->getNorm(ir2, lo, mo, *_g), 2.0);
+      vex[ir2] += std::pow(_o[ko]->getNorm(ir2, *_g), 2.0);
     }
   }
   for (int ko = 0; ko < _o.size(); ++ko) {
@@ -573,11 +571,12 @@ void HFS::calculateVd(ldouble gamma) {
 }
 
 
-void HFS::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E) {
+void HFS::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<MatrixXld> &C, std::vector<ldouble> &E) {
   std::vector<MatrixXld> Lambda(_g->N());
   int N = _om.N();
   F.resize(_g->N());
   K.resize(_g->N());
+  C.resize(_g->N());
 
   for (int i = 0; i < _g->N(); ++i) {
     ldouble r = (*_g)(i);
@@ -587,6 +586,8 @@ void HFS::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K,
     Lambda[i].setZero();
     K[i].resize(N, N);
     K[i].setZero();
+    C[i].resize(N, N);
+    C[i].setZero();
 
     for (int idx1 = 0; idx1 < N; ++idx1) {
       int k1 = _om.orbital(idx1);
@@ -631,14 +632,10 @@ void HFS::addOrbital(Orbital *o) {
   _o.push_back(o);
   // initialise energies and first solution guess
   for (int k = 0; k < _o.size(); ++k) {
-    _o[k]->E(-_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2));
+    _o[k]->E(-_Z*_Z*0.5/std::pow(_o[k]->n(), 2));
 
-    for (int idx = 0; idx < _o[k]->getSphHarm().size(); ++idx) {
-      int l = _o[k]->getSphHarm()[idx].l;
-      int m = _o[k]->getSphHarm()[idx].m;
-      for (int ir = 0; ir < _g->N(); ++ir) { // for each radial point
-        (*_o[k])(ir, l, m) = std::pow(_Z*(*_g)(ir)/((ldouble) _o[k]->initialN()), l+0.5)*std::exp(-_Z*(*_g)(ir)/((ldouble) _o[k]->initialN()));
-      }
+    for (int ir = 0; ir < _g->N(); ++ir) { // for each radial point
+      (*_o[k])(ir) = std::pow(_Z*(*_g)(ir)/((ldouble) _o[k]->n()), _o[k]->l()+0.5)*std::exp(-_Z*(*_g)(ir)/((ldouble) _o[k]->n()));
     }
   }
   _vd.clear();

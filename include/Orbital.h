@@ -28,10 +28,10 @@ class Orbital {
 
     /// \brief Constructor.
     /// \param s Spin.
-    /// \param initial_n Quantum number n. For initial conditions.
-    /// \param initial_l Quantum number l. For initial conditions.
-    /// \param initial_m Quantum number m. For initial conditions.
-    Orbital(int s = 1, int initial_n = 1, int initial_l = 0, int initial_m = 0);
+    /// \param n Quantum number n. For initial conditions.
+    /// \param l Quantum number l. For initial conditions.
+    /// \param m Quantum number m. For initial conditions.
+    Orbital(int s = 1, int n = 1, int l = 0, int m = 0);
 
     /// \brief Constructor.
     /// \param o Object to copy.
@@ -45,15 +45,6 @@ class Orbital {
     /// \return This.
     Orbital &operator =(const Orbital &o);
 
-    /// \brief Add a spherical harmonic component.
-    /// \param l Value of l.
-    /// \param m Value of m.
-    void addSphHarm(int l, int m);
-
-    /// \brief Getter for list of spherical harmonic factors.
-    /// \return List of (l, m) pairs
-    const std::vector<lm> &getSphHarm() const;
-     
     /// \brief Set number of Grid points.
     /// \param N number of Grid points.
     void N(int N);
@@ -64,9 +55,9 @@ class Orbital {
 
     /// Getters
     int length() const;
-    int initialN() const;
-    int initialL() const;
-    int initialM() const;
+    int n() const;
+    int l() const;
+    int m() const;
 
     /// \brief Getter for spin.
     /// \return Spin
@@ -94,25 +85,19 @@ class Orbital {
 
     /// \brief Return non-normalised orbital value in a Grid point.
     /// \param i Grid point index.
-    /// \param l Value of l
-    /// \param m Value of m
     /// \return Non-normalised orbital value.
-    ldouble &operator()(int i, int l, int m);
-    const ldouble operator()(int i, int l, int m) const;
+    ldouble &operator()(int i);
+    const ldouble operator()(int i) const;
 
     /// \brief Get value of normalised orbital in a points.
     /// \param i Grid point index.
-    /// \param l Value of l.
-    /// \param m Value of m.
     /// \param g Grid object.
     /// \return Orbital value.
-    const ldouble getNorm(int i, int l, int m, const Grid &g);
+    const ldouble getNorm(int i, const Grid &g);
 
-    /// \brief Get normalised orbital in spherical harmonic component (l, m)
-    /// \param lo Value of l.
-    /// \param mo Value of m.
+    /// \brief Get normalised orbital.
     /// \return List of orbital values in the Grid points.
-    python::list getNormPython(int lo, int mo);
+    python::list getNormPython();
 
     /// \brief Get normalised orbital assuming central potential approximation.
     /// \return List of orbital values in the Grid points.
@@ -137,19 +122,16 @@ class Orbital {
     ldouble *_wf;
 
     /// Quantum number n
-    int _initial_n;
+    int _n;
 
     /// Quantum number l
-    int _initial_l;
+    int _l;
 
     /// Quantum number m
-    int _initial_m;
+    int _m;
 
     /// Energy
     ldouble _E;
-
-    /// List of spherical harmonic components
-    std::vector<lm> _sphHarm;
 
     /// Needs to be renormalised?
     bool _torenorm;

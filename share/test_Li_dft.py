@@ -13,6 +13,9 @@ Z = 3
 dx = 1e-1/Z
 N = 170*Z
 rmin = 1e-6
+dx = 0.5e-1
+N = 441
+rmin = 1e-8
 h = hfnum.DFT()
 h.resetGrid(True, dx, int(N), rmin)
 h.setZ(Z)
