@@ -94,11 +94,6 @@ ldouble HFS::solveForFixedPotentials(int Niter, ldouble F0stop) {
       ldouble stepdE = _dE[k];
       ldouble newE = (_o[k]->E()+stepdE);
       std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << newE << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
-      if (stepdE > 0) {
-        _Emax[k] = newE;
-      } else if (stepdE < 0) {
-        _Emin[k] = newE;
-      }
       _o[k]->E(newE);
     }
 
@@ -242,14 +237,22 @@ ldouble HFS::stepRenormalised(ldouble gamma) {
     std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
     if (_nodes[k] < _o[k]->initialN() - _o[k]->initialL() - 1) {
       std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emax[k] = _o[k]->E();
       _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
       //std::fabs(_Z*_Z*0.5/std::pow(_nodes[k], 2) - _Z*_Z*0.5/std::pow(_nodes[k]+1, 2));
       std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
     } else if (_nodes[k] > _o[k]->initialN() - _o[k]->initialL() - 1) {
       std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emin[k] = _o[k]->E();
       _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
       //-std::fabs(_Z*_Z*0.5/std::pow(_nodes[k], 2) - _Z*_Z*0.5/std::pow(_nodes[k]+1, 2));
       std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else {
+      if (_dE[k] > 0) {
+        _Emax[k] = _o[k]->E() + _dE[k];
+      } else if (_dE[k] < 0) {
+        _Emin[k] = _o[k]->E() + _dE[k];
+      }
     }
   }
 
