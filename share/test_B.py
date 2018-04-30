@@ -32,12 +32,12 @@ h.addOrbital(orb3)
 h.addOrbital(orb4)
 
 NiterSCF = 40
-Niter = 1000
+Niter = 200
 F0stop = 1e-6
 r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
-h.gammaSCF(0.2)
+h.gammaSCF(0.1)
 h.solve(NiterSCF, Niter, F0stop)
 h.save("output/results_B.txt")
 

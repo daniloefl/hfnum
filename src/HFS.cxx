@@ -86,7 +86,7 @@ ldouble HFS::solveForFixedPotentials(int Niter, ldouble F0stop) {
     } else if (_method == 2) {
       F = stepRenormalised(gamma);
     } else if (_method == 3) {
-      F = stepStandard(0.1*gamma);
+      F = stepStandard(gamma);
     }
 
     // change orbital energies
@@ -269,12 +269,12 @@ ldouble HFS::stepStandard(ldouble gamma) {
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = 1e-5;
+    dE[k] = 1e-3;
     E[k] = _o[k]->E();
     l[k] = _o[k]->l();
   }
 
-  ldouble Fn = _iss.solve(E, _pot, _vd, _vex, matchedSt);
+  VectorXld Fn = _iss.solve(E, _pot, _vd, _vex, matchedSt);
 
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
@@ -290,24 +290,24 @@ ldouble HFS::stepStandard(ldouble gamma) {
     }
   }
 
-  std::vector<ldouble> grad(_o.size());
+  MatrixXld Jn;
+  Jn.resize(_o.size(), _o.size());
+  Jn.setZero();
   for (int k = 0; k < _o.size(); ++k) {
     std::vector<ldouble> EdE = E;
     EdE[k] += dE[k];
 
-    ldouble Fd = _iss.solve(EdE, _pot, _vd, _vex, matchedSt);
+    VectorXld Fd = _iss.solve(EdE, _pot, _vd, _vex, matchedSt);
 
-    grad[k] = (Fd - Fn)/dE[k];
+    for (int idx = 0; idx < _o.size(); ++idx) {
+      Jn(idx, k) = (Fd(idx) - Fn(idx))/dE[k];
+    }
   }
 
-  ldouble F = Fn;
+  VectorXld dD = Jn.inverse()*Fn;
   for (int k = 0; k < _o.size(); ++k) {
-    if (grad[k] != 0) {
-      _dE[k] = Fn/grad[k]; // for root finding
-      _dE[k] *= -gamma;
-    } else {
-      _dE[k] = 0;
-    }
+    _dE[k] = dD(k); // for root finding
+    _dE[k] *= -gamma;
     if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
     std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
     if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
@@ -329,6 +329,8 @@ ldouble HFS::stepStandard(ldouble gamma) {
     }
   }
 
+  ldouble F = 0;
+  for (int k = 0; k < _o.size(); ++k) F += Fn[k];
   return F;
 }
 
