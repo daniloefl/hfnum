@@ -71,6 +71,8 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     strMethod = "Iterative Numerov with Gordon method for initial condition (http://aip.scitation.org/doi/pdf/10.1063/1.436421)";
   } else if (_method == 2) {
     strMethod = "Iterative Renormalised Numerov (http://aip.scitation.org/doi/pdf/10.1063/1.436421)";
+  } else if (_method == 3) {
+    strMethod = "Iterative Standard Numerov with non-homogeneous term";
   }
 
   ldouble F = 0;
@@ -85,6 +87,8 @@ ldouble HF::solveForFixedPotentials(int Niter, ldouble F0stop) {
       F = stepGordon(gamma);
     } else if (_method == 2) {
       F = stepRenormalised(gamma);
+    } else if (_method == 3) {
+      F = stepStandard(gamma);
     }
 
     // change orbital energies
@@ -352,6 +356,79 @@ ldouble HF::stepSparse(ldouble gamma) {
   return F;
 }
 
+// solve for a fixed energy and calculate _dE for the next step
+ldouble HF::stepStandard(ldouble gamma) {
+  int N = _om.N();
+
+  std::vector<ldouble> E(_o.size(), 0);
+  std::vector<int> l(_o.size(), 0);
+
+  std::vector<ldouble> dE(_o.size(), 0);
+  for (int k = 0; k < _o.size(); ++k) {
+    dE[k] = 1e-3;
+    E[k] = _o[k]->E();
+    l[k] = _o[k]->l();
+  }
+
+  std::vector<Vradial> matched;
+  ldouble Fn = _iss.solve(E, l, _vd, _vex, matched);
+
+  for (int k = 0; k < _o.size(); ++k) {
+    _nodes[k] = 0;
+    int l = _o[k]->l();
+    int m = _o[k]->m();
+    int idx = _om.index(k);
+    for (int i = 0; i < _g->N(); ++i) {
+      (*_o[k])(i) = matched[idx][i];
+      if (i >= 10 && i < _g->N() - 4 && matched[idx][i]*matched[idx][i-1] <= 0) {
+        _nodes[k] += 1;
+        std::cout << "Orbital " << k << ": Found node at i=" << i << ", r = " << (*_g)(i) << std::endl;
+      }
+    }
+  }
+
+  std::vector<ldouble> grad(_o.size());
+  for (int k = 0; k < _o.size(); ++k) {
+    std::vector<ldouble> EdE = E;
+    EdE[k] += dE[k];
+
+    std::vector<Vradial> matched;
+    ldouble Fd = _iss.solve(EdE, l, _vd, _vex, matched);
+
+    grad[k] = (Fd - Fn)/dE[k];
+  }
+
+  ldouble F = Fn;
+  for (int k = 0; k < _o.size(); ++k) {
+    if (grad[k] != 0) {
+      _dE[k] = Fn/grad[k]; // for root finding
+      _dE[k] *= -gamma;
+    } else {
+      _dE[k] = 0;
+    }
+    if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
+    std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
+    if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emin[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emax[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else {
+      if (_dE[k] > 0) {
+        _Emin[k] = _o[k]->E();
+      } else if (_dE[k] < 0) {
+        _Emax[k] = _o[k]->E();
+      }
+    }
+  }
+
+  return F;
+}
 
 
 void HF::save(const std::string fout) {

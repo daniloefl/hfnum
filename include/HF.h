@@ -100,6 +100,11 @@ class HF : public SCF {
     /// \return Minimisation function value at the end of the step.
     ldouble stepRenormalised(ldouble gamma);
 
+    /// \brief Use a standard iterative Numerov method.
+    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
+    /// \return Minimisation function value at the end of the step.
+    ldouble stepStandard(ldouble gamma);
+
     ldouble solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched);
 
     /// \brief Build NxN matrix to solve all equations of the Numerov method for each point simultaneously. Includes an extra equation to control the orbital normalisations, which is non-linear.

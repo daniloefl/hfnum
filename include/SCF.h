@@ -17,6 +17,7 @@
 #include "utils.h"
 #include "LinearSystemBuilder.h"
 #include "IterativeRenormalisedSolver.h"
+#include "IterativeStandardSolver.h"
 #include "IterativeGordonSolver.h"
 #include "OrbitalMapper.h"
 
@@ -183,6 +184,9 @@ class SCF {
 
     /// Solver for the renormalised method
     IterativeRenormalisedSolver _irs;
+
+    /// Solver for the standard method
+    IterativeStandardSolver _iss;
 
     /// Solver for Gordon's method
     IterativeGordonSolver _igs;

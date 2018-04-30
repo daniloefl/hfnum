@@ -28,7 +28,7 @@ using namespace boost;
 #include <cstdlib>
 
 SCF::SCF()
-  : _g(new Grid(true, 1e-1, 10, 1e-3)), _Z(1), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _irs(*_g, _o, icl, _om), _igs(*_g, _o, icl, _om) {
+  : _g(new Grid(true, 1e-1, 10, 1e-3)), _Z(1), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _irs(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om), _igs(*_g, _o, icl, _om) {
   _own_grid = true;
   _pot.resize(_g->N());
   for (int k = 0; k < _g->N(); ++k) {
@@ -122,7 +122,7 @@ int SCF::getOrbital_s(int no) {
 
 void SCF::method(int m) {
   if (m < 0) m = 0;
-  if (m > 2) m = 2;
+  if (m > 3) m = 3;
   _method = m;
 }
 
