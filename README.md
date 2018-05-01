@@ -3,17 +3,20 @@
 Hartree-Fock calculation in C++ using a numerical Grid. Based on hfpython repository.
 It currently can use linear or logarithmic Grids, but only logarithmic Grids have been observed to work with acceptable precision.
 
-Three methods are available to solve the differential equation:
+Four methods are available to solve the differential equation:
   * method 0: Sparse Numerov Matrix method
     * Creates one numerical equation per differential equation and Grid point and puts them all in an NxN sparse matrix. Extra equations are created to force the normalisation of the eigenfunctions to be 1. Since the normalisation condition is non-linear, the system is resolved using the Newton-Raphson method, by calculating the Jacobian matrix of partial derivatives and changing the energy and function values according to -X inverse(Jacobian), where X is the column-vector of wavefunction values and energies. This method is extremely slow, but it is simple and assumes only that the wave function first and last values are zero.
   * method 1: Iterative Numerov Method using Gordon's method to guess initial conditions
     * The system can be solved (up to a normalisation) using Numerov equation to get the third point based on the two points before it. However, we need two initial conditions and choosing the wrong initial conditions (particularly in non-symmetric systems, such as atoms with more than 2 electrons) can lead to divergence. Gordon's solution tries a set of linearly independent solutions and uses a clever method to discover the correct initial conditions. It is described here: http://aip.scitation.org/doi/pdf/10.1063/1.436421
   * method 2: Iterative renormalised method
     * This method is an extension of the method proposed by Gordon. The method is only re-written in a different way using the ratio of solutions normalised by the differential equation coefficients. This procedure avoids overflows, which happen in method 1. It is recommended and it is explained here: http://aip.scitation.org/doi/pdf/10.1063/1.436421
+  * method 3: Standard Numerov method with non-homogeneus term
+    * This method solves the equations using the Numerov method multiplying out the terms that depend on other orbitals and leaving them as an independent non-homogeneous term. This procedure is repeated several times to achieve consistency before recalculating the energy and moving to the potential self-consistency step. This method is a simple and fast extension of the Numerov standard method, but it does not often converge easily. One paper using this method worth reading is: https://www.sciencedirect.com/science/article/pii/0010465576900400
 
 The software is a Python library, where the calculations are done in C++, but the configuration of the parameters is done in Python.
-Example Python configurations for the Hydrogen, Helium, Lithium and Beryllium can be seen in the share directory.
-A configuration for Borum is available, but there is a bug if l > 0, preventing the code from working properly in this case.
+Example Python configurations for the Hydrogen, Helium, Lithium, Beryllium, Boron and Carbon can be seen in the share directory.
+Note that the central potential approximation is used to solve the equations in the radial variable, so the energies found will only be a first approximation.
+Perturbative corrections can be applied further using the code in src/NonCentralCorrection.cxx.
 
 The basic configuration works as follows:
 
@@ -35,9 +38,9 @@ Z = 3
 # log grid
 # r = exp(log(rmin) + dx * i), where i = 0..N-1
 # change the Grid parameters below
-dx = 1e-1/Z       # Grid step
-N = 255*Z         # number of points
-rmin = 1e-10      # first point in the Grid
+dx = 0.5e-1         # Grid step
+N = 421             # number of points
+rmin = 1e-8         # first point in the Grid
 
 # this is the main solver
 h = hfnum.HF()
@@ -50,9 +53,8 @@ h.resetGrid(True, dx, int(N), rmin)
 # set atomic number
 h.setZ(Z)
 
-# use this to use the faster method, which iteratively looks for the energy
-# without solving the equations using the NxN grid of points
-h.method(2)
+# use this to use the faster (and default) method
+h.method(3)
 
 # create an Orbital as many times as needed
 # the syntax is the following:
@@ -75,11 +77,11 @@ NiterSCF = 20
 Niter = 1000
 
 # stop criteria on the energy
-F0stop = 1e-5
+F0stop = 1e-6
 
 # set velocity with which the self-consistent potentials are changed
-# 0.7 works well, but other numbers can be tried in case of divergence
-h.gammaSCF(0.7)
+# 0.2 works well, but other numbers can be tried in case of divergence
+h.gammaSCF(0.2)
 
 # actually solve the system
 # you can set NiterSCF to 1 and call this many times to plot the orbitals in
