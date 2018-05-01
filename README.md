@@ -18,6 +18,30 @@ Example Python configurations for the Hydrogen, Helium, Lithium, Beryllium, Boro
 Note that the central potential approximation is used to solve the equations in the radial variable, so the energies found will only be a first approximation.
 Perturbative corrections can be applied further using the code in src/NonCentralCorrection.cxx.
 
+The actual equation set up can be done either using several methods, which implement different potential models:
+  * Hartree-Fock with central potential approximation: this is implemented in the hfnum.HF class. It projects the potentials in the spherical harmonic of the orbitla being calculated in case of non-filled shells. This should give the most accurate result, but it is the slowest. The examples below show this method being used.
+  * Hartree-Fock-Slater method: this method is described in "A Simplification of the Hartree-Fock Method", by J. C. Slater ( https://journals.aps.org/pr/abstract/10.1103/PhysRev.81.385 ). It uses the free electron gas approximation to estimate the exchange potential, eliminating the non-homogeneous terms in the equations. This is implemented in the hfnum.HFS class.
+  * Density Functional Theory method: this is a simple implementation of DFT, splitting the system in spin up and spin down electrons and estimating the potentials using the charge density for spin up and spin down electrons. The exchange potential used is calculating using the Local Density Approximation. This method is quite fast and it is implemented in the hfnum.DFT class.
+
+The examples below can all be done using any of the Hartree-Fock, Hartree-Fock-Slater or Density Functional Theory methods, by simply replacing the
+class constructor from hfnum.HF to hfnum.HFS or hfnum.DFT, as appropriate.
+
+
+# Installing packages necessary for compilation
+
+```
+sudo apt install libboost-dev* libboost-python*
+```
+
+# Compilation
+
+```
+cmake .
+make
+```
+
+# How to run it
+
 The basic configuration works as follows:
 
 ```
@@ -43,6 +67,8 @@ N = 421             # number of points
 rmin = 1e-8         # first point in the Grid
 
 # this is the main solver
+# change this to hfnum.HFS for the Hartree-Fock-Slater method
+# or hfnum.DFT for the Density Functional Theory approach
 h = hfnum.HF()
 
 # initialise library with the Grid parameters
@@ -74,7 +100,7 @@ h.addOrbital(orb2)
 NiterSCF = 20
 
 # number of maximum iterations to loop over when scanning for the correct eigenenergy
-Niter = 1000
+Niter = 100
 
 # stop criteria on the energy
 F0stop = 1e-6
@@ -144,20 +170,7 @@ for n in range(0, h.getNOrbitals()):
 
 ```
 
-# Installing packages necessary for compilation
-
-```
-sudo apt install libboost-dev* libboost-python*
-```
-
-# Compilation
-
-```
-cmake .
-make
-```
-
-# Running
+# Examples
 
 Try getting the energy and orbital shapes for Hydrogen with:
 
