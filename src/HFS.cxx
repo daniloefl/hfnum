@@ -68,7 +68,7 @@ void HFS::save(const std::string fout) {
   f << std::setw(10) << "Z" << " " << std::setw(10) << _Z << std::endl;
   f << std::setw(10) << "gamma_scf" << " " << std::setw(10) << _gamma_scf << std::endl;
   f << std::setw(10) << "central" << " " << std::setw(10) << 1 << std::endl;
-  f << std::setw(10) << "grid.isLog" << " " << std::setw(10) << _g->isLog() << std::endl;
+  f << std::setw(10) << "grid.isLog" << " " << std::setw(10) << _g->type() << std::endl;
   f << std::setw(10) << "grid.dx" << " " << std::setw(10) << _g->dx() << std::endl;
   f << std::setw(10) << "grid.N" << " " << std::setw(10) << _g->N() << std::endl;
   f << std::setw(10) << "grid.rmin" << " " << std::setw(10) << (*_g)(0) << std::endl;
@@ -126,7 +126,7 @@ void HFS::load(const std::string fin) {
   _Z = sr.getDouble("Z");
   _gamma_scf = sr.getDouble("gamma_scf");
   std::cout << "Param load" << std::endl;
-  _g->reset((bool) sr.getInt("grid.isLog"), sr.getDouble("grid.dx"), sr.getInt("grid.N"), sr.getDouble("grid.rmin"));
+  _g->reset((gridType) sr.getInt("grid.isLog"), sr.getDouble("grid.dx"), sr.getInt("grid.N"), sr.getDouble("grid.rmin"));
   std::cout << "Grid reset" << std::endl;
   for (int k = 0; k < sr._o.size(); ++k) {
     _owned_orb.push_back(new Orbital(*sr.getOrbital(k)));

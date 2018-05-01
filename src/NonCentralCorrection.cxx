@@ -25,7 +25,7 @@ void NonCentralCorrection::load(const std::string &fname) {
   }
 
   _Z = sr.getDouble("Z");
-  _g->reset((bool) sr.getInt("grid.isLog"), sr.getDouble("grid.dx"), sr.getInt("grid.N"), sr.getDouble("grid.rmin"));
+  _g->reset((gridType) sr.getInt("grid.isLog"), sr.getDouble("grid.dx"), sr.getInt("grid.N"), sr.getDouble("grid.rmin"));
   for (int k = 0; k < sr._o.size(); ++k) {
     _o.push_back(new Orbital(*sr.getOrbital(k)));
   }

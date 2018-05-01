@@ -34,11 +34,11 @@ class SCF {
     virtual ~SCF();
 
     /// \brief Reset Grid configuration.
-    /// \param isLog Whether the Grid is logarithmic.
+    /// \param t Grid type.
     /// \param dx Grid step.
     /// \param N Number of Grid points.
     /// \param rmin Minimum Grid r value.
-    void resetGrid(bool isLog, ldouble dx, int N, ldouble rmin);
+    void resetGrid(gridType t, ldouble dx, int N, ldouble rmin);
 
     /// \brief Get Z.
     /// \return Z

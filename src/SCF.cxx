@@ -28,13 +28,13 @@ using namespace boost;
 #include <cstdlib>
 
 SCF::SCF()
-  : _g(new Grid(true, 1e-1, 10, 1e-3)), _Z(1), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _irs(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om), _igs(*_g, _o, icl, _om) {
+  : _g(new Grid(expGrid, 1e-1, 10, 1e-3)), _Z(1), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _irs(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om), _igs(*_g, _o, icl, _om) {
   _own_grid = true;
   _pot.resize(_g->N());
   for (int k = 0; k < _g->N(); ++k) {
     _pot[k] = -_Z/(*_g)(k);
   }
-  _gamma_scf = 0.5;
+  _gamma_scf = 0.2;
   _method = 3;
   _isSpinDependent = false;
 }
@@ -47,8 +47,8 @@ python::list SCF::getR() const {
   return _g->getR();
 }
 
-void SCF::resetGrid(bool isLog, ldouble dx, int N, ldouble rmin) {
-  _g->reset(isLog, dx, N, rmin);
+void SCF::resetGrid(gridType t, ldouble dx, int N, ldouble rmin) {
+  _g->reset(t, dx, N, rmin);
   _pot.resize(_g->N());
   for (int k = 0; k < _g->N(); ++k) {
     _pot[k] = -_Z/(*_g)(k);

@@ -84,7 +84,7 @@ void DFT::save(const std::string fout) {
   f << std::setw(10) << "Z" << " " << std::setw(10) << _Z << std::endl;
   f << std::setw(10) << "gamma_scf" << " " << std::setw(10) << _gamma_scf << std::endl;
   f << std::setw(10) << "central" << " " << std::setw(10) << 1 << std::endl;
-  f << std::setw(10) << "grid.isLog" << " " << std::setw(10) << _g->isLog() << std::endl;
+  f << std::setw(10) << "grid.isLog" << " " << std::setw(10) << _g->type() << std::endl;
   f << std::setw(10) << "grid.dx" << " " << std::setw(10) << _g->dx() << std::endl;
   f << std::setw(10) << "grid.N" << " " << std::setw(10) << _g->N() << std::endl;
   f << std::setw(10) << "grid.rmin" << " " << std::setw(10) << (*_g)(0) << std::endl;
@@ -120,7 +120,7 @@ void DFT::load(const std::string fin) {
   std::ifstream f(fin.c_str());
   std::string line;
 
-  bool g_isLog = true;
+  int g_isLog = 1;
   ldouble g_dx = 1e-1;
   int g_N = 220;
   ldouble g_rmin = 1e-6;
@@ -209,7 +209,7 @@ void DFT::load(const std::string fin) {
     }
   }
   std::cout << "Load resetting grid with isLog = " << g_isLog << ", dx = " << g_dx << ", g_N = " << g_N << ", g_rmin = " << g_rmin << std::endl;
-  _g->reset(g_isLog, g_dx, g_N, g_rmin);
+  _g->reset((gridType) g_isLog, g_dx, g_N, g_rmin);
   _pot.resize(_g->N());
   for (int k = 0; k < _g->N(); ++k) {
     _pot[k] = -_Z/(*_g)(k);

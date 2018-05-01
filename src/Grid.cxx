@@ -9,13 +9,16 @@
 
 using namespace boost;
 
-Grid::Grid(bool isLog, double dx, int N, double rmin) {
-  _isLog = isLog;
+Grid::Grid(gridType t, double dx, int N, double rmin, double alpha) {
   _N = N;
   _dx = dx;
   _rmin = rmin;
   _r = new double[_N];
-  if (_isLog) {
+  _t = t;
+  _alpha = alpha;
+  if (_t == expGrid) {
+    for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  } else if (_t == linExpGrid) {
     for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
   } else {
     for (int k = 0; k < _N; ++k) _r[k] = _rmin + k*_dx;
@@ -26,14 +29,17 @@ Grid::~Grid() {
   delete [] _r;
 }
 
-void Grid::reset(bool isLog, double dx, int N, double rmin) {
+void Grid::reset(gridType t, double dx, int N, double rmin, double alpha) {
   delete [] _r;
-  _isLog = isLog;
+  _t = t;
   _N = N;
   _dx = dx;
   _rmin = rmin;
   _r = new double[_N];
-  if (_isLog) {
+  _alpha = alpha;
+  if (_t == expGrid) {
+    for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  } else if (_t == linExpGrid) {
     for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
   } else {
     for (int k = 0; k < _N; ++k) _r[k] = _rmin + k*_dx;
@@ -62,8 +68,10 @@ Grid::Grid(const Grid &g) {
   _dx = g._dx;
   _rmin = g._rmin;
   _r = new double[_N];
-  _isLog = g._isLog;
-  if (_isLog) {
+  _t = g._t;
+  if (_t == expGrid) {
+    for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  } else if (_t == linExpGrid) {
     for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
   } else {
     for (int k = 0; k < _N; ++k) _r[k] = _rmin + k*_dx;
@@ -77,8 +85,10 @@ Grid &Grid::operator =(const Grid &g) {
   _dx = g._dx;
   _rmin = g._rmin;
   _r = new double[_N];
-  _isLog = g._isLog;
-  if (_isLog) {
+  _t = g._t;
+  if (_t == expGrid) {
+    for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
+  } else if (_t == linExpGrid) {
     for (int k = 0; k < _N; ++k) _r[k] = std::exp(std::log(_rmin) + k*_dx);
   } else {
     for (int k = 0; k < _N; ++k) _r[k] = _rmin + k*_dx;
@@ -87,5 +97,10 @@ Grid &Grid::operator =(const Grid &g) {
 }
 
 bool Grid::isLog() const {
-  return _isLog;
+  return _t == expGrid;
 }
+
+gridType Grid::type() const {
+  return _t;
+}
+

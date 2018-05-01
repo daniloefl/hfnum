@@ -17,15 +17,21 @@
 #include <Python.h>
 using namespace boost;
 
+enum gridType {
+  linGrid = 0,
+  expGrid = 1,
+  linExpGrid = 2
+};
+
 class Grid {
   public:
 
     /// \brief Constructor with Grid parameters.
-    /// \param isLog Whether the Grid is logarithmic. If this is true, the Grid is r = exp(rmin + dx*i), otherwise: r = rmin + dx*i for i = 0..N-1
+    /// \param t Whether the Grid is linear, exponential or linear + exponential. If this is set to expGrid, the Grid is r = exp(rmin + dx*i). If it is set to linGrid, it is r = rmin + dx*i for i = 0..N-1. If it is set to linExpGrid, the grid is such that rmin + i*dx = rmin*r + alpha*log(r)
     /// \param dx Step size.
     /// \param N Number of Grid points.
     /// \param rmin Minimum Grid point.
-    Grid(bool isLog = true, double dx = 1e-1, int N = 150, double rmin = 1e-4);
+    Grid(gridType t = expGrid, double dx = 1e-1, int N = 150, double rmin = 1e-4, double alpha = 0);
 
     /// \brief Copy constructor.
     /// \param g Other Grid object.
@@ -51,15 +57,19 @@ class Grid {
     /// \brief Getter for isLog flag.
     bool isLog() const;
 
+    /// \brief Getter for type.
+    gridType type() const;
+
     /// \brief Python interface for getting list of radial values.
     python::list getR() const;
 
     /// \brief Reset configuration.
-    /// \param isLog Whether the Grid is logarithmic. If this is true, the Grid is r = exp(rmin + dx*i), otherwise: r = rmin + dx*i for i = 0..N-1
+    /// \param t Grid type.
     /// \param dx Step size.
     /// \param N Number of Grid points.
     /// \param rmin Minimum Grid point.
-    void reset(bool isLog = true, double dx = 1e-1, int N = 150, double rmin = 1e-4);
+    /// \param alpha Parameter for the lin+exp grid.
+    void reset(gridType t = expGrid, double dx = 1e-1, int N = 150, double rmin = 1e-4, double alpha = 0.0);
 
 
   private:
@@ -77,7 +87,10 @@ class Grid {
     double _rmin;
 
     /// Whether the grid is logarithmic
-    bool _isLog;
+    gridType _t;
+
+    /// alpha
+    double _alpha;
 };
 
 #endif

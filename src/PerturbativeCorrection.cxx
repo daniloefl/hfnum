@@ -3,7 +3,7 @@
 using namespace boost;
 
 PerturbativeCorrection::PerturbativeCorrection()
-  : _g(new Grid(true, 1e-1, 10, 1e-3)), _Z(1) {
+  : _g(new Grid(expGrid, 1e-1, 10, 1e-3)), _Z(1) {
 }
 
 PerturbativeCorrection::~PerturbativeCorrection() {
