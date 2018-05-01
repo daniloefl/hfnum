@@ -28,11 +28,13 @@ using namespace boost;
 
 DFT::DFT()
   : SCF() {
+  _isSpinDependent = true;
 }
 
 DFT::DFT(const std::string fname)
   : SCF() {
   load(fname);
+  _isSpinDependent = true;
 }
 
 DFT::~DFT() {

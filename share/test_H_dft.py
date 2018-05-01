@@ -18,7 +18,7 @@ rmin = 1e-8
 h = hfnum.DFT()
 h.resetGrid(True, dx, int(N), rmin)
 h.setZ(Z)
-h.method(2)
+h.method(3)
 
 orb = hfnum.Orbital(1, 1, 0, 0)
 
