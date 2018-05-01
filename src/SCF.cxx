@@ -432,7 +432,7 @@ ldouble SCF::stepSparse(ldouble gamma) {
     int l = _o[k]->l();
     int m = _o[k]->m();
     for (int i = 0; i < _g->N(); ++i) {
-      if (i >= 10 && (*_g)(i) < std::pow(_o.size(),2) && i < _g->N() - 4 && (*_o[k])(i)*(*_o[k])(i-1) <= 0) {
+      if (i >= 10  && i < _g->N() - 4 && (*_o[k])(i)*(*_o[k])(i-1) <= 0) {
         _nodes[k] += 1;
       }
     }
