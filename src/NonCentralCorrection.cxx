@@ -115,7 +115,7 @@ void NonCentralCorrection::correct() {
       // remember, in the central approximation: <r,s|vd(k1)|u_k1(r),l1,m1,s1> = vd(k1) * u_k1(r) Y_l1,m1(phi, theta) * delta(s == s1)
       // the angular and spin parts are the ones of k1, which is the orbital equation on which this operator acts
       // this is obviously wrong, but it is part of the assumption in the central approximation in HF.cxx
-      // here we calculate <u_k2,l2,m2,s2|vd(k1)|u_k1,l1,m1,s1> = int_r u_k2(r) Vex(k1,ko)(r) u_k1(r) r^2 dr delta(l1 == l2, m1 == m2, s1 == s2)
+      // here we calculate <u_k2,l2,m2,s2|vd(k1)|u_k1,l1,m1,s1> = int_r u_k2(r) Vd(k1,ko)(r) u_k1(r) r^2 dr delta(l1 == l2, m1 == m2, s1 == s2)
       // - vd
       if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() > 0) {
         for (int ir = 0; ir < _g->N(); ++ir) {
