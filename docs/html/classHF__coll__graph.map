@@ -1,8 +1,9 @@
 <map id="HF" name="HF">
-<area shape="rect" id="node2" href="$classSCF.html" title="SCF" alt="" coords="563,112,612,139"/>
-<area shape="rect" id="node3" href="$classGrid.html" title="Represents a grid in the radial distance to the nucleus. " alt="" coords="5,129,52,156"/>
-<area shape="rect" id="node4" href="$classOrbitalMapper.html" title="OrbitalMapper" alt="" coords="119,129,221,156"/>
-<area shape="rect" id="node5" href="$classIterativeGordonSolver.html" title="IterativeGordonSolver" alt="" coords="318,60,466,87"/>
-<area shape="rect" id="node6" href="$classIterativeRenormalisedSolver.html" title="IterativeRenormalisedSolver" alt="" coords="299,224,485,251"/>
-<area shape="rect" id="node7" href="$classLinearSystemBuilder.html" title="LinearSystemBuilder" alt="" coords="321,173,463,200"/>
+<area shape="rect" id="node2" href="$classSCF.html" title="SCF" alt="" coords="563,141,612,168"/>
+<area shape="rect" id="node3" href="$classGrid.html" title="Represents a grid in the radial distance to the nucleus. " alt="" coords="5,211,52,237"/>
+<area shape="rect" id="node4" href="$classOrbitalMapper.html" title="OrbitalMapper" alt="" coords="119,165,221,192"/>
+<area shape="rect" id="node5" href="$classIterativeGordonSolver.html" title="IterativeGordonSolver" alt="" coords="318,232,466,259"/>
+<area shape="rect" id="node6" href="$classIterativeRenormalisedSolver.html" title="IterativeRenormalisedSolver" alt="" coords="299,181,485,208"/>
+<area shape="rect" id="node7" href="$classLinearSystemBuilder.html" title="LinearSystemBuilder" alt="" coords="321,283,463,309"/>
+<area shape="rect" id="node8" href="$classIterativeStandardSolver.html" title="IterativeStandardSolver" alt="" coords="313,68,471,95"/>
 </map>

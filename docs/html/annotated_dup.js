@@ -6,8 +6,10 @@ var annotated_dup =
     [ "GTO", "classGTO.html", "classGTO" ],
     [ "GTOUnit", "structGTOUnit.html", "structGTOUnit" ],
     [ "HF", "classHF.html", "classHF" ],
+    [ "HFS", "classHFS.html", "classHFS" ],
     [ "IterativeGordonSolver", "classIterativeGordonSolver.html", "classIterativeGordonSolver" ],
     [ "IterativeRenormalisedSolver", "classIterativeRenormalisedSolver.html", "classIterativeRenormalisedSolver" ],
+    [ "IterativeStandardSolver", "classIterativeStandardSolver.html", "classIterativeStandardSolver" ],
     [ "LinearSystemBuilder", "classLinearSystemBuilder.html", "classLinearSystemBuilder" ],
     [ "lm", "classlm.html", "classlm" ],
     [ "MatrixSCF", "classMatrixSCF.html", "classMatrixSCF" ],
@@ -19,5 +21,7 @@ var annotated_dup =
     [ "RHF", "classRHF.html", "classRHF" ],
     [ "SCF", "classSCF.html", "classSCF" ],
     [ "SpinOrbitCorrection", "classSpinOrbitCorrection.html", "classSpinOrbitCorrection" ],
-    [ "StateReader", "classStateReader.html", "classStateReader" ]
+    [ "StateReader", "classStateReader.html", "classStateReader" ],
+    [ "STO", "classSTO.html", "classSTO" ],
+    [ "STOUnit", "structSTOUnit.html", "structSTOUnit" ]
 ];

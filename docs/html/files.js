@@ -23,6 +23,10 @@ var files =
       [ "HF", "classHF.html", "classHF" ]
     ] ],
     [ "hfnum.cxx", "hfnum_8cxx.html", "hfnum_8cxx" ],
+    [ "HFS.cxx", "HFS_8cxx.html", null ],
+    [ "HFS.h", "HFS_8h.html", [
+      [ "HFS", "classHFS.html", "classHFS" ]
+    ] ],
     [ "IterativeGordonSolver.cxx", "IterativeGordonSolver_8cxx.html", null ],
     [ "IterativeGordonSolver.h", "IterativeGordonSolver_8h.html", [
       [ "IterativeGordonSolver", "classIterativeGordonSolver.html", "classIterativeGordonSolver" ]
@@ -30,6 +34,10 @@ var files =
     [ "IterativeRenormalisedSolver.cxx", "IterativeRenormalisedSolver_8cxx.html", null ],
     [ "IterativeRenormalisedSolver.h", "IterativeRenormalisedSolver_8h.html", [
       [ "IterativeRenormalisedSolver", "classIterativeRenormalisedSolver.html", "classIterativeRenormalisedSolver" ]
+    ] ],
+    [ "IterativeStandardSolver.cxx", "IterativeStandardSolver_8cxx.html", null ],
+    [ "IterativeStandardSolver.h", "IterativeStandardSolver_8h.html", [
+      [ "IterativeStandardSolver", "classIterativeStandardSolver.html", "classIterativeStandardSolver" ]
     ] ],
     [ "LinearSystemBuilder.cxx", "LinearSystemBuilder_8cxx.html", null ],
     [ "LinearSystemBuilder.h", "LinearSystemBuilder_8h.html", [
@@ -71,6 +79,11 @@ var files =
     [ "StateReader.cxx", "StateReader_8cxx.html", null ],
     [ "StateReader.h", "StateReader_8h.html", [
       [ "StateReader", "classStateReader.html", "classStateReader" ]
+    ] ],
+    [ "STO.cxx", "STO_8cxx.html", null ],
+    [ "STO.h", "STO_8h.html", [
+      [ "STOUnit", "structSTOUnit.html", "structSTOUnit" ],
+      [ "STO", "classSTO.html", "classSTO" ]
     ] ],
     [ "utils.cxx", "utils_8cxx.html", "utils_8cxx" ],
     [ "utils.h", "utils_8h.html", "utils_8h" ]

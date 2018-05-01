@@ -61,6 +61,7 @@ $(document).ready(function(){initNavTree('classDFT.html','');});
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classDFT-members.html">List of all members</a>  </div>
@@ -83,12 +84,13 @@ Collaboration diagram for DFT:</div>
 <div class="dyncontent">
 <div class="center"><img src="classDFT__coll__graph.png" border="0" usemap="#DFT_coll__map" alt="Collaboration graph"/></div>
 <map name="DFT_coll__map" id="DFT_coll__map">
-<area shape="rect" id="node2" href="classSCF.html" title="SCF" alt="" coords="563,112,612,139"/>
-<area shape="rect" id="node3" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. " alt="" coords="5,129,52,156"/>
-<area shape="rect" id="node4" href="classOrbitalMapper.html" title="OrbitalMapper" alt="" coords="119,129,221,156"/>
-<area shape="rect" id="node5" href="classIterativeGordonSolver.html" title="IterativeGordonSolver" alt="" coords="318,60,466,87"/>
-<area shape="rect" id="node6" href="classIterativeRenormalisedSolver.html" title="IterativeRenormalisedSolver" alt="" coords="299,224,485,251"/>
-<area shape="rect" id="node7" href="classLinearSystemBuilder.html" title="LinearSystemBuilder" alt="" coords="321,173,463,200"/>
+<area shape="rect" id="node2" href="classSCF.html" title="SCF" alt="" coords="563,141,612,168"/>
+<area shape="rect" id="node3" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. " alt="" coords="5,211,52,237"/>
+<area shape="rect" id="node4" href="classOrbitalMapper.html" title="OrbitalMapper" alt="" coords="119,165,221,192"/>
+<area shape="rect" id="node5" href="classIterativeGordonSolver.html" title="IterativeGordonSolver" alt="" coords="318,232,466,259"/>
+<area shape="rect" id="node6" href="classIterativeRenormalisedSolver.html" title="IterativeRenormalisedSolver" alt="" coords="299,181,485,208"/>
+<area shape="rect" id="node7" href="classLinearSystemBuilder.html" title="LinearSystemBuilder" alt="" coords="321,283,463,309"/>
+<area shape="rect" id="node8" href="classIterativeStandardSolver.html" title="IterativeStandardSolver" alt="" coords="313,68,471,95"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -106,20 +108,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a58a79a2d805033b63838f3e63bda56a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42dcb5d6c6041a601a5ea3897600ec89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#a42dcb5d6c6041a601a5ea3897600ec89">solve</a> (int NiterSCF, int Niter, <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> F0stop)</td></tr>
 <tr class="separator:a42dcb5d6c6041a601a5ea3897600ec89"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5118de98a747f3761f59e82cfd92f5ea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#a5118de98a747f3761f59e82cfd92f5ea">solveForFixedPotentials</a> (int Niter, <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> F0stop)</td></tr>
-<tr class="separator:a5118de98a747f3761f59e82cfd92f5ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab7112222d646abcb99749153dbe5c0e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#ab7112222d646abcb99749153dbe5c0e2">stepGordon</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma)</td></tr>
-<tr class="separator:ab7112222d646abcb99749153dbe5c0e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af8e83aec26188bfc3ba948734e4da736"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#af8e83aec26188bfc3ba948734e4da736">stepRenormalised</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma)</td></tr>
-<tr class="separator:af8e83aec26188bfc3ba948734e4da736"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad913c3096b05440107f34cc328a471c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#ad913c3096b05440107f34cc328a471c4">solveOrbitalFixedEnergy</a> (std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;E, std::vector&lt; int &gt; &amp;l, std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;Fm, std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;Km, std::vector&lt; <a class="el" href="utils_8h.html#a7c6892fef5f51fae1b62981a2b41f44c">VectorXld</a> &gt; &amp;matched)</td></tr>
-<tr class="separator:ad913c3096b05440107f34cc328a471c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad629abc8ada54f563a40fef019082c8d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#ad629abc8ada54f563a40fef019082c8d">stepSparse</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma)</td></tr>
-<tr class="separator:ad629abc8ada54f563a40fef019082c8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a768769f0adf071b7d344bfe2dd96dbf3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#a768769f0adf071b7d344bfe2dd96dbf3">getE0</a> ()</td></tr>
 <tr class="separator:a768769f0adf071b7d344bfe2dd96dbf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1eb13cb8b65bbce8a320013cda81e160"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#a1eb13cb8b65bbce8a320013cda81e160">calculateFMatrix</a> (std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;F, std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;K, std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;E)</td></tr>
-<tr class="separator:a1eb13cb8b65bbce8a320013cda81e160"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaa740e274c0e9fd8c0ebe515d797ce31"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#aaa740e274c0e9fd8c0ebe515d797ce31">addOrbital</a> (<a class="el" href="classOrbital.html">Orbital</a> *o)</td></tr>
 <tr class="separator:aaa740e274c0e9fd8c0ebe515d797ce31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c4a3552d728884a7cc474fd26a62f5e"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#a6c4a3552d728884a7cc474fd26a62f5e">getDensityUp</a> ()</td></tr>
@@ -155,8 +145,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aeca6a51492bd3b1e5730888c479e23dd inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35c1ab4ecadb162dd946eef831558afb inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a35c1ab4ecadb162dd946eef831558afb">method</a> (int m)</td></tr>
 <tr class="separator:a35c1ab4ecadb162dd946eef831558afb inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0d65d679009f9d8460a2c0fa3ba3636 inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ae0d65d679009f9d8460a2c0fa3ba3636">getOrbital</a> (int no, int mo, int lo)</td></tr>
-<tr class="separator:ae0d65d679009f9d8460a2c0fa3ba3636 inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8138307f2d894eb6d83fccd55e23cae inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ac8138307f2d894eb6d83fccd55e23cae">getOrbital</a> (int no)</td></tr>
+<tr class="separator:ac8138307f2d894eb6d83fccd55e23cae inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4bc5dd75714013c145e02b287885e27e inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a4bc5dd75714013c145e02b287885e27e">getOrbitalCentral</a> (int no)</td></tr>
 <tr class="separator:a4bc5dd75714013c145e02b287885e27e inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75413ee4f3d0ef845b458507055a6127 inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top">boost::python::list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a75413ee4f3d0ef845b458507055a6127">getOrbitalCentralPython</a> (int no)</td></tr>
@@ -181,6 +171,21 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a480a53dc4c73567847d2a76d52fd7512 inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c202b9c4e6f5a0994da4ad6720bf2a6 inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a1c202b9c4e6f5a0994da4ad6720bf2a6">addOrbitalPython</a> (boost::python::object o)</td></tr>
 <tr class="separator:a1c202b9c4e6f5a0994da4ad6720bf2a6 inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a602257b5273b9c422cda18b19794305d inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a602257b5273b9c422cda18b19794305d">solveForFixedPotentials</a> (int Niter, <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> F0stop)</td></tr>
+<tr class="separator:a602257b5273b9c422cda18b19794305d inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c26dcf23691db3b991c92865931531b inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a0c26dcf23691db3b991c92865931531b">stepGordon</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma)</td></tr>
+<tr class="separator:a0c26dcf23691db3b991c92865931531b inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b36c4e0cf6adb85b7d4375c3097c0b2 inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a8b36c4e0cf6adb85b7d4375c3097c0b2">stepRenormalised</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma)</td></tr>
+<tr class="separator:a8b36c4e0cf6adb85b7d4375c3097c0b2 inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f12f4c443aef1620c783f509fcbe3f9 inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a1f12f4c443aef1620c783f509fcbe3f9">stepStandard</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma, bool checkE=false)</td></tr>
+<tr class="separator:a1f12f4c443aef1620c783f509fcbe3f9 inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c90fbb3a2f6aa43fa72f69569225fb3 inherit pub_methods_classSCF"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a7c90fbb3a2f6aa43fa72f69569225fb3">stepSparse</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma)</td></tr>
+<tr class="separator:a7c90fbb3a2f6aa43fa72f69569225fb3 inherit pub_methods_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:abc7baf40ff0e18261cab455ca831a574"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#abc7baf40ff0e18261cab455ca831a574">calculateFMatrix</a> (std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;F, std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;K, std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;C, std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;E)</td></tr>
+<tr class="separator:abc7baf40ff0e18261cab455ca831a574"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
@@ -205,10 +210,6 @@ Private Attributes</h2></td></tr>
 <tr class="separator:af48de0ab07afdd895aed733e3a21ff92"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e2e3ef10d3483be1682033481e36b70"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#a4e2e3ef10d3483be1682033481e36b70">_vex_lda_dw</a></td></tr>
 <tr class="separator:a4e2e3ef10d3483be1682033481e36b70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0689f7fc09e8a6f982512639e77e50f7"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#a0689f7fc09e8a6f982512639e77e50f7">_vsum_up</a></td></tr>
-<tr class="separator:a0689f7fc09e8a6f982512639e77e50f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d2c6b9ecd127fe2ab63aad0f378d171"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDFT.html#a4d2c6b9ecd127fe2ab63aad0f378d171">_vsum_dw</a></td></tr>
-<tr class="separator:a4d2c6b9ecd127fe2ab63aad0f378d171"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -245,6 +246,8 @@ Additional Inherited Members</h2></td></tr>
 <tr class="separator:a86849958e3661bc38abd84df224c90bf inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac335e20d7d7ba1c62b7c1b3e5c8fa832 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIterativeRenormalisedSolver.html">IterativeRenormalisedSolver</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ac335e20d7d7ba1c62b7c1b3e5c8fa832">_irs</a></td></tr>
 <tr class="separator:ac335e20d7d7ba1c62b7c1b3e5c8fa832 inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ec4bd82dc0cce70a6d62b34224c8f09 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIterativeStandardSolver.html">IterativeStandardSolver</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a4ec4bd82dc0cce70a6d62b34224c8f09">_iss</a></td></tr>
+<tr class="separator:a4ec4bd82dc0cce70a6d62b34224c8f09 inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0cd199a66005b34679257de0f4d2ccb7 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIterativeGordonSolver.html">IterativeGordonSolver</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a0cd199a66005b34679257de0f4d2ccb7">_igs</a></td></tr>
 <tr class="separator:a0cd199a66005b34679257de0f4d2ccb7 inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae50df9cfdd4ffd5a9283bf980ac110b2 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classOrbitalMapper.html">OrbitalMapper</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ae50df9cfdd4ffd5a9283bf980ac110b2">_om</a></td></tr>
@@ -253,6 +256,18 @@ Additional Inherited Members</h2></td></tr>
 <tr class="separator:afb0a6ba1a037c9b4aae4592d1256cead inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56fe9aa73c9eb688854218263459acf6 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a56fe9aa73c9eb688854218263459acf6">_own_grid</a></td></tr>
 <tr class="separator:a56fe9aa73c9eb688854218263459acf6 inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9fe5c34c22531a7fdb2c4907e0afb65 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53">Vradial</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ae9fe5c34c22531a7fdb2c4907e0afb65">_vd</a></td></tr>
+<tr class="separator:ae9fe5c34c22531a7fdb2c4907e0afb65 inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e5d461d3e9d0acf1f843ed64fb1ab64 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::pair&lt; int, int &gt;, <a class="el" href="utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53">Vradial</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a2e5d461d3e9d0acf1f843ed64fb1ab64">_vex</a></td></tr>
+<tr class="separator:a2e5d461d3e9d0acf1f843ed64fb1ab64 inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec07b2fc1732946971e359e6f7238713 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#aec07b2fc1732946971e359e6f7238713">_vsum_up</a></td></tr>
+<tr class="separator:aec07b2fc1732946971e359e6f7238713 inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1a6e5045da7f2de1ca2ec0a2db38966 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ad1a6e5045da7f2de1ca2ec0a2db38966">_vsum_dw</a></td></tr>
+<tr class="separator:ad1a6e5045da7f2de1ca2ec0a2db38966 inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3796874eed48765f49b32243e9192253 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53">Vradial</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a3796874eed48765f49b32243e9192253">matchedSt</a></td></tr>
+<tr class="separator:a3796874eed48765f49b32243e9192253 inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65cd77b085092003abd2859343b7e532 inherit pro_attribs_classSCF"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a65cd77b085092003abd2859343b7e532">_isSpinDependent</a></td></tr>
+<tr class="separator:a65cd77b085092003abd2859343b7e532 inherit pro_attribs_classSCF"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
@@ -303,7 +318,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00033">33</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00034">34</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -332,7 +347,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Destructor. </p>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00038">38</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00040">40</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -371,15 +386,18 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classSCF.html#aacb5c429c2d2fcd3978077cbf7b8b443">SCF</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00727">727</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00445">445</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
-<a id="a1eb13cb8b65bbce8a320013cda81e160"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1eb13cb8b65bbce8a320013cda81e160">&#9670;&nbsp;</a></span>calculateFMatrix()</h2>
+<a id="abc7baf40ff0e18261cab455ca831a574"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc7baf40ff0e18261cab455ca831a574">&#9670;&nbsp;</a></span>calculateFMatrix()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void DFT::calculateFMatrix </td>
@@ -396,6 +414,12 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>C</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>E</em>&#160;</td>
         </tr>
@@ -405,6 +429,11 @@ Additional Inherited Members</h2></td></tr>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Calculate F matrix, which represents the Hamiltonian using the Numerov method. </p>
@@ -412,12 +441,15 @@ Additional Inherited Members</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">F</td><td>To be returned by reference. Matrix F for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. </td></tr>
     <tr><td class="paramname">K</td><td>To be returned by reference. Inverse of F. </td></tr>
+    <tr><td class="paramname">C</td><td>To be returned by reference. Independent term. </td></tr>
     <tr><td class="paramname">E</td><td>Values of energy in each orbital. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00677">677</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p>Implements <a class="el" href="classSCF.html#a572feb9f923cf0354d68638680c30012">SCF</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00392">392</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -453,7 +485,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00587">587</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00302">302</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -489,7 +521,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00615">615</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00330">330</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -511,7 +543,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Get electron density for spin down orbitals. </p>
 <dl class="section return"><dt>Returns</dt><dd>Vector of electron density values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00069">69</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00071">71</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -533,7 +565,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Get electron density for spin down orbitals. </p>
 <dl class="section return"><dt>Returns</dt><dd>Vector of electron density values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00073">73</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00075">75</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -555,7 +587,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Get electron density for spin up orbitals. </p>
 <dl class="section return"><dt>Returns</dt><dd>Vector of electron density values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00041">41</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00043">43</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -577,7 +609,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Get electron density for spin up orbitals. </p>
 <dl class="section return"><dt>Returns</dt><dd>Vector of electron density values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00045">45</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00047">47</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -599,7 +631,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Calculate total energy. </p>
 <dl class="section return"><dt>Returns</dt><dd>Ground energy </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00512">512</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00227">227</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -621,7 +653,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Get Exchange potential for spin down orbitals. </p>
 <dl class="section return"><dt>Returns</dt><dd>Vector of exchange potential down values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00063">63</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00065">65</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -643,7 +675,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Get Exchange potential for spin up orbitals. </p>
 <dl class="section return"><dt>Returns</dt><dd>Vector of exchange potential up values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00057">57</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00059">59</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -665,7 +697,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Get Hartree potential. </p>
 <dl class="section return"><dt>Returns</dt><dd>Vector of hartree potential values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00051">51</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00053">53</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -703,7 +735,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classSCF.html#a4ebcdbad21ff380c26ccd445bfd4147b">SCF</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00138">138</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00119">119</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -741,7 +773,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classSCF.html#a5cca3fce03c5463d428d26272dcfa547">SCF</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00079">79</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00081">81</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -787,180 +819,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00538">538</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
-
-</div>
-</div>
-<a id="a5118de98a747f3761f59e82cfd92f5ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5118de98a747f3761f59e82cfd92f5ea">&#9670;&nbsp;</a></span>solveForFixedPotentials()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> DFT::solveForFixedPotentials </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>Niter</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td>
-          <td class="paramname"><em>F0stop</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Keep self-consistent potentials constant and solve Schroedinger eq., looking for the correct energy eigenvalue. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">Niter</td><td>Number of iterations used to seek for energy eigenvalue. </td></tr>
-    <tr><td class="paramname">F0stop</td><td>When energies vary by less than this value, stop looking for energy eigenvalue. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Value of a constraint being minimised (depends on the method). </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00260">260</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
-
-</div>
-</div>
-<a id="ad913c3096b05440107f34cc328a471c4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad913c3096b05440107f34cc328a471c4">&#9670;&nbsp;</a></span>solveOrbitalFixedEnergy()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> DFT::solveOrbitalFixedEnergy </td>
-          <td>(</td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>E</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; int &gt; &amp;&#160;</td>
-          <td class="paramname"><em>l</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>Fm</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>Km</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#a7c6892fef5f51fae1b62981a2b41f44c">VectorXld</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>matched</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ab7112222d646abcb99749153dbe5c0e2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab7112222d646abcb99749153dbe5c0e2">&#9670;&nbsp;</a></span>stepGordon()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> DFT::stepGordon </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td>
-          <td class="paramname"><em>gamma</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Use Gordon's method, which tries a set of orthogonal initial conditions to find the energy. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">gamma</td><td>Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Minimisation function value at the end of the step. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00324">324</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
-
-</div>
-</div>
-<a id="af8e83aec26188bfc3ba948734e4da736"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af8e83aec26188bfc3ba948734e4da736">&#9670;&nbsp;</a></span>stepRenormalised()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> DFT::stepRenormalised </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td>
-          <td class="paramname"><em>gamma</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Use renormalised wave function method, which looks for solution in ratio of Numerov parameters to avoid overflow. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">gamma</td><td>Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Minimisation function value at the end of the step. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00390">390</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
-
-</div>
-</div>
-<a id="ad629abc8ada54f563a40fef019082c8d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad629abc8ada54f563a40fef019082c8d">&#9670;&nbsp;</a></span>stepSparse()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> DFT::stepSparse </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td>
-          <td class="paramname"><em>gamma</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Build NxN matrix to solve all equations of the Numerov method for each point simultaneously. </p>
-<p>Includes an extra equation to control the orbital normalisations, which is non-linear. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">gamma</td><td>Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Minimisation function value at the end of the step. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00459">459</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8cxx_source.html#l00253">253</a> of file <a class="el" href="DFT_8cxx_source.html">DFT.cxx</a>.</p>
 
 </div>
 </div>
@@ -985,7 +844,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00133">133</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00113">113</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
 
 </div>
 </div>
@@ -1009,7 +868,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00130">130</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00110">110</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
 
 </div>
 </div>
@@ -1033,7 +892,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00132">132</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00112">112</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
 
 </div>
 </div>
@@ -1059,7 +918,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Electron densities. </p>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00129">129</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00109">109</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
 
 </div>
 </div>
@@ -1085,7 +944,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>central Hartree potential </p>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00136">136</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00116">116</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
 
 </div>
 </div>
@@ -1109,7 +968,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00140">140</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00120">120</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
 
 </div>
 </div>
@@ -1135,57 +994,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>LDA exchange potential. </p>
 
-<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00139">139</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
-
-</div>
-</div>
-<a id="a4d2c6b9ecd127fe2ab63aad0f378d171"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d2c6b9ecd127fe2ab63aad0f378d171">&#9670;&nbsp;</a></span>_vsum_dw</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&gt; DFT::_vsum_dw</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00144">144</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
-
-</div>
-</div>
-<a id="a0689f7fc09e8a6f982512639e77e50f7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0689f7fc09e8a6f982512639e77e50f7">&#9670;&nbsp;</a></span>_vsum_up</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&gt; DFT::_vsum_up</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>total potential </p>
-
-<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00143">143</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DFT_8h_source.html#l00119">119</a> of file <a class="el" href="DFT_8h_source.html">DFT.h</a>.</p>
 
 </div>
 </div>

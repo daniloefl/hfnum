@@ -1,16 +1,20 @@
 <map id="OrbitalMapper.h" name="OrbitalMapper.h">
-<area shape="rect" id="node2" href="$LinearSystemBuilder_8h.html" title="LinearSystemBuilder.h" alt="" coords="202,80,355,107"/>
-<area shape="rect" id="node3" href="$SCF_8h.html" title="SCF.h" alt="" coords="367,155,427,181"/>
-<area shape="rect" id="node4" href="$DFT_8h.html" title="DFT.h" alt="" coords="300,229,359,256"/>
-<area shape="rect" id="node7" href="$HF_8h.html" title="HF.h" alt="" coords="669,229,720,256"/>
-<area shape="rect" id="node11" href="$IterativeRenormalisedSolver_8h.html" title="IterativeRenormalisedSolver.h" alt="" coords="447,80,644,107"/>
-<area shape="rect" id="node13" href="$IterativeGordonSolver_8h.html" title="IterativeGordonSolver.h" alt="" coords="669,80,827,107"/>
-<area shape="rect" id="node14" href="$IterativeGordonSolver_8cxx.html" title="IterativeGordonSolver.cxx" alt="" coords="837,155,1011,181"/>
-<area shape="rect" id="node15" href="$OrbitalMapper_8cxx.html" title="OrbitalMapper.cxx" alt="" coords="1085,80,1213,107"/>
-<area shape="rect" id="node10" href="$LinearSystemBuilder_8cxx.html" title="LinearSystemBuilder.cxx" alt="" coords="23,155,190,181"/>
-<area shape="rect" id="node9" href="$SCF_8cxx.html" title="SCF.cxx" alt="" coords="383,229,457,256"/>
-<area shape="rect" id="node5" href="$DFT_8cxx.html" title="DFT.cxx" alt="" coords="293,304,366,331"/>
-<area shape="rect" id="node6" href="$hfnum_8cxx.html" title="hfnum.cxx" alt="" coords="500,304,583,331"/>
-<area shape="rect" id="node8" href="$HF_8cxx.html" title="HF.cxx" alt="" coords="662,304,727,331"/>
-<area shape="rect" id="node12" href="$IterativeRenormalisedSolver_8cxx.html" title="IterativeRenormalisedSolver.cxx" alt="" coords="451,155,661,181"/>
+<area shape="rect" id="node2" href="$LinearSystemBuilder_8h.html" title="LinearSystemBuilder.h" alt="" coords="278,80,432,107"/>
+<area shape="rect" id="node3" href="$SCF_8h.html" title="SCF.h" alt="" coords="805,155,865,181"/>
+<area shape="rect" id="node4" href="$DFT_8h.html" title="DFT.h" alt="" coords="422,229,480,256"/>
+<area shape="rect" id="node7" href="$HF_8h.html" title="HF.h" alt="" coords="691,229,742,256"/>
+<area shape="rect" id="node9" href="$HFS_8h.html" title="HFS.h" alt="" coords="910,229,970,256"/>
+<area shape="rect" id="node13" href="$IterativeRenormalisedSolver_8h.html" title="IterativeRenormalisedSolver.h" alt="" coords="482,80,679,107"/>
+<area shape="rect" id="node15" href="$IterativeStandardSolver_8h.html" title="IterativeStandardSolver.h" alt="" coords="997,80,1166,107"/>
+<area shape="rect" id="node16" href="$IterativeStandardSolver_8cxx.html" title="IterativeStandardSolver.cxx" alt="" coords="1240,155,1422,181"/>
+<area shape="rect" id="node17" href="$IterativeGordonSolver_8h.html" title="IterativeGordonSolver.h" alt="" coords="814,80,973,107"/>
+<area shape="rect" id="node18" href="$IterativeGordonSolver_8cxx.html" title="IterativeGordonSolver.cxx" alt="" coords="1042,155,1215,181"/>
+<area shape="rect" id="node19" href="$OrbitalMapper_8cxx.html" title="OrbitalMapper.cxx" alt="" coords="1498,80,1626,107"/>
+<area shape="rect" id="node12" href="$LinearSystemBuilder_8cxx.html" title="LinearSystemBuilder.cxx" alt="" coords="24,155,190,181"/>
+<area shape="rect" id="node11" href="$SCF_8cxx.html" title="SCF.cxx" alt="" coords="798,229,872,256"/>
+<area shape="rect" id="node5" href="$DFT_8cxx.html" title="DFT.cxx" alt="" coords="414,304,488,331"/>
+<area shape="rect" id="node6" href="$hfnum_8cxx.html" title="hfnum.cxx" alt="" coords="724,304,807,331"/>
+<area shape="rect" id="node8" href="$HF_8cxx.html" title="HF.cxx" alt="" coords="634,304,700,331"/>
+<area shape="rect" id="node10" href="$HFS_8cxx.html" title="HFS.cxx" alt="" coords="903,304,978,331"/>
+<area shape="rect" id="node14" href="$IterativeRenormalisedSolver_8cxx.html" title="IterativeRenormalisedSolver.cxx" alt="" coords="418,155,628,181"/>
 </map>

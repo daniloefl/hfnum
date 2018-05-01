@@ -1,6 +1,7 @@
 <map id="StateReader.h" name="StateReader.h">
 <area shape="rect" id="node2" href="$HF_8cxx.html" title="HF.cxx" alt="" coords="5,80,71,107"/>
-<area shape="rect" id="node3" href="$NonCentralCorrection_8cxx.html" title="NonCentralCorrection.cxx" alt="" coords="95,80,269,107"/>
-<area shape="rect" id="node4" href="$SpinOrbitCorrection_8cxx.html" title="SpinOrbitCorrection.cxx" alt="" coords="293,80,455,107"/>
-<area shape="rect" id="node5" href="$StateReader_8cxx.html" title="StateReader.cxx" alt="" coords="479,80,599,107"/>
+<area shape="rect" id="node3" href="$HFS_8cxx.html" title="HFS.cxx" alt="" coords="95,80,170,107"/>
+<area shape="rect" id="node4" href="$NonCentralCorrection_8cxx.html" title="NonCentralCorrection.cxx" alt="" coords="194,80,367,107"/>
+<area shape="rect" id="node5" href="$SpinOrbitCorrection_8cxx.html" title="SpinOrbitCorrection.cxx" alt="" coords="392,80,553,107"/>
+<area shape="rect" id="node6" href="$StateReader_8cxx.html" title="StateReader.cxx" alt="" coords="578,80,698,107"/>
 </map>

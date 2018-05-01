@@ -4,9 +4,10 @@ var classHF =
     [ "HF", "classHF.html#aaca6ad8d1c129148a9f48f34b8ec632a", null ],
     [ "~HF", "classHF.html#a26c4333faa005ed8ca2863afd72760b4", null ],
     [ "addOrbital", "classHF.html#aaed6429a4123a38bf75636686bca402f", null ],
-    [ "calculateFMatrix", "classHF.html#a4cf7aa1341bc8fda15d80aa18ac5087a", null ],
+    [ "calculateFMatrix", "classHF.html#ad749746b2a8d4e6ae9ea17a2ff187d1e", null ],
     [ "calculateVd", "classHF.html#abe4a51b742c05d7a787eb4e5e9102ced", null ],
     [ "calculateVex", "classHF.html#aacc5500ebeafe7002580bf1af2ec9e2d", null ],
+    [ "calculateY", "classHF.html#a80048b277c28af6772a2965e56e404c2", null ],
     [ "getDirectPotential", "classHF.html#a6de19f5d06e92e8bfe0f63d1d0f104c9", null ],
     [ "getDirectPotentialPython", "classHF.html#a8427de0846613841d765d24b9ff02b79", null ],
     [ "getE0", "classHF.html#a500bc320732e93a162feeb0e9684f6eb", null ],
@@ -15,13 +16,7 @@ var classHF =
     [ "load", "classHF.html#a9e27eedfdd795e380b22f2cacf1a7ce0", null ],
     [ "save", "classHF.html#a14d49ae3aa4032c9b19abefb5d4f7cec", null ],
     [ "solve", "classHF.html#aa63cb58ed259911c29f8aefca00809bc", null ],
-    [ "solveForFixedPotentials", "classHF.html#ad0c4b8b1d7bec2cb42cecd218715ec27", null ],
-    [ "solveOrbitalFixedEnergy", "classHF.html#a1339b1e9ab169c667d57326012c800a0", null ],
-    [ "stepGordon", "classHF.html#a43b4e607f11445644ec595bdb2f16253", null ],
-    [ "stepRenormalised", "classHF.html#a918b92a0efae8dc78d2c787f33f070f1", null ],
-    [ "stepSparse", "classHF.html#a99ce94f52c6738e811380407dec3ef06", null ],
-    [ "_vd", "classHF.html#a7c691413f0978d44fb79bc1a205e032a", null ],
     [ "_vdsum", "classHF.html#a627269037f92f5c920454a9674d68c00", null ],
-    [ "_vex", "classHF.html#aa6da4d8bc63b5146726a80b2a52fb4b5", null ],
-    [ "_vexsum", "classHF.html#ab41c4e42122111506f09a23301d8af80", null ]
+    [ "_vexsum", "classHF.html#ab41c4e42122111506f09a23301d8af80", null ],
+    [ "_Y", "classHF.html#a4f4e0aa9b194e6419ce446f0b5626fac", null ]
 ];

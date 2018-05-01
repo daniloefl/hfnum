@@ -1,9 +1,10 @@
 <map id="SCF.h" name="SCF.h">
-<area shape="rect" id="node2" href="$Grid_8h.html" title="Grid.h" alt="" coords="875,229,932,256"/>
-<area shape="rect" id="node7" href="$Orbital_8h.html" title="Orbital.h" alt="" coords="653,229,724,256"/>
-<area shape="rect" id="node10" href="$utils_8h.html" title="utils.h" alt="" coords="264,304,321,331"/>
-<area shape="rect" id="node16" href="$LinearSystemBuilder_8h.html" title="LinearSystemBuilder.h" alt="" coords="965,80,1119,107"/>
-<area shape="rect" id="node17" href="$OrbitalMapper_8h.html" title="OrbitalMapper.h" alt="" coords="853,155,967,181"/>
-<area shape="rect" id="node18" href="$IterativeRenormalisedSolver_8h.html" title="IterativeRenormalisedSolver.h" alt="" coords="294,80,491,107"/>
-<area shape="rect" id="node19" href="$IterativeGordonSolver_8h.html" title="IterativeGordonSolver.h" alt="" coords="701,80,860,107"/>
+<area shape="rect" id="node2" href="$Grid_8h.html" title="Grid.h" alt="" coords="689,229,746,256"/>
+<area shape="rect" id="node7" href="$Orbital_8h.html" title="Orbital.h" alt="" coords="901,229,972,256"/>
+<area shape="rect" id="node10" href="$utils_8h.html" title="utils.h" alt="" coords="233,304,290,331"/>
+<area shape="rect" id="node16" href="$LinearSystemBuilder_8h.html" title="LinearSystemBuilder.h" alt="" coords="726,80,880,107"/>
+<area shape="rect" id="node17" href="$OrbitalMapper_8h.html" title="OrbitalMapper.h" alt="" coords="642,155,756,181"/>
+<area shape="rect" id="node18" href="$IterativeRenormalisedSolver_8h.html" title="IterativeRenormalisedSolver.h" alt="" coords="124,80,322,107"/>
+<area shape="rect" id="node19" href="$IterativeStandardSolver_8h.html" title="IterativeStandardSolver.h" alt="" coords="346,80,516,107"/>
+<area shape="rect" id="node20" href="$IterativeGordonSolver_8h.html" title="IterativeGordonSolver.h" alt="" coords="952,80,1110,107"/>
 </map>

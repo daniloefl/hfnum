@@ -1,3 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classStateReader.html" title="StateReader" alt="" coords="5,5,100,32"/>
+<area shape="rect" id="node1" href="$classSCF.html" title="SCF" alt="" coords="5,56,55,83"/>
+<area shape="rect" id="node2" href="$classDFT.html" title="DFT" alt="" coords="103,5,151,32"/>
+<area shape="rect" id="node3" href="$classHF.html" title="HF" alt="" coords="107,56,147,83"/>
+<area shape="rect" id="node4" href="$classHFS.html" title="HFS" alt="" coords="103,107,152,133"/>
 </map>

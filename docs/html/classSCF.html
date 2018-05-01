@@ -61,6 +61,7 @@ $(document).ready(function(){initNavTree('classSCF.html','');});
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classSCF-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -76,6 +77,7 @@ Inheritance diagram for SCF:</div>
 <map name="SCF_inherit__map" id="SCF_inherit__map">
 <area shape="rect" id="node2" href="classDFT.html" title="DFT" alt="" coords="5,80,53,107"/>
 <area shape="rect" id="node3" href="classHF.html" title="HF" alt="" coords="77,80,117,107"/>
+<area shape="rect" id="node4" href="classHFS.html" title="HFS" alt="" coords="142,80,191,107"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
@@ -83,11 +85,12 @@ Collaboration diagram for SCF:</div>
 <div class="dyncontent">
 <div class="center"><img src="classSCF__coll__graph.png" border="0" usemap="#SCF_coll__map" alt="Collaboration graph"/></div>
 <map name="SCF_coll__map" id="SCF_coll__map">
-<area shape="rect" id="node2" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. " alt="" coords="5,129,52,156"/>
-<area shape="rect" id="node3" href="classOrbitalMapper.html" title="OrbitalMapper" alt="" coords="119,129,221,156"/>
-<area shape="rect" id="node4" href="classIterativeGordonSolver.html" title="IterativeGordonSolver" alt="" coords="318,60,466,87"/>
-<area shape="rect" id="node5" href="classIterativeRenormalisedSolver.html" title="IterativeRenormalisedSolver" alt="" coords="299,224,485,251"/>
-<area shape="rect" id="node6" href="classLinearSystemBuilder.html" title="LinearSystemBuilder" alt="" coords="321,173,463,200"/>
+<area shape="rect" id="node2" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. " alt="" coords="5,211,52,237"/>
+<area shape="rect" id="node3" href="classOrbitalMapper.html" title="OrbitalMapper" alt="" coords="119,165,221,192"/>
+<area shape="rect" id="node4" href="classIterativeGordonSolver.html" title="IterativeGordonSolver" alt="" coords="318,232,466,259"/>
+<area shape="rect" id="node5" href="classIterativeRenormalisedSolver.html" title="IterativeRenormalisedSolver" alt="" coords="299,181,485,208"/>
+<area shape="rect" id="node6" href="classLinearSystemBuilder.html" title="LinearSystemBuilder" alt="" coords="321,283,463,309"/>
+<area shape="rect" id="node7" href="classIterativeStandardSolver.html" title="IterativeStandardSolver" alt="" coords="313,68,471,95"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -117,8 +120,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aeca6a51492bd3b1e5730888c479e23dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35c1ab4ecadb162dd946eef831558afb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a35c1ab4ecadb162dd946eef831558afb">method</a> (int m)</td></tr>
 <tr class="separator:a35c1ab4ecadb162dd946eef831558afb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0d65d679009f9d8460a2c0fa3ba3636"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ae0d65d679009f9d8460a2c0fa3ba3636">getOrbital</a> (int no, int mo, int lo)</td></tr>
-<tr class="separator:ae0d65d679009f9d8460a2c0fa3ba3636"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8138307f2d894eb6d83fccd55e23cae"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ac8138307f2d894eb6d83fccd55e23cae">getOrbital</a> (int no)</td></tr>
+<tr class="separator:ac8138307f2d894eb6d83fccd55e23cae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4bc5dd75714013c145e02b287885e27e"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a4bc5dd75714013c145e02b287885e27e">getOrbitalCentral</a> (int no)</td></tr>
 <tr class="separator:a4bc5dd75714013c145e02b287885e27e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75413ee4f3d0ef845b458507055a6127"><td class="memItemLeft" align="right" valign="top">boost::python::list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a75413ee4f3d0ef845b458507055a6127">getOrbitalCentralPython</a> (int no)</td></tr>
@@ -143,6 +146,21 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a480a53dc4c73567847d2a76d52fd7512"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c202b9c4e6f5a0994da4ad6720bf2a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a1c202b9c4e6f5a0994da4ad6720bf2a6">addOrbitalPython</a> (boost::python::object o)</td></tr>
 <tr class="separator:a1c202b9c4e6f5a0994da4ad6720bf2a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a602257b5273b9c422cda18b19794305d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a602257b5273b9c422cda18b19794305d">solveForFixedPotentials</a> (int Niter, <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> F0stop)</td></tr>
+<tr class="separator:a602257b5273b9c422cda18b19794305d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c26dcf23691db3b991c92865931531b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a0c26dcf23691db3b991c92865931531b">stepGordon</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma)</td></tr>
+<tr class="separator:a0c26dcf23691db3b991c92865931531b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b36c4e0cf6adb85b7d4375c3097c0b2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a8b36c4e0cf6adb85b7d4375c3097c0b2">stepRenormalised</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma)</td></tr>
+<tr class="separator:a8b36c4e0cf6adb85b7d4375c3097c0b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f12f4c443aef1620c783f509fcbe3f9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a1f12f4c443aef1620c783f509fcbe3f9">stepStandard</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma, bool checkE=false)</td></tr>
+<tr class="separator:a1f12f4c443aef1620c783f509fcbe3f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c90fbb3a2f6aa43fa72f69569225fb3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a7c90fbb3a2f6aa43fa72f69569225fb3">stepSparse</a> (<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> gamma)</td></tr>
+<tr class="separator:a7c90fbb3a2f6aa43fa72f69569225fb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a572feb9f923cf0354d68638680c30012"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a572feb9f923cf0354d68638680c30012">calculateFMatrix</a> (std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;F, std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;K, std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;C, std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;E)=0</td></tr>
+<tr class="separator:a572feb9f923cf0354d68638680c30012"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -178,6 +196,8 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a86849958e3661bc38abd84df224c90bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac335e20d7d7ba1c62b7c1b3e5c8fa832"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIterativeRenormalisedSolver.html">IterativeRenormalisedSolver</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ac335e20d7d7ba1c62b7c1b3e5c8fa832">_irs</a></td></tr>
 <tr class="separator:ac335e20d7d7ba1c62b7c1b3e5c8fa832"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ec4bd82dc0cce70a6d62b34224c8f09"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIterativeStandardSolver.html">IterativeStandardSolver</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a4ec4bd82dc0cce70a6d62b34224c8f09">_iss</a></td></tr>
+<tr class="separator:a4ec4bd82dc0cce70a6d62b34224c8f09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0cd199a66005b34679257de0f4d2ccb7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIterativeGordonSolver.html">IterativeGordonSolver</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a0cd199a66005b34679257de0f4d2ccb7">_igs</a></td></tr>
 <tr class="separator:a0cd199a66005b34679257de0f4d2ccb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae50df9cfdd4ffd5a9283bf980ac110b2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classOrbitalMapper.html">OrbitalMapper</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ae50df9cfdd4ffd5a9283bf980ac110b2">_om</a></td></tr>
@@ -186,10 +206,22 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:afb0a6ba1a037c9b4aae4592d1256cead"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56fe9aa73c9eb688854218263459acf6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a56fe9aa73c9eb688854218263459acf6">_own_grid</a></td></tr>
 <tr class="separator:a56fe9aa73c9eb688854218263459acf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9fe5c34c22531a7fdb2c4907e0afb65"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53">Vradial</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ae9fe5c34c22531a7fdb2c4907e0afb65">_vd</a></td></tr>
+<tr class="separator:ae9fe5c34c22531a7fdb2c4907e0afb65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e5d461d3e9d0acf1f843ed64fb1ab64"><td class="memItemLeft" align="right" valign="top">std::map&lt; std::pair&lt; int, int &gt;, <a class="el" href="utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53">Vradial</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a2e5d461d3e9d0acf1f843ed64fb1ab64">_vex</a></td></tr>
+<tr class="separator:a2e5d461d3e9d0acf1f843ed64fb1ab64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec07b2fc1732946971e359e6f7238713"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#aec07b2fc1732946971e359e6f7238713">_vsum_up</a></td></tr>
+<tr class="separator:aec07b2fc1732946971e359e6f7238713"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1a6e5045da7f2de1ca2ec0a2db38966"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#ad1a6e5045da7f2de1ca2ec0a2db38966">_vsum_dw</a></td></tr>
+<tr class="separator:ad1a6e5045da7f2de1ca2ec0a2db38966"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3796874eed48765f49b32243e9192253"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, <a class="el" href="utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53">Vradial</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a3796874eed48765f49b32243e9192253">matchedSt</a></td></tr>
+<tr class="separator:a3796874eed48765f49b32243e9192253"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65cd77b085092003abd2859343b7e532"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSCF.html#a65cd77b085092003abd2859343b7e532">_isSpinDependent</a></td></tr>
+<tr class="separator:a65cd77b085092003abd2859343b7e532"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00026">26</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00027">27</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a1aaa3613d2df18dd5fd5f920813bd7a2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1aaa3613d2df18dd5fd5f920813bd7a2">&#9670;&nbsp;</a></span>SCF()</h2>
@@ -237,7 +269,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Destructor. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00068">68</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00069">69</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -274,7 +306,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classHF.html#aaed6429a4123a38bf75636686bca402f">HF</a>, and <a class="el" href="classDFT.html#aaa740e274c0e9fd8c0ebe515d797ce31">DFT</a>.</p>
+<p>Implemented in <a class="el" href="classHF.html#aaed6429a4123a38bf75636686bca402f">HF</a>, <a class="el" href="classHFS.html#a93382eaf3fb28fea443257799ca110ab">HFS</a>, and <a class="el" href="classDFT.html#aaa740e274c0e9fd8c0ebe515d797ce31">DFT</a>.</p>
 
 </div>
 </div>
@@ -302,7 +334,68 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00160">160</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00161">161</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+
+</div>
+</div>
+<a id="a572feb9f923cf0354d68638680c30012"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a572feb9f923cf0354d68638680c30012">&#9670;&nbsp;</a></span>calculateFMatrix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void SCF::calculateFMatrix </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>F</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>K</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#aa30812bb256751833efb7733fe7ae528">MatrixXld</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>C</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>E</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Calculate F matrix, which represents the Hamiltonian using the Numerov method. </p>
+<p>K is the inverse of F. This is used for the Gordon and renormalised methods, since these matrices are calculated per <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. The sparse method uses a large matrix solving all points simultaneously. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">F</td><td>To be returned by reference. Matrix F for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point. </td></tr>
+    <tr><td class="paramname">K</td><td>To be returned by reference. Inverse of F. </td></tr>
+    <tr><td class="paramname">C</td><td>To be returned by reference. Independent term. </td></tr>
+    <tr><td class="paramname">E</td><td>Values of energy in each orbital. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="classDFT.html#abc7baf40ff0e18261cab455ca831a574">DFT</a>, <a class="el" href="classHF.html#ad749746b2a8d4e6ae9ea17a2ff187d1e">HF</a>, and <a class="el" href="classHFS.html#abb55df3eef86d33a27b42a65017d9f66">HFS</a>.</p>
 
 </div>
 </div>
@@ -330,7 +423,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00166">166</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00167">167</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -352,7 +445,7 @@ Protected Attributes</h2></td></tr>
 <p>Get <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> object. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00041">41</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00042">42</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -374,7 +467,7 @@ Protected Attributes</h2></td></tr>
 <p>Get number of orbitals. </p>
 <dl class="section return"><dt>Returns</dt><dd>Number of orbitals. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00076">76</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00077">77</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -396,7 +489,7 @@ Protected Attributes</h2></td></tr>
 <p>Get Coulomb attraction potential -Z/r. </p>
 <dl class="section return"><dt>Returns</dt><dd>Coulomb potential </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00171">171</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00172">172</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -418,12 +511,12 @@ Protected Attributes</h2></td></tr>
 <p>Get Coulomb attraction potential -Z/r. </p>
 <p>Python interface. </p><dl class="section return"><dt>Returns</dt><dd>Coulomb potential </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00129">129</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00130">130</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
-<a id="ae0d65d679009f9d8460a2c0fa3ba3636"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae0d65d679009f9d8460a2c0fa3ba3636">&#9670;&nbsp;</a></span>getOrbital()</h2>
+<a id="ac8138307f2d894eb6d83fccd55e23cae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8138307f2d894eb6d83fccd55e23cae">&#9670;&nbsp;</a></span>getOrbital()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -432,24 +525,8 @@ Protected Attributes</h2></td></tr>
           <td class="memname">std::vector&lt; <a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> &gt; SCF::getOrbital </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>no</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"><em>no</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>mo</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>lo</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -458,14 +535,12 @@ Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">no</td><td><a class="el" href="classOrbital.html">Orbital</a> identification. </td></tr>
-    <tr><td class="paramname">lo</td><td>Spherical harmonic parameter l. </td></tr>
-    <tr><td class="paramname">mo</td><td>Spherical harmonic parameter m. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of orbital values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point, in that spherical harmonic component. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00135">135</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00136">136</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -494,7 +569,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> energy </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00107">107</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00108">108</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -523,7 +598,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> quantum number l </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00111">111</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00112">112</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -552,7 +627,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> quantum number m </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00115">115</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00116">116</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -581,7 +656,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> quantum number n </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00080">80</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00081">81</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -610,7 +685,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> spin </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00119">119</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00120">120</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -639,7 +714,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of orbital values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point, in that spherical harmonic component. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00144">144</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00145">145</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -668,7 +743,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of orbital values for each <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> point, in that spherical harmonic component. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00153">153</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00154">154</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -697,7 +772,7 @@ Protected Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classOrbital.html">Orbital</a> name </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00084">84</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00085">85</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -719,7 +794,7 @@ Protected Attributes</h2></td></tr>
 <p>Get list of R values from the <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd>List of R values </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00045">45</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00046">46</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -755,7 +830,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classHF.html#a9e27eedfdd795e380b22f2cacf1a7ce0">HF</a>, and <a class="el" href="classDFT.html#a58a79a2d805033b63838f3e63bda56a4">DFT</a>.</p>
+<p>Implemented in <a class="el" href="classHF.html#a9e27eedfdd795e380b22f2cacf1a7ce0">HF</a>, <a class="el" href="classHFS.html#acf7049556f474d8a15250dcac2a4eca5">HFS</a>, and <a class="el" href="classDFT.html#a58a79a2d805033b63838f3e63bda56a4">DFT</a>.</p>
 
 </div>
 </div>
@@ -783,7 +858,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00123">123</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00124">124</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -836,7 +911,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00049">49</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00050">50</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -872,7 +947,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classHF.html#a14d49ae3aa4032c9b19abefb5d4f7cec">HF</a>, and <a class="el" href="classDFT.html#a612d066a05efddfe6915f7532ca83e19">DFT</a>.</p>
+<p>Implemented in <a class="el" href="classHF.html#a14d49ae3aa4032c9b19abefb5d4f7cec">HF</a>, <a class="el" href="classHFS.html#a9728ea9bdf15b733f2f7b1edeb20f215">HFS</a>, and <a class="el" href="classDFT.html#a612d066a05efddfe6915f7532ca83e19">DFT</a>.</p>
 
 </div>
 </div>
@@ -900,7 +975,174 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00057">57</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00058">58</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+
+</div>
+</div>
+<a id="a602257b5273b9c422cda18b19794305d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a602257b5273b9c422cda18b19794305d">&#9670;&nbsp;</a></span>solveForFixedPotentials()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> SCF::solveForFixedPotentials </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>Niter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td>
+          <td class="paramname"><em>F0stop</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Keep self-consistent potentials constant and solve Schroedinger eq., looking for the correct energy eigenvalue. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">Niter</td><td>Number of iterations used to seek for energy eigenvalue. </td></tr>
+    <tr><td class="paramname">F0stop</td><td>When energies vary by less than this value, stop looking for energy eigenvalue. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Value of a constraint being minimised (depends on the method). </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00176">176</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+
+</div>
+</div>
+<a id="a0c26dcf23691db3b991c92865931531b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c26dcf23691db3b991c92865931531b">&#9670;&nbsp;</a></span>stepGordon()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> SCF::stepGordon </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td>
+          <td class="paramname"><em>gamma</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Use Gordon's method, which tries a set of orthogonal initial conditions to find the energy. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">gamma</td><td>Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Minimisation function value at the end of the step. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00223">223</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+
+</div>
+</div>
+<a id="a8b36c4e0cf6adb85b7d4375c3097c0b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b36c4e0cf6adb85b7d4375c3097c0b2">&#9670;&nbsp;</a></span>stepRenormalised()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> SCF::stepRenormalised </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td>
+          <td class="paramname"><em>gamma</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Use renormalised wave function method, which looks for solution in ratio of Numerov parameters to avoid overflow. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">gamma</td><td>Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Minimisation function value at the end of the step. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00309">309</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+
+</div>
+</div>
+<a id="a7c90fbb3a2f6aa43fa72f69569225fb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c90fbb3a2f6aa43fa72f69569225fb3">&#9670;&nbsp;</a></span>stepSparse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> SCF::stepSparse </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td>
+          <td class="paramname"><em>gamma</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Build NxN matrix to solve all equations of the Numerov method for each point simultaneously. </p>
+<p>Includes an extra equation to control the orbital normalisations, which is non-linear. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">gamma</td><td>Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Minimisation function value at the end of the step. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00396">396</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+
+</div>
+</div>
+<a id="a1f12f4c443aef1620c783f509fcbe3f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f12f4c443aef1620c783f509fcbe3f9">&#9670;&nbsp;</a></span>stepStandard()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a> SCF::stepStandard </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&#160;</td>
+          <td class="paramname"><em>gamma</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>checkE</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Use a standard iterative Numerov method. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">gamma</td><td>Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues. </td></tr>
+    <tr><td class="paramname">checkE</td><td>Whether to check number of nodes and update energy accordingly. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Minimisation function value at the end of the step. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00467">467</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -922,7 +1164,7 @@ Protected Attributes</h2></td></tr>
 <p>Get Z. </p>
 <dl class="section return"><dt>Returns</dt><dd>Z </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00064">64</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8cxx_source.html#l00065">65</a> of file <a class="el" href="SCF_8cxx_source.html">SCF.cxx</a>.</p>
 
 </div>
 </div>
@@ -949,7 +1191,7 @@ Protected Attributes</h2></td></tr>
 
 <p>for the matrix Numerov method using sparse matrices A is the Jacobian of the non-linear system </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00177">177</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00211">211</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -975,7 +1217,7 @@ Protected Attributes</h2></td></tr>
 
 <p>b is the column vector of solutions </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00179">179</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00213">213</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1001,7 +1243,7 @@ Protected Attributes</h2></td></tr>
 
 <p>b0 is the column vector of last solutions for the iteration </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00181">181</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00215">215</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1027,7 +1269,7 @@ Protected Attributes</h2></td></tr>
 
 <p>variation in energy for the next step </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00155">155</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00189">189</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1053,7 +1295,7 @@ Protected Attributes</h2></td></tr>
 
 <p>record maximum energy if needed </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00164">164</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00198">198</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1079,7 +1321,7 @@ Protected Attributes</h2></td></tr>
 
 <p>record minimum energy if needed </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00167">167</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00201">201</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1105,7 +1347,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Numerical <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00143">143</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00177">177</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1131,7 +1373,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Speed at which the new Vd and Vex are integrated into the next self-consistent step. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00158">158</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00192">192</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1157,7 +1399,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Solver for Gordon's method. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00190">190</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00227">227</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1183,7 +1425,59 @@ Protected Attributes</h2></td></tr>
 
 <p>Solver for the renormalised method. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00187">187</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00221">221</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+
+</div>
+</div>
+<a id="a4ec4bd82dc0cce70a6d62b34224c8f09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ec4bd82dc0cce70a6d62b34224c8f09">&#9670;&nbsp;</a></span>_iss</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIterativeStandardSolver.html">IterativeStandardSolver</a> SCF::_iss</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Solver for the standard method. </p>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00224">224</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+
+</div>
+</div>
+<a id="a65cd77b085092003abd2859343b7e532"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65cd77b085092003abd2859343b7e532">&#9670;&nbsp;</a></span>_isSpinDependent</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool SCF::_isSpinDependent</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set to true of the method uses vsum_up and vsum_dw for the standard method. </p>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00253">253</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1209,7 +1503,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Solver using sparse matrices. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00184">184</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00218">218</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1235,7 +1529,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Method to be used for solving equations. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00173">173</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00207">207</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1261,7 +1555,7 @@ Protected Attributes</h2></td></tr>
 
 <p>record number of zero crossings of the main orbital function if needed </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00170">170</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00204">204</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1287,7 +1581,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Vector of orbitals. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00149">149</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00183">183</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1313,7 +1607,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Class that maps orbitals to indices. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00193">193</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00230">230</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1339,7 +1633,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Whether we own the <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00199">199</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00236">236</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1365,7 +1659,7 @@ Protected Attributes</h2></td></tr>
 
 <p>List of owned <a class="el" href="classOrbital.html">Orbital</a> pointers. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00196">196</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00233">233</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1391,7 +1685,109 @@ Protected Attributes</h2></td></tr>
 
 <p>Coulomb potential. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00152">152</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00186">186</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+
+</div>
+</div>
+<a id="ae9fe5c34c22531a7fdb2c4907e0afb65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9fe5c34c22531a7fdb2c4907e0afb65">&#9670;&nbsp;</a></span>_vd</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;int, <a class="el" href="utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53">Vradial</a>&gt; SCF::_vd</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Direct potential. </p>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00239">239</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+
+</div>
+</div>
+<a id="a2e5d461d3e9d0acf1f843ed64fb1ab64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e5d461d3e9d0acf1f843ed64fb1ab64">&#9670;&nbsp;</a></span>_vex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;std::pair&lt;int, int&gt;, <a class="el" href="utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53">Vradial</a>&gt; SCF::_vex</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Exchange potential. </p>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00242">242</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+
+</div>
+</div>
+<a id="ad1a6e5045da7f2de1ca2ec0a2db38966"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1a6e5045da7f2de1ca2ec0a2db38966">&#9670;&nbsp;</a></span>_vsum_dw</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&gt; SCF::_vsum_dw</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00246">246</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+
+</div>
+</div>
+<a id="aec07b2fc1732946971e359e6f7238713"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec07b2fc1732946971e359e6f7238713">&#9670;&nbsp;</a></span>_vsum_up</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="utils_8h.html#a1566981a7d4a4b1da64e5330b25a690c">ldouble</a>&gt; SCF::_vsum_up</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>total potential for spin-dependent methods </p>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00245">245</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1417,7 +1813,7 @@ Protected Attributes</h2></td></tr>
 
 <p>Atomic number. </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00146">146</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00180">180</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>
@@ -1443,7 +1839,33 @@ Protected Attributes</h2></td></tr>
 
 <p>index in the numerical <a class="el" href="classGrid.html" title="Represents a grid in the radial distance to the nucleus. ">Grid</a> where the classical crossing of energy-potential happens </p>
 
-<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00161">161</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00195">195</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
+
+</div>
+</div>
+<a id="a3796874eed48765f49b32243e9192253"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3796874eed48765f49b32243e9192253">&#9670;&nbsp;</a></span>matchedSt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;int, <a class="el" href="utils_8h.html#a6b30371d5a83ba053bebcf58f4aa5d53">Vradial</a>&gt; SCF::matchedSt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>temporary variable for standard solver </p>
+
+<p class="definition">Definition at line <a class="el" href="SCF_8h_source.html#l00249">249</a> of file <a class="el" href="SCF_8h_source.html">SCF.h</a>.</p>
 
 </div>
 </div>

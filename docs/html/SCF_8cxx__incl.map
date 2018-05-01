@@ -1,10 +1,11 @@
 <map id="SCF.cxx" name="SCF.cxx">
-<area shape="rect" id="node2" href="$SCF_8h.html" title="SCF.h" alt="" coords="647,80,707,107"/>
-<area shape="rect" id="node3" href="$Grid_8h.html" title="Grid.h" alt="" coords="974,304,1031,331"/>
-<area shape="rect" id="node8" href="$Orbital_8h.html" title="Orbital.h" alt="" coords="771,304,842,331"/>
-<area shape="rect" id="node11" href="$utils_8h.html" title="utils.h" alt="" coords="414,379,471,405"/>
-<area shape="rect" id="node17" href="$LinearSystemBuilder_8h.html" title="LinearSystemBuilder.h" alt="" coords="851,155,1005,181"/>
-<area shape="rect" id="node18" href="$OrbitalMapper_8h.html" title="OrbitalMapper.h" alt="" coords="749,229,864,256"/>
-<area shape="rect" id="node19" href="$IterativeRenormalisedSolver_8h.html" title="IterativeRenormalisedSolver.h" alt="" coords="579,155,776,181"/>
-<area shape="rect" id="node20" href="$IterativeGordonSolver_8h.html" title="IterativeGordonSolver.h" alt="" coords="395,155,554,181"/>
+<area shape="rect" id="node2" href="$SCF_8h.html" title="SCF.h" alt="" coords="777,80,837,107"/>
+<area shape="rect" id="node3" href="$Grid_8h.html" title="Grid.h" alt="" coords="1137,304,1194,331"/>
+<area shape="rect" id="node8" href="$Orbital_8h.html" title="Orbital.h" alt="" coords="689,304,759,331"/>
+<area shape="rect" id="node11" href="$utils_8h.html" title="utils.h" alt="" coords="555,379,613,405"/>
+<area shape="rect" id="node17" href="$LinearSystemBuilder_8h.html" title="LinearSystemBuilder.h" alt="" coords="246,155,399,181"/>
+<area shape="rect" id="node18" href="$OrbitalMapper_8h.html" title="OrbitalMapper.h" alt="" coords="651,229,765,256"/>
+<area shape="rect" id="node19" href="$IterativeRenormalisedSolver_8h.html" title="IterativeRenormalisedSolver.h" alt="" coords="973,155,1171,181"/>
+<area shape="rect" id="node20" href="$IterativeStandardSolver_8h.html" title="IterativeStandardSolver.h" alt="" coords="529,155,698,181"/>
+<area shape="rect" id="node21" href="$IterativeGordonSolver_8h.html" title="IterativeGordonSolver.h" alt="" coords="790,155,949,181"/>
 </map>
