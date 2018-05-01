@@ -220,9 +220,9 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
 
     for (int k = 0; k < _o.size(); ++k) {
       _nodes[k] = 0;
-      _Emin[k] = -_Z*_Z;
+      _Emin[k] = -_Z*_Z*0.5/std::pow(_o[k]->n(), 2);
       _Emax[k] = 0;
-      //_o[k]->E(-_Z*_Z*0.5/std::pow(_o[k]->initialN(), 2));
+      _o[k]->E(-0.5*std::pow(_Z/((ldouble) _o[k]->n()), 2));
     }
 
     std::cout << "SCF step " << nStepSCF << std::endl;

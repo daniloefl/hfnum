@@ -527,11 +527,13 @@ ldouble SCF::stepStandard(ldouble gamma) {
       std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
       _Emin[k] = _o[k]->E();
       _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/(2.0*_o[k]->n());
       std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
     } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
       std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
       _Emax[k] = _o[k]->E();
       _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/(2.0*_o[k]->n());
       std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
     } else {
       if (_dE[k] > 0) {
