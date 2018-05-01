@@ -155,8 +155,9 @@ class SCF {
 
     /// \brief Use a standard iterative Numerov method.
     /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
+    /// \param checkE Whether to check number of nodes and update energy accordingly.
     /// \return Minimisation function value at the end of the step.
-    ldouble stepStandard(ldouble gamma);
+    ldouble stepStandard(ldouble gamma, bool checkE = false);
 
     /// \brief Build NxN matrix to solve all equations of the Numerov method for each point simultaneously. Includes an extra equation to control the orbital normalisations, which is non-linear.
     /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.

@@ -222,13 +222,13 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
       _nodes[k] = 0;
       _Emin[k] = -_Z*_Z*0.5/std::pow(_o[k]->n(), 2);
       _Emax[k] = 0;
-      _o[k]->E(-0.5*std::pow(_Z/((ldouble) _o[k]->n()), 2));
+      //_o[k]->E(-0.5*std::pow(_Z/((ldouble) _o[k]->n()), 2));
     }
 
     std::cout << "SCF step " << nStepSCF << std::endl;
     solveForFixedPotentials(Niter, F0stop);
     nStepSCF++;
-    //calculateY();
+    calculateY();
     calculateVex(_gamma_scf);
     calculateVd(_gamma_scf);
   }
@@ -259,6 +259,18 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
 void HF::calculateVex(ldouble gamma) {
   std::cout << "Calculating Vex." << std::endl;
 
+  std::vector<bool> filled;
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    int c = 0;
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      if (_o[k2]->l() == _o[k1]->l() && _o[k2]->n() == _o[k1]->n()) {
+        c++;
+      }
+    }
+    if (c == 2*(2*_o[k1]->l() + 1)) filled.push_back(true);
+    else filled.push_back(false);
+  }
+
   for (int k = 0; k < _o.size(); ++k) {
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       _vexsum[std::pair<int, int>(k, k2)] = Vradial(_g->N(), 0);
@@ -272,36 +284,49 @@ void HF::calculateVex(ldouble gamma) {
     // calculate it first with filled orbitals, dividing by the number of orbitals
     // this is exact if all 2(2*l+1) orbitals in this level are filled
     for (int k2 = 0; k2 < _o.size(); ++k2) {
-      //if (k1 == k2) continue;
-      if (_o[k1]->spin()*_o[k2]->spin() < 0) continue;
+      if (k1 == k2) continue; // cancels out with Vd, so remove it here and there
+      if (_o[k1]->spin()*_o[k2]->spin() < 0) continue; // only applies if same spin, otherwise it is zero
 
       int l2 = _o[k2]->l();
       int m2 = _o[k2]->m();
-      std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
 
-      /*for (int k = 0; k <= 5; k += 1) {
-        ldouble B = 0.0;
-        if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
-        if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/3.0;
+      // we know this exactly for a filled shell, but we will double count it in the k2 loop above (2 l2 + 1) times, so divide by it
+      if (filled[k2] && filled[k1]) {
+        std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << "(filled)" << std::endl;
+        for (int k = abs(l2-l1); k <= l2+l1; k += 1) {  // this is the sum over L from |l2-l1| to |l2+l1|
+          ldouble B = std::pow(CG(l1, l2, 0, 0, k, 0), 2);
 
-        //if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
-        //if (k == 0 && l1 == 1 && l2 == 1 && m1 == m2) B = 1.0;
-        //if (k == 0 && l1 == 2 && l2 == 2 && m1 == m2) B = 1.0;
-
-        //if (k == 2 && l1 == 0 && l2 == 2 && m1 ==  0 && m2 ==  0) B =  0.1118033989;
-        //if (k == 2 && l1 == 1 && l2 == 1 && m1 == -1 && m2 == -1) B = -0.05;
-        //if (k == 2 && l1 == 1 && l2 == 1 && m1 ==  0 && m2 ==  0) B =  0.10;
-        //if (k == 2 && l1 == 1 && l2 == 1 && m1 ==  1 && m2 ==  1) B = -0.05;
-
-        //B = 1.0/((ldouble) (2*k + 1))*std::pow(CG(l1p, l2p, 0, 0, k, 0), 2);
-        if (B == 0) continue;
-        // This is the extra k parts
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          ldouble r1 = (*_g)(ir1);
-          _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
+          if (B == 0) continue;
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            _vexsum[std::pair<int,int>(k1, k2)][ir1] += 1.0/((ldouble) 2*k + 1) * B * _Y[10000*k + 100*k1 + 1*k2][ir1];
+          }
         }
-      }*/
+      } else {
+        // if the shell is not complete, project in the sph. harm of k1
+        // (see calculations/Angular coefficients Hartree-Fock numerical.ipynb)
+        std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << "(not filled)" << std::endl;
+        for (int k = 0; k <= 2; k += 2) {
+          ldouble B = 0.0;
+          if (k == 0 && l1 == 0 && l2 == 0) B = (1.0)*(1.0);
+          if (k == 0 && l1 == 1 && l2 == 1) B = (1.0)*(1.0/3.0);
+          if (k == 2 && l1 == 1 && l2 == 1) B = (1.0/10.0)*(4.0/3.0);
 
+          // appear after projecting it into k1 orbital sph. harm.
+          if (k == 0 && l1 == 1 && l2 == 1) B = (1.0)*(1.0/3.0);
+          if (k == 1 && l1 == 1 && l2 == 0) B = (1.0/3.0)*(1.0);
+          if (k == 1 && l1 == 0 && l2 == 1) B = (1.0/3.0)*(1.0);
+
+          if (B == 0) continue;
+          // This is the extra k parts
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
+          }
+        }
+      }
+
+      /*
       // temporary variable
       std::vector<ldouble> vex(_g->N(), 0); // calculate it here first
       for (int L = (int) std::fabs(l1 - l2); L <= l1 + l2; ++L) {
@@ -328,6 +353,7 @@ void HF::calculateVex(ldouble gamma) {
       for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
         _vexsum[std::pair<int,int>(k1, k2)][ir1] += vex[ir1];
       }
+      */
     }
   }
 
@@ -365,7 +391,7 @@ void HF::calculateY() {
   std::cout << "Calculating Y" << std::endl;
   // Calculating Y_k(orb1, orb2)[r]
   // index in Y is 10000*k + 100*orb1 + orb2
-  for (int k = 0; k <= 6; ++k) {
+  for (int k = 0; k <= 2; ++k) {
     std::cout << "Calculating Y for k "<< k << std::endl;
     for (int k1 = 0; k1 < _o.size(); ++k1) {
       int l1 = _o[k1]->l();
@@ -405,47 +431,59 @@ void HF::calculateVd(ldouble gamma) {
     _vdsum[k] = Vradial(_g->N(), 0);
   }
 
+  std::vector<bool> filled;
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    int c = 0;
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      if (_o[k2]->l() == _o[k1]->l() && _o[k2]->n() == _o[k1]->n()) {
+        c++;
+      }
+    }
+    if (c == (2*_o[k1]->l() + 1)) filled.push_back(true);
+    else filled.push_back(false);
+  }
+
   // calculate it first with filled orbitals, dividing by the number of orbitals
   // this is exact if all 2(2*l+1) orbitals in this level are filled
   for (int k1 = 0; k1 < _o.size(); ++k1) {
     int l1 = _o[k1]->l();
     int m1 = _o[k1]->m();
-    std::cout << "Calculating Vd term from k = " << k1 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
 
-    //for (int k2 = 0; k2 < _o.size(); ++k2) {
-    //  //if (k2 == k1) continue;
-    //  // This is the T part (the rest of T is just Z/r)
-    //  // The - Y_0 term is in Vex
-    //  for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-    //    _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
-    //  }
-    //}
+    std::cout << "Calculating Vd term from k = " << k1 << std::endl;
 
-    //for (int k = 2; k <= 6; k += 2) {
-    //  ldouble A = 0.0;
-    //  if (k == 2 && l1 == 1 && m1 == -1) A = -0.05;
-    //  if (k == 2 && l1 == 1 && m1 == 0) A = 0.10;
-    //  if (k == 2 && l1 == 1 && m1 == 1) A = -0.05;
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      if (k2 == k1) continue; // cancels out with Vex ... we also remove it from there
 
-    //  if (k == 2 && l1 == 2 && m1 == -2) A = -0.0714285714;
-    //  if (k == 2 && l1 == 2 && m1 == -1) A = 0.0357142857;
-    //  if (k == 2 && l1 == 2 && m1 == 0) A = 0.0714285714;
-    //  if (k == 2 && l1 == 2 && m1 == 1) A = 0.0357142857;
-    //  if (k == 2 && l1 == 2 && m1 == 2) A = -0.0714285714;
+      if (filled[k2]) { // we know this to be exact, but divide it by 2*(2l+1) because this is how many times we will find an orbital in the same shell
 
-    //  if (k == 4 && l1 == 2 && m1 == -2) A =  0.0066964286;
-    //  //if (k == 4 && l1 == 2 && m1 == -1) A =  0;
-    //  //if (k == 4 && l1 == 2 && m1 ==  0) A =  0;
-    //  //if (k == 4 && l1 == 2 && m1 ==  1) A =  0;
-    //  if (k == 4 && l1 == 2 && m1 ==  2) A =  0.0066964286;
+        // This is the T part (the rest of T is just Z/r)
+        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+          _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
+        }
 
-    //  if (A == 0) continue;
-    //  // This is the extra k parts
-    //  for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-    //    _vdsum[k1][ir1] += A * _Y[10000*k + 100*k1 + 1*k1][ir1];
-    //  }
-    //}
+      } else {
 
+        // This is the central part
+        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+          _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
+        }
+
+        // project it into sph. harm of orbital k1 (see calculations/Angular coefficients Hartree-Fock numerical.ipynb)
+        for (int k = 2; k <= 2; k += 2) {
+          ldouble A = 0.0;
+          if (k == 2 && l1 == 1) A = 0.1375; //A = 0.20/3.0;
+ 
+          if (A == 0) continue;
+          // This is the extra k parts
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            _vdsum[k1][ir1] += A * _Y[10000*k + 100*k1 + 1*k1][ir1];
+          }
+        } // end of vdsum averaging over angles
+
+      }
+    }
+
+    /*
     int lmax = 2;
     // temporary variable
     std::vector<ldouble> vd(_g->N(), 0); // calculate it here first
@@ -490,6 +528,7 @@ void HF::calculateVd(ldouble gamma) {
         _vdsum[ko][ir2] += vd[ir2];
       }
     }
+     */
   }
 
   for (int ko = 0; ko < _o.size(); ++ko) {

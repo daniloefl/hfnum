@@ -16,7 +16,7 @@ IterativeStandardSolver::~IterativeStandardSolver() {
 }
 
 
-VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched) {
+VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched, ldouble c) {
   int M = _om.N();
 
   for (int idx = 0; idx < M; ++idx) {
@@ -50,7 +50,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   for (int idx = 0; idx < M; ++idx) {
     solveOutward(E, matched, idx, outward[idx]);
     solveInward(E, matched, idx, inward[idx]);
-    match(idx, matched[idx], inward[idx], outward[idx]);
+    match(idx, matched[idx], inward[idx], outward[idx], c);
   
     // recalculate non-homogeneus term
     for (int idx1 = 0; idx1 < M; ++idx1) {
@@ -71,7 +71,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     for (int idxI = idx-1; idxI >= 0; --idxI) {
       solveOutward(E, matched, idxI, outward[idxI]);
       solveInward(E, matched, idxI, inward[idxI]);
-      match(idxI, matched[idxI], inward[idxI], outward[idxI]);
+      match(idxI, matched[idxI], inward[idxI], outward[idxI], c);
 
       // recalculate non-homogeneus term
       for (int idx1 = 0; idx1 < M; ++idx1) {
@@ -90,6 +90,28 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
 
     } // solving in inverse order
   } // solving it in the direct order
+
+  // solve in inverse order from current index back to zero
+  for (int idxI = M-1; idxI >= 0; --idxI) {
+    solveOutward(E, matched, idxI, outward[idxI]);
+    solveInward(E, matched, idxI, inward[idxI]);
+    match(idxI, matched[idxI], inward[idxI], outward[idxI], c);
+
+    // recalculate non-homogeneus term
+    for (int idx1 = 0; idx1 < M; ++idx1) {
+      std::fill(s[idx1].begin(), s[idx1].end(), 0);
+      for (int idx2 = 0; idx2 < M; ++idx2) {
+        if (idx1 == idx2) continue;
+        for (int k = 0; k < _g.N(); ++k) {
+          if (_g.isLog()) {
+            s[idx1][k] += std::pow(_g.dx(), 2)/12.0*2*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
+          } else {
+            s[idx1][k] += std::pow(_g.dx(), 2)/12.0*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
+          }
+        }
+      }
+    } // recalculate non-homogeneous term
+  } // solving in inverse order
 
   VectorXld F(M);
   // calculate first derivative in icl[idx]
@@ -179,10 +201,10 @@ void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::map<int,
 void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int, Vradial> &matched, int idx, Vradial &solution) {
   int N = _g.N();
   solution.resize(N);
-  //solution[0] = std::pow(_g(0), 0.5)*std::exp(-_g(0))*std::pow(_g(0), _o[idx]->n() - _o[idx]->l() - 1);
-  //solution[1] = std::pow(_g(1), 0.5)*std::exp(-_g(1))*std::pow(_g(1), _o[idx]->n() - _o[idx]->l() - 1);
-  solution[0] = std::exp(-_g(0)/_o[idx]->n())*std::pow(_g(0), _o[idx]->l() + 0.5);
-  solution[1] = std::exp(-_g(1)/_o[idx]->n())*std::pow(_g(1), _o[idx]->l() + 0.5);
+  //solution[0] = std::exp(-_g(0)/_o[idx]->n())*std::pow(_g(0), _o[idx]->l() + 0.5);
+  //solution[1] = std::exp(-_g(1)/_o[idx]->n())*std::pow(_g(1), _o[idx]->l() + 0.5);
+  solution[0] = std::pow(_g(0), _o[idx]->l() + 0.5);
+  solution[1] = std::pow(_g(1), _o[idx]->l() + 0.5);
   if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
     solution[0] *= -1;
     solution[1] *= -1;
@@ -193,20 +215,39 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
   }
 }
 
-void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial &outward) {
+void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial &outward, ldouble c) {
   o.resize(_g.N());
+  Vradial newO = o;
 
   ldouble ratio = outward[icl[k]]/inward[icl[k]];
   for (int i = 0; i < _g.N(); ++i) {
     if (i < icl[k]) {
-      o[i] = outward[i];
+      newO[i] = outward[i];
     } else {
-      o[i] = ratio*inward[i];
+      newO[i] = ratio*inward[i];
     }
   }
 
   // normalise it
   ldouble norm = 0;
+  for (int i = 0; i < _g.N(); ++i) {
+    ldouble r = _g(i);
+    ldouble dr = 0;
+    if (i < _g.N()-1) dr = std::fabs(_g(i+1) - _g(i));
+    ldouble ov = newO[i];
+    if (_g.isLog()) ov *= std::pow(r, -0.5);
+    //o_untransformed[i] = ov;
+    norm += std::pow(ov*r, 2)*dr;
+  }
+  norm = 1.0/std::sqrt(norm);
+  for (int i = 0; i < _g.N(); ++i) {
+    newO[i] *= norm;
+  }
+  for (int i = 0; i < _g.N(); ++i) {
+    o[i] = o[i]*(1-c) + c*newO[i];
+  }
+
+  norm = 0;
   for (int i = 0; i < _g.N(); ++i) {
     ldouble r = _g(i);
     ldouble dr = 0;

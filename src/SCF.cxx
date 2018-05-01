@@ -200,7 +200,7 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     } else if (_method == 2) {
       F = stepRenormalised(gamma);
     } else if (_method == 3) {
-      F = stepStandard(gamma);
+      F = stepStandard(gamma, true);
     }
 
     // change orbital energies
@@ -464,15 +464,16 @@ ldouble SCF::stepSparse(ldouble gamma) {
 }
 
 // solve for a fixed energy and calculate _dE for the next step
-ldouble SCF::stepStandard(ldouble gamma) {
+ldouble SCF::stepStandard(ldouble gamma, bool checkE) {
   int N = _om.N();
+  ldouble c = 1.0;
 
   std::vector<ldouble> E(_o.size(), 0);
   std::vector<int> l(_o.size(), 0);
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = 1e-3;
+    dE[k] = -1e-3;
     E[k] = _o[k]->E();
     l[k] = _o[k]->l();
   }
@@ -481,7 +482,7 @@ ldouble SCF::stepStandard(ldouble gamma) {
   if (_isSpinDependent) {
     Fn = _iss.solve(E, _pot, _vsum_up, _vsum_dw, matchedSt);
   } else {
-    Fn = _iss.solve(E, _pot, _vd, _vex, matchedSt);
+    Fn = _iss.solve(E, _pot, _vd, _vex, matchedSt, c);
   }
 
   for (int k = 0; k < _o.size(); ++k) {
@@ -490,8 +491,8 @@ ldouble SCF::stepStandard(ldouble gamma) {
     int m = _o[k]->m();
     int idx = _om.index(k);
     for (int i = 0; i < _g->N(); ++i) {
-      (*_o[k])(i) = matchedSt[idx][i];
-      if (i >= 10 && i < _g->N() - 4 && matchedSt[idx][i]*matchedSt[idx][i-1] <= 0) {
+      (*_o[k])(i) += matchedSt[idx][i];
+      if (i >= 10 && i < _g->N() - 4 && (*_o[k])(i)*(*_o[k])(i-1) < 0) {
         _nodes[k] += 1;
         std::cout << "Orbital " << k << ": Found node at i=" << i << ", r = " << (*_g)(i) << std::endl;
       }
@@ -509,7 +510,7 @@ ldouble SCF::stepStandard(ldouble gamma) {
     if (_isSpinDependent) {
       Fd = _iss.solve(EdE, _pot, _vsum_up, _vsum_dw, matchedSt);
     } else {
-      Fd = _iss.solve(EdE, _pot, _vd, _vex, matchedSt);
+      Fd = _iss.solve(EdE, _pot, _vd, _vex, matchedSt, c);
     }
 
     for (int idx = 0; idx < _o.size(); ++idx) {
@@ -521,30 +522,31 @@ ldouble SCF::stepStandard(ldouble gamma) {
   for (int k = 0; k < _o.size(); ++k) {
     _dE[k] = dD(k); // for root finding
     _dE[k] *= -gamma;
-    //if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
+    //if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);
     std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
-    if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
-      std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
-      _Emin[k] = _o[k]->E();
-      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
-      //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/(2.0*_o[k]->n());
-      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
-    } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
-      std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
-      _Emax[k] = _o[k]->E();
-      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
-      //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/(2.0*_o[k]->n());
-      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
-    } else {
-      if (_dE[k] > 0) {
+    if (checkE) {
+      if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
+        std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
         _Emin[k] = _o[k]->E();
-      } else if (_dE[k] < 0) {
+        _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+        //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/(2.0*_o[k]->n());
+        std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
+        std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
         _Emax[k] = _o[k]->E();
+        _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+        //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/(2.0*_o[k]->n());
+        std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      } else {
+        if (_dE[k] > 0) {
+          _Emin[k] = _o[k]->E();
+        } else if (_dE[k] < 0) {
+          _Emax[k] = _o[k]->E();
+        }
       }
     }
   }
   
-  ldouble F = 0;
-  for (int k = 0; k < _o.size(); ++k) F += Fn[k];
+  ldouble F = (Fn*Fn.transpose())(0);
   return F;
 }
