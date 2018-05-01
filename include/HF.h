@@ -77,44 +77,18 @@ class HF : public SCF {
     /// \return Ground energy
     ldouble getE0();
 
+    /// \brief Add an orbital in internal _o list.
+    /// \param o Pointer to orbital.
+    void addOrbital(Orbital *o);
+
+  protected:
+
     /// \brief Calculate F matrix, which represents the Hamiltonian using the Numerov method. K is the inverse of F. This is used for the Gordon and renormalised methods, since these matrices are calculated per Grid point. The sparse method uses a large matrix solving all points simultaneously.
     /// \param F To be returned by reference. Matrix F for each Grid point.
     /// \param K To be returned by reference. Inverse of F.
     /// \param C To be returned by reference. Independent term.
     /// \param E Values of energy in each orbital.
     void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<MatrixXld> &C, std::vector<ldouble> &E);
-
-    /// \brief Keep self-consistent potentials constant and solve Schroedinger eq., looking for the correct energy eigenvalue.
-    /// \param Niter Number of iterations used to seek for energy eigenvalue.
-    /// \param F0stop When energies vary by less than this value, stop looking for energy eigenvalue.
-    /// \return Value of a constraint being minimised (depends on the method).
-    ldouble solveForFixedPotentials(int Niter, ldouble F0stop);
-
-    /// \brief Use Gordon's method, which tries a set of orthogonal initial conditions to find the energy.
-    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
-    /// \return Minimisation function value at the end of the step.
-    ldouble stepGordon(ldouble gamma);
-
-    /// \brief Use renormalised wave function method, which looks for solution in ratio of Numerov parameters to avoid overflow.
-    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
-    /// \return Minimisation function value at the end of the step.
-    ldouble stepRenormalised(ldouble gamma);
-
-    /// \brief Use a standard iterative Numerov method.
-    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
-    /// \return Minimisation function value at the end of the step.
-    ldouble stepStandard(ldouble gamma);
-
-    ldouble solveOrbitalFixedEnergy(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched);
-
-    /// \brief Build NxN matrix to solve all equations of the Numerov method for each point simultaneously. Includes an extra equation to control the orbital normalisations, which is non-linear.
-    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
-    /// \return Minimisation function value at the end of the step.
-    ldouble stepSparse(ldouble gamma);
-
-    /// \brief Add an orbital in internal _o list.
-    /// \param o Pointer to orbital.
-    void addOrbital(Orbital *o);
 
   private:
 
@@ -132,20 +106,11 @@ class HF : public SCF {
     /// Auxiliary variable Y
     std::map<int, Vradial> _Y;
 
-    /// Direct potential
-    std::map<int, Vradial>   _vd;
-
-    /// Exchange potential
-    std::map<std::pair<int, int>, Vradial>  _vex;
-
     /// temporary variable for the new Vd
     std::map<int, Vradial>   _vdsum;
 
     /// temporary variable for the new Vex
     std::map<std::pair<int, int>, Vradial>  _vexsum;
-
-    /// temporary variable for standard solver
-    std::map<int, Vradial> matchedSt;
 
 
 };

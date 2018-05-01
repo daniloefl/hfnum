@@ -54,6 +54,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
       solveInward(E, matched, idx, inward[idx]);
       match(idx, matched[idx], inward[idx], outward[idx]);
   
+      // recalculate non-homogeneus term
       for (int idx1 = 0; idx1 < M; ++idx1) {
         std::fill(s[idx1].begin(), s[idx1].end(), 0);
         for (int idx2 = 0; idx2 < M; ++idx2) {
@@ -66,35 +67,15 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
             }
           }
         }
-  
-      }
-    }
-  
-    // solve in inverse order
-    for (int idx = M-1; idx >= 0; --idx) {
-      solveOutward(E, matched, idx, outward[idx]);
-      solveInward(E, matched, idx, inward[idx]);
-      match(idx, matched[idx], inward[idx], outward[idx]);
-  
-      for (int idx1 = 0; idx1 < M; ++idx1) {
-        std::fill(s[idx1].begin(), s[idx1].end(), 0);
-        for (int idx2 = 0; idx2 < M; ++idx2) {
-          if (idx1 == idx2) continue;
-          for (int k = 0; k < _g.N(); ++k) {
-            if (_g.isLog()) {
-              s[idx1][k] += std::pow(_g.dx(), 2)/12.0*2*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
-            } else {
-              s[idx1][k] += std::pow(_g.dx(), 2)/12.0*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
-            }
-          }
-        }
+      } // recalculate non-homogeneous term
 
-      // solve it in the direct order
-      for (int idx = 0; idx < M; ++idx) {
-        solveOutward(E, matched, idx, outward[idx]);
-        solveInward(E, matched, idx, inward[idx]);
-        match(idx, matched[idx], inward[idx], outward[idx]);
-  
+      // solve in inverse order from current index back to zero
+      for (int idxI = idx-1; idxI >= 0; --idxI) {
+        solveOutward(E, matched, idxI, outward[idxI]);
+        solveInward(E, matched, idxI, inward[idxI]);
+        match(idxI, matched[idxI], inward[idxI], outward[idxI]);
+
+        // recalculate non-homogeneus term
         for (int idx1 = 0; idx1 < M; ++idx1) {
           std::fill(s[idx1].begin(), s[idx1].end(), 0);
           for (int idx2 = 0; idx2 < M; ++idx2) {
@@ -107,12 +88,11 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
               }
             }
           }
-  
-      }
-    }
-  
-      }
-    }
+        } // recalculate non-homogeneous term
+
+      } // solving in inverse order
+
+    } // solve in direct order
   } while (++nIterations < 2);
 
   VectorXld F(M);
@@ -179,7 +159,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   VectorXld F(M);
   // calculate first derivative in icl[idx]
   for (int idx = 0; idx < M; ++idx) {
-    F(idx) = std::fabs( (12 - 10*f[idx][icl[idx]])*matched[idx][icl[idx]] 
+    F(idx) = ( (12 - 10*f[idx][icl[idx]])*matched[idx][icl[idx]] 
                     - f[idx][icl[idx]-1]*matched[idx][icl[idx]-1]
                     - f[idx][icl[idx]+1]*matched[idx][icl[idx]+1]
                   );
@@ -203,8 +183,10 @@ void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::map<int,
 void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int, Vradial> &matched, int idx, Vradial &solution) {
   int N = _g.N();
   solution.resize(N);
-  solution[0] = std::pow(_g(0), (_o[idx]->l()+0.5));
-  solution[1] = std::pow(_g(1), (_o[idx]->l()+0.5));
+  //solution[0] = std::pow(_g(0), 0.5)*std::exp(-_g(0))*std::pow(_g(0), _o[idx]->n() - _o[idx]->l() - 1);
+  //solution[1] = std::pow(_g(1), 0.5)*std::exp(-_g(1))*std::pow(_g(1), _o[idx]->n() - _o[idx]->l() - 1);
+  solution[0] = std::exp(-_g(0)/_o[idx]->n())*std::pow(_g(0), _o[idx]->l() + 0.5);
+  solution[1] = std::exp(-_g(1)/_o[idx]->n())*std::pow(_g(1), _o[idx]->l() + 0.5);
   if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
     solution[0] *= -1;
     solution[1] *= -1;
