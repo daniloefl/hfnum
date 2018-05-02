@@ -284,7 +284,7 @@ void HF::calculateVex(ldouble gamma) {
     // calculate it first with filled orbitals, dividing by the number of orbitals
     // this is exact if all 2(2*l+1) orbitals in this level are filled
     for (int k2 = 0; k2 < _o.size(); ++k2) {
-      //if (k1 == k2) continue; // cancels out with Vd, so remove it here and there
+      if (k1 == k2) continue; // cancels out with Vd, so remove it here and there
       if (_o[k1]->spin()*_o[k2]->spin() < 0) continue; // only applies if same spin, otherwise it is zero
 
       int l2 = _o[k2]->l();
@@ -304,6 +304,7 @@ void HF::calculateVex(ldouble gamma) {
         if (k == 0 && l1 == 0 && l2 == 0) B = 1.0/2.0;
         if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/6.0;
         if (k == 1 && l1 == 1 && l2 == 0) B = 1.0/6.0;
+
         if (k == 2 && l1 == 0 && l2 == 2) B = 1.0/10.0;
         if (k == 2 && l1 == 2 && l2 == 0) B = 1.0/10.0;
 
