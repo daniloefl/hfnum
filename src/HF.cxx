@@ -290,13 +290,6 @@ void HF::calculateVex(ldouble gamma) {
       int l2 = _o[k2]->l();
       int m2 = _o[k2]->m();
 
-      if (_o[k1]->n() == _o[k2]->n() && l1 == l2) continue; // only for non-equivalent electrons
-
-      for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-        ldouble r1 = (*_g)(ir1);
-        _vexsum[std::pair<int,int>(k1, k2)][ir1] += _Y[10000*0 + 100*k1 + 1*k2][ir1];
-      }
-
       // from C. Fischer, "The Hartree-Fock method for atoms"
       std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << std::endl;
       for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
