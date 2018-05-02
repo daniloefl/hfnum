@@ -60,6 +60,7 @@ void SCF::setZ(ldouble Z) {
   for (int k = 0; k < _g->N(); ++k) {
     _pot[k] = -_Z/(*_g)(k);
   }
+  _iss.setZ(_Z);
 }
 
 ldouble SCF::Z() {

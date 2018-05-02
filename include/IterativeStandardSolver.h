@@ -26,7 +26,8 @@ class IterativeStandardSolver {
     /// \param o List of orbitals.
     /// \param i Grid positions where to make the matching.
     /// \param om Class to provide orbital number to matrix index mapping.
-    IterativeStandardSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om);
+    /// \param Z Atomic number used for initial condition at infinity.
+    IterativeStandardSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om, ldouble Z = 1.0);
 
     /// \brief Destructor.
     virtual ~IterativeStandardSolver();
@@ -70,6 +71,10 @@ class IterativeStandardSolver {
     /// \param c Convergence acceleration parameter
     void match(int k, Vradial &o, Vradial &inward, Vradial &outward, ldouble c = 1.0);
 
+    /// \brief Set Z value.
+    /// \param Z New atomic number.
+    void setZ(ldouble Z);
+
   private:
 
     /// Grid.
@@ -91,6 +96,7 @@ class IterativeStandardSolver {
     std::map<int, Vradial> inward;
     std::map<int, Vradial> outward;
 
+    ldouble _Z;
 };
 
 #endif

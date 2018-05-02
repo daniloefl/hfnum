@@ -7,12 +7,16 @@
 #include "utils.h"
 #include "OrbitalMapper.h"
 
-IterativeStandardSolver::IterativeStandardSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om)
-  : _g(g), _o(o), icl(i), _om(om) {
+IterativeStandardSolver::IterativeStandardSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om, ldouble Z)
+  : _g(g), _o(o), icl(i), _om(om), _Z(Z) {
 
 }
 
 IterativeStandardSolver::~IterativeStandardSolver() {
+}
+
+void IterativeStandardSolver::setZ(ldouble Z) {
+  _Z = Z;
 }
 
 
@@ -191,8 +195,8 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
 void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::map<int, Vradial> &matched, int idx, Vradial &solution) {
   int N = _g.N();
   solution.resize(N);
-  solution[N-1] = std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-1));
-  solution[N-2] = std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
+  solution[N-1] = std::pow(_g(N-1), _Z/std::sqrt(2*std::fabs(E[idx]))-0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-1));
+  solution[N-2] = std::pow(_g(N-2), _Z/std::sqrt(2*std::fabs(E[idx]))-0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
   for (int k = N-2; k >= 1; --k) {
     solution[k-1] = ((12 - f[idx][k]*10)*solution[k] - f[idx][k+1]*solution[k+1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k-1];
   }

@@ -206,8 +206,10 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
       for (int i = _g->N()-3; i >= 3; --i) {
         ldouble r = (*_g)(i);
         ldouble a = 0;
-        if (_g->isLog()) a = 2*std::pow(r, 2)*(_o[k]->E() - _pot[i] - _vd[k][i]) - std::pow(lmain_eq + 0.5, 2);
-        else a = 2*(_o[k]->E() - _pot[i] - _vd[k][i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
+        //if (_g->isLog()) a = 2*std::pow(r, 2)*(_o[k]->E() - _pot[i] - _vd[k][i]) - std::pow(lmain_eq + 0.5, 2);
+        //else a = 2*(_o[k]->E() - _pot[i] - _vd[k][i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
+        if (_g->isLog()) a = 2*std::pow(r, 2)*(_o[k]->E() - _pot[i]) - std::pow(lmain_eq + 0.5, 2);
+        else a = 2*(_o[k]->E() - _pot[i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
         if (icl[k] < 0 && a*a_m1 < 0) {
           icl[k] = i;
           break;
@@ -291,29 +293,31 @@ void HF::calculateVex(ldouble gamma) {
       int m2 = _o[k2]->m();
 
       // from C. Fischer, "The Hartree-Fock method for atoms"
+      // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
+      // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
       std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << std::endl;
       for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
         ldouble B = 0.0;
-        if (k == 0 && l1 == 0 && l2 == 0) B = 1.0/2.0;
-        if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/6.0;
-        if (k == 1 && l1 == 1 && l2 == 0) B = 1.0/6.0;
+        if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
+        if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/3.0;
 
-        if (k == 2 && l1 == 0 && l2 == 2) B = 1.0/10.0;
-        if (k == 2 && l1 == 2 && l2 == 0) B = 1.0/10.0;
+        if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/3.0;
+        if (k == 1 && l1 == 1 && l2 == 0) B = 1.0/3.0;
 
-        if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/6.0;
-        if (k == 2 && l1 == 1 && l2 == 1) B = 1.0/15.0;
+        if (k == 2 && l1 == 1 && l2 == 1) B = 2.0/15.0;
 
-        if (k == 1 && l1 == 1 && l2 == 2) B = 1.0/15.0;
-        if (k == 1 && l1 == 2 && l2 == 1) B = 1.0/15.0;
-        if (k == 3 && l1 == 1 && l2 == 2) B = 3.0/70.0;
-        if (k == 3 && l1 == 2 && l2 == 1) B = 3.0/70.0;
+        //if (k == 2 && l1 == 0 && l2 == 2) B = 1.0/10.0*2;
+        //if (k == 2 && l1 == 2 && l2 == 0) B = 1.0/10.0*2;
 
-        if (k == 0 && l1 == 2 && l2 == 2) B = 1.0/10.0;
-        if (k == 2 && l1 == 2 && l2 == 2) B = 1.0/35.0;
-        if (k == 4 && l1 == 2 && l2 == 2) B = 1.0/35.0;
+        //if (k == 1 && l1 == 1 && l2 == 2) B = 1.0/15.0*2;
+        //if (k == 1 && l1 == 2 && l2 == 1) B = 1.0/15.0*2;
+        //if (k == 3 && l1 == 1 && l2 == 2) B = 3.0/70.0*2;
+        //if (k == 3 && l1 == 2 && l2 == 1) B = 3.0/70.0*2;
 
-        B *= 2.0; // why?
+        //if (k == 0 && l1 == 2 && l2 == 2) B = 1.0/10.0*2;
+        //if (k == 2 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
+        //if (k == 4 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
+
         if (B == 0) continue;
         // This is the extra k parts
         for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
@@ -459,16 +463,18 @@ void HF::calculateVd(ldouble gamma) {
       }
 
       // from C. Fischer, "The Hartree-Fock method for atoms"
+      // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
+      // Values agree, but taken in abs value ... how to average them in km?
       for (int k = 2; k <= 2*l2; k += 2) {
         ldouble A = 0.0;
-        if (k == 2 && l2 == 1) A = -2.0/25.0;
-        if (k == 2 && l2 == 2) A = -2.0/63.0;
-        if (k == 4 && l2 == 2) A = -2.0/63.0;
-        if (k == 2 && l2 == 3) A = -4.0/195.0;
-        if (k == 4 && l2 == 3) A = -2.0/143.0;
-        if (k == 6 && l2 == 3) A = -100.0/5577.0;
+        if (k == 2 && l2 == 1) A = 2.0/25.0;
+
+        if (k == 2 && l2 == 2) A = 2.0/63.0;
+        if (k == 4 && l2 == 2) A = 2.0/63.0;
+        if (k == 2 && l2 == 3) A = 4.0/195.0;
+        if (k == 4 && l2 == 3) A = 2.0/143.0;
+        if (k == 6 && l2 == 3) A = 100.0/5577.0;
  
-        A *= -1; // why?
         if (A == 0) continue;
         // This is the extra k parts
         for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
