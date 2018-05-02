@@ -47,8 +47,8 @@ python::list SCF::getR() const {
   return _g->getR();
 }
 
-void SCF::resetGrid(gridType t, ldouble dx, int N, ldouble rmin) {
-  _g->reset(t, dx, N, rmin);
+void SCF::resetGrid(int t, ldouble dx, int N, ldouble rmin) {
+  _g->reset((gridType) t, dx, N, rmin);
   _pot.resize(_g->N());
   for (int k = 0; k < _g->N(); ++k) {
     _pot[k] = -_Z/(*_g)(k);

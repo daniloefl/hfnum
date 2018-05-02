@@ -38,7 +38,7 @@ class SCF {
     /// \param dx Grid step.
     /// \param N Number of Grid points.
     /// \param rmin Minimum Grid r value.
-    void resetGrid(gridType t, ldouble dx, int N, ldouble rmin);
+    void resetGrid(int t, ldouble dx, int N, ldouble rmin);
 
     /// \brief Get Z.
     /// \return Z

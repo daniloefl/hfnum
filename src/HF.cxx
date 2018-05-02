@@ -284,45 +284,46 @@ void HF::calculateVex(ldouble gamma) {
     // calculate it first with filled orbitals, dividing by the number of orbitals
     // this is exact if all 2(2*l+1) orbitals in this level are filled
     for (int k2 = 0; k2 < _o.size(); ++k2) {
-      if (k1 == k2) continue; // cancels out with Vd, so remove it here and there
+      //if (k1 == k2) continue; // cancels out with Vd, so remove it here and there
       if (_o[k1]->spin()*_o[k2]->spin() < 0) continue; // only applies if same spin, otherwise it is zero
 
       int l2 = _o[k2]->l();
       int m2 = _o[k2]->m();
 
-      // we know this exactly for a filled shell, but we will double count it in the k2 loop above (2 l2 + 1) times, so divide by it
-      if (filled[k2] && filled[k1]) {
-        std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << "(filled)" << std::endl;
-        for (int k = abs(l2-l1); k <= l2+l1; k += 1) {  // this is the sum over L from |l2-l1| to |l2+l1|
-          ldouble B = std::pow(CG(l1, l2, 0, 0, k, 0), 2);
+      if (_o[k1]->n() == _o[k2]->n() && l1 == l2) continue; // only for non-equivalent electrons
 
-          if (B == 0) continue;
-          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            ldouble r1 = (*_g)(ir1);
-            _vexsum[std::pair<int,int>(k1, k2)][ir1] += 1.0/((ldouble) 2*k + 1) * B * _Y[10000*k + 100*k1 + 1*k2][ir1];
-          }
-        }
-      } else {
-        // if the shell is not complete, project in the sph. harm of k1
-        // (see calculations/Angular coefficients Hartree-Fock numerical.ipynb)
-        std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << "(not filled)" << std::endl;
-        for (int k = 0; k <= 2; k += 2) {
-          ldouble B = 0.0;
-          if (k == 0 && l1 == 0 && l2 == 0) B = (1.0)*(1.0);
-          if (k == 0 && l1 == 1 && l2 == 1) B = (1.0)*(1.0/3.0);
-          if (k == 2 && l1 == 1 && l2 == 1) B = (1.0/10.0)*(4.0/3.0);
+      for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+        ldouble r1 = (*_g)(ir1);
+        _vexsum[std::pair<int,int>(k1, k2)][ir1] += _Y[10000*0 + 100*k1 + 1*k2][ir1];
+      }
 
-          // appear after projecting it into k1 orbital sph. harm.
-          if (k == 0 && l1 == 1 && l2 == 1) B = (1.0)*(1.0/3.0);
-          if (k == 1 && l1 == 1 && l2 == 0) B = (1.0/3.0)*(1.0);
-          if (k == 1 && l1 == 0 && l2 == 1) B = (1.0/3.0)*(1.0);
+      // from C. Fischer, "The Hartree-Fock method for atoms"
+      std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << std::endl;
+      for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
+        ldouble B = 0.0;
+        if (k == 0 && l1 == 0 && l2 == 0) B = 1.0/2.0;
+        if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/6.0;
+        if (k == 1 && l1 == 1 && l2 == 0) B = 1.0/6.0;
+        if (k == 2 && l1 == 0 && l2 == 2) B = 1.0/10.0;
+        if (k == 2 && l1 == 2 && l2 == 0) B = 1.0/10.0;
 
-          if (B == 0) continue;
-          // This is the extra k parts
-          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            ldouble r1 = (*_g)(ir1);
-            _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
-          }
+        if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/6.0;
+        if (k == 2 && l1 == 1 && l2 == 1) B = 1.0/15.0;
+
+        if (k == 1 && l1 == 1 && l2 == 2) B = 1.0/15.0;
+        if (k == 1 && l1 == 2 && l2 == 1) B = 1.0/15.0;
+        if (k == 3 && l1 == 1 && l2 == 2) B = 3.0/70.0;
+        if (k == 3 && l1 == 2 && l2 == 1) B = 3.0/70.0;
+
+        if (k == 0 && l1 == 2 && l2 == 2) B = 1.0/10.0;
+        if (k == 2 && l1 == 2 && l2 == 2) B = 1.0/35.0;
+        if (k == 4 && l1 == 2 && l2 == 2) B = 1.0/35.0;
+
+        if (B == 0) continue;
+        // This is the extra k parts
+        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+          ldouble r1 = (*_g)(ir1);
+          _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
         }
       }
 
@@ -454,33 +455,32 @@ void HF::calculateVd(ldouble gamma) {
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       if (k2 == k1) continue; // cancels out with Vex ... we also remove it from there
 
-      if (filled[k2]) { // we know this to be exact, but divide it by 2*(2l+1) because this is how many times we will find an orbital in the same shell
+      int l2 = _o[k2]->l();
+      int m2 = _o[k2]->m();
 
-        // This is the T part (the rest of T is just Z/r)
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
-        }
-
-      } else {
-
-        // This is the central part
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
-        }
-
-        // project it into sph. harm of orbital k1 (see calculations/Angular coefficients Hartree-Fock numerical.ipynb)
-        for (int k = 2; k <= 2; k += 2) {
-          ldouble A = 0.0;
-          if (k == 2 && l1 == 1) A = 0.1375; //A = 0.20/3.0;
- 
-          if (A == 0) continue;
-          // This is the extra k parts
-          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            _vdsum[k1][ir1] += A * _Y[10000*k + 100*k1 + 1*k1][ir1];
-          }
-        } // end of vdsum averaging over angles
-
+      // This is the central part
+      for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+        _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
       }
+
+      // from C. Fischer, "The Hartree-Fock method for atoms"
+      for (int k = 2; k <= 2*l2; k += 2) {
+        ldouble A = 0.0;
+        if (k == 2 && l2 == 1) A = -2.0/25.0;
+        if (k == 2 && l2 == 2) A = -2.0/63.0;
+        if (k == 4 && l2 == 2) A = -2.0/63.0;
+        if (k == 2 && l2 == 3) A = -4.0/195.0;
+        if (k == 4 && l2 == 3) A = -2.0/143.0;
+        if (k == 6 && l2 == 3) A = -100.0/5577.0;
+ 
+        if (A == 0) continue;
+        // This is the extra k parts
+        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+          _vdsum[k1][ir1] += A * _Y[10000*k + 100*k1 + 1*k1][ir1];
+        }
+      } // end of vdsum averaging over angles
+
+      
     }
 
     /*

@@ -12,6 +12,7 @@ Four methods are available to solve the differential equation:
     * This method is an extension of the method proposed by Gordon. The method is only re-written in a different way using the ratio of solutions normalised by the differential equation coefficients. This procedure avoids overflows, which happen in method 1. It is recommended and it is explained here: http://aip.scitation.org/doi/pdf/10.1063/1.436421
   * method 3: Standard Numerov method with non-homogeneus term
     * This method solves the equations using the Numerov method multiplying out the terms that depend on other orbitals and leaving them as an independent non-homogeneous term. This procedure is repeated several times to achieve consistency before recalculating the energy and moving to the potential self-consistency step. This method is a simple and fast extension of the Numerov standard method, but it does not often converge easily. One paper using this method worth reading is: https://www.sciencedirect.com/science/article/pii/0010465576900400
+    * It is recommended to try this method (which is faster), but switch to method 2 in case the method does not converge.
 
 The software is a Python library, where the calculations are done in C++, but the configuration of the parameters is done in Python.
 Example Python configurations for the Hydrogen, Helium, Lithium, Beryllium, Boron and Carbon can be seen in the share directory.
@@ -73,8 +74,8 @@ h = hfnum.HF()
 
 # initialise library with the Grid parameters
 # the first parameter tells it whether one should use the logarithmic Grid
-# the linear Grid works poorly, so it is recommended to keep this always in True
-h.resetGrid(True, dx, int(N), rmin)
+# the linear Grid works poorly, so it is recommended to keep this always in 1
+h.resetGrid(1, dx, int(N), rmin)
 
 # set atomic number
 h.setZ(Z)
