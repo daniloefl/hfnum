@@ -22,7 +22,7 @@ var classSCF =
     [ "getR", "classSCF.html#a2fbd243b5ee6322e43296b09369357de", null ],
     [ "load", "classSCF.html#a4ebcdbad21ff380c26ccd445bfd4147b", null ],
     [ "method", "classSCF.html#a35c1ab4ecadb162dd946eef831558afb", null ],
-    [ "resetGrid", "classSCF.html#ab8f90ef1adde929fbfaf4bbaa4e48eda", null ],
+    [ "resetGrid", "classSCF.html#a0978f058f3dfd289f96c4ac56ec1074b", null ],
     [ "save", "classSCF.html#a5cca3fce03c5463d428d26272dcfa547", null ],
     [ "setZ", "classSCF.html#afaf040116cf75da351e6049b06eb9d2b", null ],
     [ "solveForFixedPotentials", "classSCF.html#a602257b5273b9c422cda18b19794305d", null ],

@@ -10,9 +10,7 @@ var files =
     ] ],
     [ "feature_tests.cxx", "feature__tests_8cxx.html", "feature__tests_8cxx" ],
     [ "Grid.cxx", "Grid_8cxx.html", null ],
-    [ "Grid.h", "Grid_8h.html", [
-      [ "Grid", "classGrid.html", "classGrid" ]
-    ] ],
+    [ "Grid.h", "Grid_8h.html", "Grid_8h" ],
     [ "GTO.cxx", "GTO_8cxx.html", null ],
     [ "GTO.h", "GTO_8h.html", [
       [ "GTOUnit", "structGTOUnit.html", "structGTOUnit" ],
