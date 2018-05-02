@@ -313,6 +313,7 @@ void HF::calculateVex(ldouble gamma) {
         if (k == 2 && l1 == 2 && l2 == 2) B = 1.0/35.0;
         if (k == 4 && l1 == 2 && l2 == 2) B = 1.0/35.0;
 
+        B *= 2.0; // why?
         if (B == 0) continue;
         // This is the extra k parts
         for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
@@ -467,6 +468,7 @@ void HF::calculateVd(ldouble gamma) {
         if (k == 4 && l2 == 3) A = -2.0/143.0;
         if (k == 6 && l2 == 3) A = -100.0/5577.0;
  
+        A *= -1; // why?
         if (A == 0) continue;
         // This is the extra k parts
         for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
