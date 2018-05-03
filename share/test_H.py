@@ -18,6 +18,9 @@ rmin = 1e-8
 dx = 0.1e-1
 N = 1300
 rmin = 1e-4
+dx = 1.0/16.0/Z
+N = 120*Z
+rmin = np.exp(-4)/Z
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
@@ -31,6 +34,7 @@ NiterSCF = 1
 Niter = 100
 F0stop = 1e-6
 r = np.asarray(h.getR())
+print r[0], r[-1]
 h.solve(NiterSCF, Niter, F0stop)
 
 h.save('output/results_H.txt')

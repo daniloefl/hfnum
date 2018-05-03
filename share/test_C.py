@@ -17,6 +17,8 @@ N = 421
 rmin = 1e-8
 dx = 0.1e-1
 N = 1300
+dx = 0.2e-1
+N = 650
 rmin = 1e-4
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
