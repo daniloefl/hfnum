@@ -103,8 +103,9 @@ class HF : public SCF {
     /// \param gamma Parameter used to take a linear combination of previous potential and new one.
     void calculateVex(ldouble gamma);
 
-    /// Auxiliary variable Y
+    /// Auxiliary variables Y and Z
     std::map<int, Vradial> _Y;
+    std::map<int, Vradial> _Zt;
 
     /// temporary variable for the new Vd
     std::map<int, Vradial>   _vdsum;

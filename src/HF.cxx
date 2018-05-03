@@ -400,7 +400,48 @@ void HF::calculateY() {
         int l2 = _o[k2]->l();
         int m2 = _o[k2]->m();
         _Y[10000*k + 100*k1 + 1*k2] = Vradial(_g->N(), 0);
+        _Zt[10000*k + 100*k1 + 1*k2] = Vradial(_g->N(), 0);
 
+        // r Y(r) = int_0^r Pk1*t Pk2*t (t/r)^k dt +
+        //         int_r^inf Pk1*t Pk2*t (r/t)^(k+1) dt
+        // Z(r) = int_0^r Pk1*t Pk2*t (t/r)^k dt
+        // dZ/dr = Pk1*r Pk2*r - k/r Z
+        // d(rY)/dr = 1/r [ (k+1) (rY) - (2k + 1) Z ]
+        // Z (r=0) = 0
+        // lim Y when r -> infinity = Z
+        // define r = exp(x), x = ln(r)
+        // dZ/dx = dZ/dr dr/dx = Pk1*r Pk2*r * r - k Z
+        // d(rY)/dx = [ (k+1) (rY) - (2k + 1) Z ]
+        // d(exp(kx)*Z)/dx = k exp(kx) Z + exp(kx) dZ/dx
+        //                 = exp(kx) *Pk1*r Pk2 *r *r
+        // d(exp(- (k+1)x) (rY))/dx = -(k+1) exp(-(k+1)x) (rY) + exp(-(k+1)x) d(rY)/dx
+        //                       = - (2k +1) Z exp(-(k+1)x)
+        _Zt[10000*k + 100*k1 + 1*k2][0] = 0;
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+          ldouble x = std::log(r);
+          ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+          ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
+          //if (_g->isLog()) dx = 1;
+          _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g)*std::exp(dx*k)*dx;
+        }
+        _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
+        for (int ir = _g->N()-1; ir >= 1; --ir) {
+          ldouble r = (*_g)(ir);
+          ldouble x = std::log(r);
+          ldouble dr = (*_g)(ir) - (*_g)(ir-1);
+          ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir-1));
+          //if (_g->isLog()) dx = 1;
+          _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir]*std::exp(-(k+1)*dx)*dx;
+        }
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+          _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
+        }
+
+
+        // classical integration:
+        /*
         for (int ir = 0; ir < _g->N()-1; ++ir) {
           ldouble r = (*_g)(ir);
 
@@ -418,6 +459,7 @@ void HF::calculateY() {
             _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r/r1, k)/r1 * r1 * r1 * dr1;
           }
         }
+        */
 
       }
     }
