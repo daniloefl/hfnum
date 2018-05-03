@@ -31,7 +31,7 @@ h.addOrbital(orb2)
 
 h.method(3)
 
-NiterSCF = 40
+NiterSCF = 80
 Niter = 200
 F0stop = 1e-5
 r = np.asarray(h.getR())
