@@ -13,8 +13,8 @@ Z = 2
 dx = 0.5e-1
 N = 421
 rmin = 1e-8
-dx = 0.2e-1
-N = 650
+dx = 0.2e-1/2
+N = 650*2
 rmin = 1e-4
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
@@ -27,7 +27,7 @@ h.addOrbital(orb1)
 
 NiterSCF = 40
 Niter = 100
-F0stop = 1e-5
+F0stop = 1e-8
 r = h.getR()
 r = np.asarray(r)
 print "Last r:", r[-1]
