@@ -422,7 +422,6 @@ void HF::calculateY() {
           ldouble x = std::log(r);
           ldouble dr = (*_g)(ir+1) - (*_g)(ir);
           ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
-          //if (_g->isLog()) dx = 1;
           _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g)*std::exp(dx*k)*dx;
         }
         _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
@@ -431,7 +430,6 @@ void HF::calculateY() {
           ldouble x = std::log(r);
           ldouble dr = (*_g)(ir) - (*_g)(ir-1);
           ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir-1));
-          //if (_g->isLog()) dx = 1;
           _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir]*std::exp(-(k+1)*dx)*dx;
         }
         for (int ir = 0; ir < _g->N()-1; ++ir) {
