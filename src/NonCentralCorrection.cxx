@@ -250,7 +250,13 @@ void NonCentralCorrection::correct() {
     
             for (int l = 0; l <= lmax; ++l) {
               for (int m = -l; m <= l; ++m) {
-                ldouble v = std::pow(-1, m+tlm_d1.m+tlmo.m)*(2.0*tlmo.l+1.0)*std::sqrt((2.0*tlm_d1.l+1.0)*(2.0*tlm_d2.l+1.0))*std::pow(2.0*l+1.0, -2)*CG(tlm_d1.l, tlm_d2.l, 0, 0, l, 0)*CG(tlmo.l, tlmo.l, 0, 0, l, 0)*CG(tlm_d1.l, tlm_d2.l, -tlm_d1.m, tlm_d2.m, l, m)*CG(tlmo.l, tlmo.l, -tlmo.m, tlmo.m, l, -m)*_Y[10000*l + 100*k1 + 1*k2][ir2]*std::pow(_o[ko]->getNorm(ir2, *_g), 2)*std::pow(r2, 2)*dr2;
+                ldouble v = std::pow(-1, m+tlm_d1.m+tlmo.m)*(2.0*tlmo.l+1.0)*
+                            std::sqrt((2.0*tlm_d1.l+1.0)*(2.0*tlm_d2.l+1.0))*
+                            std::pow(2.0*l+1.0, -2)*
+                            CG(tlm_d1.l, tlm_d2.l, 0, 0, l, 0)*CG(tlmo.l, tlmo.l, 0, 0, l, 0)*
+                            CG(tlm_d1.l, tlm_d2.l, -tlm_d1.m, tlm_d2.m, l, m)*CG(tlmo.l, tlmo.l, -tlmo.m, tlmo.m, l, -m)*
+                            _Y[10000*l + 100*k1 + 1*k2][ir2]*
+                            std::pow(_o[ko]->getNorm(ir2, *_g), 2)*std::pow(r2, 2)*dr2;
                 dH(k1, k2) += v;
                 _J(k1, k2) += v;
               }
@@ -292,7 +298,12 @@ void NonCentralCorrection::correct() {
     
           for (int l = 0; l <= lmax; ++l) {
             for (int m = -l; m <= l; ++m) {
-              ldouble v = std::pow(-1, m + tlm_d2.m + tlmo.m)*(2.0*tlm_d2.l+1.0)*(2.0*tlmo.l+1.0)*std::pow(2.0*l+1.0, -2)*CG(tlm_d2.l, tlmo.l, 0, 0, l, 0)*CG(tlmo.l, tlm_d1.l, 0, 0, l, 0)*CG(tlm_d2.l, tlmo.l, -tlm_d2.m, tlmo.m, l, -m)*CG(tlmo.l, tlm_d1.l, -tlmo.m, tlm_d1.m, l, m)*_Y[10000*l + 100*k2 + 1*ko][ir2]*_o[ko]->getNorm(ir2, *_g)*_o[k1]->getNorm(ir2, *_g)*std::pow(r2, 2)*dr2;
+              ldouble v = std::pow(-1, m + tlm_d2.m + tlmo.m)*(2.0*tlm_d2.l+1.0)*(2.0*tlmo.l+1.0)*std::pow(2.0*l+1.0, -2)*
+                          CG(tlm_d2.l, tlmo.l, 0, 0, l, 0)*CG(tlmo.l, tlm_d1.l, 0, 0, l, 0)*
+                          CG(tlm_d2.l, tlmo.l, -tlm_d2.m, tlmo.m, l, -m)*CG(tlmo.l, tlm_d1.l, -tlmo.m, tlm_d1.m, l, m)*
+                          _Y[10000*l + 100*k2 + 1*ko][ir2]*
+                          _o[ko]->getNorm(ir2, *_g)*_o[k1]->getNorm(ir2, *_g)*
+                          std::pow(r2, 2)*dr2;
               dH(k1, k2) += -v;
               _K(k1, k2) += v;
             }
