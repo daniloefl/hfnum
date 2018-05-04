@@ -1,6 +1,6 @@
 var classIterativeGordonSolver =
 [
-    [ "IterativeGordonSolver", "classIterativeGordonSolver.html#a627aa857c6218ca93fb6e2081ba45512", null ],
+    [ "IterativeGordonSolver", "classIterativeGordonSolver.html#a75a8d550f817266820b799c61064e646", null ],
     [ "~IterativeGordonSolver", "classIterativeGordonSolver.html#ab229a5779c69e80b9e6f1011a4ed618e", null ],
     [ "match", "classIterativeGordonSolver.html#a812070539b949646e26a834cf700d81d", null ],
     [ "solve", "classIterativeGordonSolver.html#a6220bfd7045d24984bcb1bc881f23e19", null ],

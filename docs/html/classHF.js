@@ -18,5 +18,6 @@ var classHF =
     [ "solve", "classHF.html#aa63cb58ed259911c29f8aefca00809bc", null ],
     [ "_vdsum", "classHF.html#a627269037f92f5c920454a9674d68c00", null ],
     [ "_vexsum", "classHF.html#ab41c4e42122111506f09a23301d8af80", null ],
-    [ "_Y", "classHF.html#a4f4e0aa9b194e6419ce446f0b5626fac", null ]
+    [ "_Y", "classHF.html#a4f4e0aa9b194e6419ce446f0b5626fac", null ],
+    [ "_Zt", "classHF.html#a6413cba2e4c4c75fcac2ca2be9495839", null ]
 ];

@@ -21,7 +21,7 @@ Perturbative corrections can be applied further using the code in src/NonCentral
 
 The actual equation set up can be done either using several methods, which implement different potential models:
   * Hartree-Fock with central potential approximation: this is implemented in the hfnum.HF class. It projects the potentials in the spherical harmonic of the orbitla being calculated in case of non-filled shells. This should give the most accurate result, but it is the slowest. The examples below show this method being used.
-  * Hartree-Fock-Slater method: this method is described in "A Simplification of the Hartree-Fock Method", by J. C. Slater ( https://journals.aps.org/pr/abstract/10.1103/PhysRev.81.385 ). It uses the free electron gas approximation to estimate the exchange potential, eliminating the non-homogeneous terms in the equations. This is implemented in the hfnum.HFS class.
+  * Hartree-Fock-Slater method: this method is described in "A Simplification of the Hartree-Fock Method", by J. C. Slater ( https://journals.aps.org/pr/abstract/10.1103/PhysRev.81.385 ). It uses the free electron gas approximation to estimate the exchange potential, eliminating the non-homogeneous terms in the equations. This is implemented in the hfnum.HFS class. This gives results that may be very off for low Z atoms (ie: He), due to this approximation, but the equation is easily solved with it. For this reason, it is worth using this method and applying the NonCentralCorrection with share/load_and_correct_result.py to get a reasonable solution.
   * Density Functional Theory method: this is a simple implementation of DFT, splitting the system in spin up and spin down electrons and estimating the potentials using the charge density for spin up and spin down electrons. The exchange potential used is calculating using the Local Density Approximation. This method is quite fast and it is implemented in the hfnum.DFT class.
 
 The examples below can all be done using any of the Hartree-Fock, Hartree-Fock-Slater or Density Functional Theory methods, by simply replacing the
@@ -169,6 +169,25 @@ eV = 27.21138602
 for n in range(0, h.getNOrbitals()):
   print "Energy for orbital %10s: %10.6f Hartree = %15.8f eV, first order non-central correction: %10.6f Hartree = %15.8f eV" % (h.getOrbitalName(n), h.getOrbital_E(n), h.getOrbital_E(n)*eV, pert_E[n], pert_E[n]*eV)
 
+```
+
+The results can then be read and corrected using the hfnum.NonCentralCorrection as follows (an example can be found in share/load_and_correct_result.py):
+
+```
+h = hfnum.NonCentralCorrection()
+h.load("output/result_He_hfs.txt")
+h.correct()
+
+# get corrected eigenvalues
+pert_E = h.getCorrectedE()
+# get coefficients to apply to uncorrected orbitals to get the corrected ones
+coeff = h.getCoefficients()
+
+# get the corrected ground state energy
+E0 = h.getE0()
+
+# get the uncorrected ground state energy
+E0uncorr = h.getE0Uncorrected()
 ```
 
 # Examples

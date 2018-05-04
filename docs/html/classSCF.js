@@ -19,7 +19,7 @@ var classSCF =
     [ "getOrbitalCentral", "classSCF.html#a4bc5dd75714013c145e02b287885e27e", null ],
     [ "getOrbitalCentralPython", "classSCF.html#a75413ee4f3d0ef845b458507055a6127", null ],
     [ "getOrbitalName", "classSCF.html#a2b4ff7d46034d554778bebebabc49ef0", null ],
-    [ "getR", "classSCF.html#a2fbd243b5ee6322e43296b09369357de", null ],
+    [ "getR", "classSCF.html#a64884bf0ba71c59b283f7a82cb0dac20", null ],
     [ "load", "classSCF.html#a4ebcdbad21ff380c26ccd445bfd4147b", null ],
     [ "method", "classSCF.html#a35c1ab4ecadb162dd946eef831558afb", null ],
     [ "resetGrid", "classSCF.html#a0978f058f3dfd289f96c4ac56ec1074b", null ],

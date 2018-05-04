@@ -1,6 +1,6 @@
 var classIterativeRenormalisedSolver =
 [
-    [ "IterativeRenormalisedSolver", "classIterativeRenormalisedSolver.html#a7fab43f883736f004002e7702df519d8", null ],
+    [ "IterativeRenormalisedSolver", "classIterativeRenormalisedSolver.html#a621a4b34e1608c280b9d9dfc6d41fd46", null ],
     [ "~IterativeRenormalisedSolver", "classIterativeRenormalisedSolver.html#a4d117f8c38a1271b3d6646fbedc0bac2", null ],
     [ "match", "classIterativeRenormalisedSolver.html#a0cf597913e8291ec525eba6c8b62c729", null ],
     [ "solve", "classIterativeRenormalisedSolver.html#a8d47100b7c1d097cf75b4696b8b83b66", null ],
