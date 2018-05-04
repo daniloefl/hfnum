@@ -224,8 +224,86 @@ void HFS::solve(int NiterSCF, int Niter, ldouble F0stop) {
     std::cout << "SCF step " << nStepSCF << std::endl;
     solveForFixedPotentials(Niter, F0stop);
     nStepSCF++;
+    calculateY();
     calculateVex(_gamma_scf);
     calculateVd(_gamma_scf);
+  }
+}
+
+void HFS::calculateY() {
+  std::cout << "Calculating Y" << std::endl;
+  // Calculating Y_k(orb1, orb2)[r]
+  // index in Y is 10000*k + 100*orb1 + orb2
+  for (int k = 0; k <= 2; ++k) {
+    std::cout << "Calculating Y for k "<< k << std::endl;
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      int l1 = _o[k1]->l();
+      int m1 = _o[k1]->m();
+      for (int k2 = 0; k2 < _o.size(); ++k2) {
+        int l2 = _o[k2]->l();
+        int m2 = _o[k2]->m();
+        _Y[10000*k + 100*k1 + 1*k2] = Vradial(_g->N(), 0);
+        _Zt[10000*k + 100*k1 + 1*k2] = Vradial(_g->N(), 0);
+
+        // r Y(r) = int_0^r Pk1*t Pk2*t (t/r)^k dt +
+        //         int_r^inf Pk1*t Pk2*t (r/t)^(k+1) dt
+        // Z(r) = int_0^r Pk1*t Pk2*t (t/r)^k dt
+        // dZ/dr = Pk1*r Pk2*r - k/r Z
+        // d(rY)/dr = 1/r [ (k+1) (rY) - (2k + 1) Z ]
+        // Z (r=0) = 0
+        // lim Y when r -> infinity = Z
+        // define r = exp(x), x = ln(r)
+        // dZ/dx = dZ/dr dr/dx = Pk1*r Pk2*r * r - k Z
+        // d(rY)/dx = [ (k+1) (rY) - (2k + 1) Z ]
+        // d(exp(kx)*Z)/dx = k exp(kx) Z + exp(kx) dZ/dx
+        //                 = exp(kx) *Pk1*r Pk2 *r *r
+        // d(exp(- (k+1)x) (rY))/dx = -(k+1) exp(-(k+1)x) (rY) + exp(-(k+1)x) d(rY)/dx
+        //                       = - (2k +1) Z exp(-(k+1)x)
+        _Zt[10000*k + 100*k1 + 1*k2][0] = 0;
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+          ldouble x = std::log(r);
+          ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+          ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
+          _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g)*std::exp(dx*k)*dx;
+        }
+        _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
+        for (int ir = _g->N()-1; ir >= 1; --ir) {
+          ldouble r = (*_g)(ir);
+          ldouble x = std::log(r);
+          ldouble dr = (*_g)(ir) - (*_g)(ir-1);
+          ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir-1));
+          _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir]*std::exp(-(k+1)*dx)*dx;
+        }
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+          _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
+        }
+
+
+        // classical integration:
+        /*
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+
+          // integrate r1 from 0 to r
+          for (int ir1 = 0; ir1 < ir; ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+            _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r1/r, k)/r * r1 * r1 * dr1;
+          }
+
+          // integrate r1 from r to inf
+          for (int ir1 = ir; ir1 < _g->N()-1; ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+            _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r/r1, k)/r1 * r1 * r1 * dr1;
+          }
+        }
+        */
+
+      }
+    }
   }
 }
 
@@ -255,6 +333,41 @@ void HFS::calculateVd(ldouble gamma) {
     int m1 = _o[k1]->m();
     std::cout << "Calculating Vd term from k = " << k1 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
 
+    std::cout << "Calculating Vd term from k = " << k1 << std::endl;
+
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      //if (k2 == k1) continue; // cancels out with Vex ... we also remove it from there
+
+      int l2 = _o[k2]->l();
+      int m2 = _o[k2]->m();
+
+      // This is the central part
+      for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+        _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
+      }
+
+      // from C. Fischer, "The Hartree-Fock method for atoms"
+      // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
+      // Values agree, but taken in abs value ... how to average them in km?
+      for (int k = 2; k <= 2*l2; k += 2) {
+        ldouble A = 0.0;
+        if (k == 2 && l2 == 1) A = 2.0/25.0;
+
+        if (k == 2 && l2 == 2) A = 2.0/63.0;
+        if (k == 4 && l2 == 2) A = 2.0/63.0;
+        if (k == 2 && l2 == 3) A = 4.0/195.0;
+        if (k == 4 && l2 == 3) A = 2.0/143.0;
+        if (k == 6 && l2 == 3) A = 100.0/5577.0;
+ 
+        if (A == 0) continue;
+        // This is the extra k parts
+        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+          _vdsum[k1][ir1] += A * _Y[10000*k + 100*k1 + 1*k1][ir1];
+        }
+      } // end of vdsum averaging over angles
+    }
+
+    /*
     int lmax = 2;
     // temporary variable
     std::vector<ldouble> vd(_g->N(), 0); // calculate it here first
@@ -283,6 +396,7 @@ void HFS::calculateVd(ldouble gamma) {
         _vdsum[ko][ir2] += vd[ir2];
       }
     }
+    */
   }
 
   for (int ko = 0; ko < _o.size(); ++ko) {
