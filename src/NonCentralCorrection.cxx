@@ -37,6 +37,83 @@ void NonCentralCorrection::load(const std::string &fname) {
   }
 }
 
+void NonCentralCorrection::calculateY() {
+  std::cout << "Calculating Y" << std::endl;
+  // Calculating Y_k(orb1, orb2)[r]
+  // index in Y is 10000*k + 100*orb1 + orb2
+  for (int k = 0; k <= 2; ++k) {
+    std::cout << "Calculating Y for k "<< k << std::endl;
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      int l1 = _o[k1]->l();
+      int m1 = _o[k1]->m();
+      for (int k2 = 0; k2 < _o.size(); ++k2) {
+        int l2 = _o[k2]->l();
+        int m2 = _o[k2]->m();
+        _Y[10000*k + 100*k1 + 1*k2] = Vradial(_g->N(), 0);
+        _Zt[10000*k + 100*k1 + 1*k2] = Vradial(_g->N(), 0);
+
+        // r Y(r) = int_0^r Pk1*t Pk2*t (t/r)^k dt +
+        //         int_r^inf Pk1*t Pk2*t (r/t)^(k+1) dt
+        // Z(r) = int_0^r Pk1*t Pk2*t (t/r)^k dt
+        // dZ/dr = Pk1*r Pk2*r - k/r Z
+        // d(rY)/dr = 1/r [ (k+1) (rY) - (2k + 1) Z ]
+        // Z (r=0) = 0
+        // lim Y when r -> infinity = Z
+        // define r = exp(x), x = ln(r)
+        // dZ/dx = dZ/dr dr/dx = Pk1*r Pk2*r * r - k Z
+        // d(rY)/dx = [ (k+1) (rY) - (2k + 1) Z ]
+        // d(exp(kx)*Z)/dx = k exp(kx) Z + exp(kx) dZ/dx
+        //                 = exp(kx) *Pk1*r Pk2 *r *r
+        // d(exp(- (k+1)x) (rY))/dx = -(k+1) exp(-(k+1)x) (rY) + exp(-(k+1)x) d(rY)/dx
+        //                       = - (2k +1) Z exp(-(k+1)x)
+        _Zt[10000*k + 100*k1 + 1*k2][0] = 0;
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+          ldouble x = std::log(r);
+          ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+          ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
+          _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g)*std::exp(dx*k)*dx;
+        }
+        _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
+        for (int ir = _g->N()-1; ir >= 1; --ir) {
+          ldouble r = (*_g)(ir);
+          ldouble x = std::log(r);
+          ldouble dr = (*_g)(ir) - (*_g)(ir-1);
+          ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir-1));
+          _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir]*std::exp(-(k+1)*dx)*dx;
+        }
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+          _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
+        }
+
+
+        // classical integration:
+        /*
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+
+          // integrate r1 from 0 to r
+          for (int ir1 = 0; ir1 < ir; ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+            _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r1/r, k)/r * r1 * r1 * dr1;
+          }
+
+          // integrate r1 from r to inf
+          for (int ir1 = ir; ir1 < _g->N()-1; ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+            _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r/r1, k)/r1 * r1 * r1 * dr1;
+          }
+        }
+        */
+
+      }
+    }
+  }
+}
+
 void NonCentralCorrection::correct() {
   _Ec.resize(_o.size(), 0);
   for (auto &e : _Ec) e = 0;
@@ -56,6 +133,8 @@ void NonCentralCorrection::correct() {
 
   MatrixXcld cdeg(_o.size(), _o.size());
   cdeg.setZero();
+
+  calculateY();
 
   int idx = 0;
   
@@ -159,33 +238,21 @@ void NonCentralCorrection::correct() {
       // int dO1 Y*_a(O1) Y_b(O1) Y_lm*(O1) = (-1)^(m+m_a) int dO1 Y_(l_a, -m_a)(O1) Y_(l_b, m_b)(O1) Y_(l,-m)(O1) = (-1)^(m_ka) sqrt((2l_a+1)*(2l_b+1))/sqrt(4pi(2l+1)) CG(l_a, l_b, 0, 0, l, 0) CG(l_a, l_b, -m_a, m_b, l, m)
       // int dO2 Y*_ko(O2) Y_ko(O2) Y_lm(O2) = (-1)^(m_ko) int dO2 Y_(l_ko, -m_ko)(O2) Y_(l_ko, m_ko)(O2) Y_(l,m)(O1) = (-1)^(m+m_ko) (2l_ko+1)/sqrt(4pi(2l+1)) CG(l_ko, l_ko, 0, 0, l, 0) CG(l_ko, l_ko, -m_ko, m_ko, l, -m)
       // Term = sum_ko int dr1 int dr2 sum_l=0^inf sum_m=-l^+l [ sqrt((2*l_a+1)*(2l_b+1)) * (2*l_ko+1) / (2*l+1)^2 (-1)^(m+m_a+m_ko) CG(l_a, l_b, 0, 0, l, 0) * CG(l_ko, l_ko, 0, 0, l, 0) * CG(l_a, l_b, -m_a, m_b, l, m) * CG(l_ko, l_ko, -m_ko, m_ko, l, -m) ] * [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_a(r1) psi_b(r1) psi_ko(r2)^2 ]
-      //
+      // Y^k(r2) = int r_<^k / r_>^(k+1) psi_a(r1) psi_b(r1) r1^2 dr1
+      // Term = sum_ko int dr2 sum_l=0^inf sum_m=-l^+l [ sqrt((2*l_a+1)*(2l_b+1)) * (2*l_ko+1) / (2*l+1)^2 (-1)^(m+m_a+m_ko) CG(l_a, l_b, 0, 0, l, 0) * CG(l_ko, l_ko, 0, 0, l, 0) * CG(l_a, l_b, -m_a, m_b, l, m) * CG(l_ko, l_ko, -m_ko, m_ko, l, -m) ] * [ r2^2 Y^l(r2) psi_ko(r2)^2 ]
       if (_o[k1]->spin()*_o[k2]->spin() > 0) {
         for (int ko = 0; ko < _o.size(); ++ko) {
           lm tlmo(_o[ko]->l(), _o[ko]->m());
-          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            ldouble r1 = (*_g)(ir1);
-            ldouble dr1 = 0;
-            if (ir1 < _g->N()-1) dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+          for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
+            ldouble r2 = (*_g)(ir2);
+            ldouble dr2 = 0;
+            if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
     
-            for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
-              ldouble r2 = (*_g)(ir2);
-              ldouble dr2 = 0;
-              if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
-    
-              ldouble rsmall = r1;
-              ldouble rlarge = r2;
-              if (r2 < r1) {
-                rsmall = r2;
-                rlarge = r1;
-              }
-    
-              for (int l = 0; l <= lmax; ++l) {
-                for (int m = -l; m <= l; ++m) {
-                  ldouble v = std::pow(-1, m+tlm_d1.m+tlmo.m)*(2.0*tlmo.l+1.0)*std::sqrt((2.0*tlm_d1.l+1.0)*(2.0*tlm_d2.l+1.0))*std::pow(2.0*l+1.0, -2)*CG(tlm_d1.l, tlm_d2.l, 0, 0, l, 0)*CG(tlmo.l, tlmo.l, 0, 0, l, 0)*CG(tlm_d1.l, tlm_d2.l, -tlm_d1.m, tlm_d2.m, l, m)*CG(tlmo.l, tlmo.l, -tlmo.m, tlmo.m, l, -m)*_o[k1]->getNorm(ir1, *_g)*_o[k2]->getNorm(ir1, *_g)*std::pow(_o[ko]->getNorm(ir2, *_g), 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
-                  dH(k1, k2) += v;
-                  _J(k1, k2) += v;
-                }
+            for (int l = 0; l <= lmax; ++l) {
+              for (int m = -l; m <= l; ++m) {
+                ldouble v = std::pow(-1, m+tlm_d1.m+tlmo.m)*(2.0*tlmo.l+1.0)*std::sqrt((2.0*tlm_d1.l+1.0)*(2.0*tlm_d2.l+1.0))*std::pow(2.0*l+1.0, -2)*CG(tlm_d1.l, tlm_d2.l, 0, 0, l, 0)*CG(tlmo.l, tlmo.l, 0, 0, l, 0)*CG(tlm_d1.l, tlm_d2.l, -tlm_d1.m, tlm_d2.m, l, m)*CG(tlmo.l, tlmo.l, -tlmo.m, tlmo.m, l, -m)*_Y[10000*l + 100*k1 + 1*k2][ir2]*std::pow(_o[ko]->getNorm(ir2, *_g), 2)*std::pow(r2, 2)*dr2;
+                dH(k1, k2) += v;
+                _J(k1, k2) += v;
               }
             }
           }
@@ -211,33 +278,23 @@ void NonCentralCorrection::correct() {
       //
       // Term = sum_ko int dr1 int dr2 sum_l=0^inf sum_m=-l^+l (-1)^(m+m_k2+m_ko) [ (2l_k2+1) * (2l_ko+1) / (2l+1)^2 * CG(l_k2, l_ko, 0, 0, l, 0) * CG(l_k2, l_ko, -m_k2, m_ko, l, -m) * CG(l_ko, l_k1, 0, 0, l, 0) * CG(l_ko, l_k1, -m_ko, m_k1, l, m) ] * [ r1^2 r2^2 r_<^l/r_>^(l+1) psi_k2(r1) psi_ko(r1) psi_ko(r2) psi_k1(r2) ]
       //
+      // Y^k(r2) = int r_<^k / r_>^(k+1) psi_a(r1) psi_b(r1) r1^2 dr1
+      // Term = sum_ko int dr2 sum_l=0^inf sum_m=-l^+l (-1)^(m+m_k2+m_ko) [ (2l_k2+1) * (2l_ko+1) / (2l+1)^2 * CG(l_k2, l_ko, 0, 0, l, 0) * CG(l_k2, l_ko, -m_k2, m_ko, l, -m) * CG(l_ko, l_k1, 0, 0, l, 0) * CG(l_ko, l_k1, -m_ko, m_k1, l, m) ] * [ r2^2 Y^l(k2,ko,r2) psi_ko(r2) psi_k1(r2) ]
+      //
       for (int ko = 0; ko < _o.size(); ++ko) {
         lm tlmo(_o[ko]->l(), _o[ko]->m());
         if (_o[ko]->spin()*_o[k1]->spin() < 0) continue; // spin component dot product
         if (_o[k2]->spin()*_o[ko]->spin() < 0) continue; // spin component dot product
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          ldouble r1 = (*_g)(ir1);
-          ldouble dr1 = 0;
-          if (ir1 < _g->N()-1) dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+        for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
+          ldouble r2 = (*_g)(ir2);
+          ldouble dr2 = 0;
+          if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
     
-          for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
-            ldouble r2 = (*_g)(ir2);
-            ldouble dr2 = 0;
-            if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
-    
-            ldouble rsmall = r1;
-            ldouble rlarge = r2;
-            if (r2 < r1) {
-              rsmall = r2;
-              rlarge = r1;
-            }
-    
-            for (int l = 0; l <= lmax; ++l) {
-              for (int m = -l; m <= l; ++m) {
-                ldouble v = std::pow(-1, m + tlm_d2.m + tlmo.m)*(2.0*tlm_d2.l+1.0)*(2.0*tlmo.l+1.0)*std::pow(2.0*l+1.0, -2)*CG(tlm_d2.l, tlmo.l, 0, 0, l, 0)*CG(tlmo.l, tlm_d1.l, 0, 0, l, 0)*CG(tlm_d2.l, tlmo.l, -tlm_d2.m, tlmo.m, l, -m)*CG(tlmo.l, tlm_d1.l, -tlmo.m, tlm_d1.m, l, m)*_o[k2]->getNorm(ir1, *_g)*_o[ko]->getNorm(ir1, *_g)*_o[ko]->getNorm(ir2, *_g)*_o[k1]->getNorm(ir2, *_g)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;;
-                dH(k1, k2) += -v;
-                _K(k1, k2) += v;
-              }
+          for (int l = 0; l <= lmax; ++l) {
+            for (int m = -l; m <= l; ++m) {
+              ldouble v = std::pow(-1, m + tlm_d2.m + tlmo.m)*(2.0*tlm_d2.l+1.0)*(2.0*tlmo.l+1.0)*std::pow(2.0*l+1.0, -2)*CG(tlm_d2.l, tlmo.l, 0, 0, l, 0)*CG(tlmo.l, tlm_d1.l, 0, 0, l, 0)*CG(tlm_d2.l, tlmo.l, -tlm_d2.m, tlmo.m, l, -m)*CG(tlmo.l, tlm_d1.l, -tlmo.m, tlm_d1.m, l, m)*_Y[10000*l + 100*k2 + 1*ko][ir2]*_o[ko]->getNorm(ir2, *_g)*_o[k1]->getNorm(ir2, *_g)*std::pow(r2, 2)*dr2;
+              dH(k1, k2) += -v;
+              _K(k1, k2) += v;
             }
           }
         }
@@ -356,116 +413,122 @@ void NonCentralCorrection::correct() {
   std::cout << "Recalculating J and K after correction" << std::endl;
 
   // now recalculate J and K with corrected orbitals
-  for (int k1 = 0; k1 < _o.size(); ++k1) {
+  for (int k1 = 0; k1 < _o.size(); ++k1) { // for each orbital k1
     lm tlm_d1(_o[k1]->l(), _o[k1]->m());
-    for (int k2 = 0; k2 < _o.size(); ++k2) {
+    for (int k2 = 0; k2 < _o.size(); ++k2) { // for each orbital k2
       lm tlm_d2(_o[k2]->l(), _o[k2]->m());
-      std::cout << "Calculating matrix elements for element " << k1 << ", " << k2 << std::endl;
 
       std::cout << "Calculating matrix element <" << k1 << "|Vd|" << k2 << ">" << std::endl;
-      if (_o[k1]->spin()*_o[k2]->spin() > 0) {
-        for (int ko = 0; ko < _o.size(); ++ko) {
-          lm tlmo(_o[ko]->l(), _o[ko]->m());
-          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            ldouble r1 = (*_g)(ir1);
-            ldouble dr1 = 0;
-            if (ir1 < _g->N()-1) dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+      if (_o[k1]->spin()*_o[k2]->spin() < 0) continue; // only if the same spin
+
+      for (int ko = 0; ko < _o.size(); ++ko) { // project on orbitals ko
+        lm tlmo(_o[ko]->l(), _o[ko]->m());
+        for (int ir2 = 0; ir2 < _g->N(); ++ir2) { // integrate on r1
+          ldouble r2 = (*_g)(ir2);
+          ldouble dr2 = 0;
+          if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
     
-            for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
-              ldouble r2 = (*_g)(ir2);
-              ldouble dr2 = 0;
-              if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
-    
-              ldouble rsmall = r1;
-              ldouble rlarge = r2;
-              if (r2 < r1) {
-                rsmall = r2;
-                rlarge = r1;
-              }
-    
-              for (int l = 0; l <= lmax; ++l) {
-                for (int m = -l; m <= l; ++m) {
+          // sum on l and m due to 1/r12 = sum_l sum_m 4 pi/(2l + 1) int Ylm r_<^l/r_>^(l+1) dr
+          // the integral is absorbed in the Y factor below
+          for (int l = 0; l <= lmax; ++l) {
+            for (int m = -l; m <= l; ++m) {
 
-                  ldouble v = 0;
-                  for (int k1c = 0; k1c < _o.size(); ++k1c) {
-                    lm tlm_d1c(_o[k1c]->l(), _o[k1c]->m());
-                    ldouble ok1 = _c(k1, k1c).real()*_o[k1c]->getNorm(ir1, *_g);
-                    if (ok1 == 0) continue;
+              // the new orbital k1 and k2 are expressed as a linear combination of the original k1 and k2
+              // so:
+              // o^new_k1 = sum_k1c c(k1, k1c) o_k1c
+              // o^new_k2 = sum_k2c c(k2, k2c) o_k2c
+              ldouble v = 0;
+              for (int k1c = 0; k1c < _o.size(); ++k1c) {
+                lm tlm_d1c(_o[k1c]->l(), _o[k1c]->m());
+                ldouble ck1 = _c(k1, k1c).real();
+                if (ck1 == 0) continue;
 
-                    for (int k2c = 0; k2c < _o.size(); ++k2c) {
-                      lm tlm_d2c(_o[k2c]->l(), _o[k2c]->m());
-                      ldouble ok2 = _c(k2, k2c).real()*_o[k2c]->getNorm(ir1, *_g);
-                      if (ok2 == 0) continue;
+                for (int k2c = 0; k2c < _o.size(); ++k2c) {
+                  lm tlm_d2c(_o[k2c]->l(), _o[k2c]->m());
+                  ldouble ck2 = _c(k2, k2c).real();
+                  if (ck2 == 0) continue;
 
-                      for (int koc = 0; koc < _o.size(); ++koc) {
-                        lm tlm_doc(_o[koc]->l(), _o[koc]->m());
-                        ldouble oko = _c(ko, koc).real()*_o[koc]->getNorm(ir2, *_g);
-                        if (oko == 0) continue;
+                  for (int koc = 0; koc < _o.size(); ++koc) {
+                    lm tlm_doc(_o[koc]->l(), _o[koc]->m());
+                    ldouble oko = _c(ko, koc).real()*_o[koc]->getNorm(ir2, *_g);
+                    if (oko == 0) continue;
 
-                        v += std::pow(-1, m+tlm_d1c.m+tlm_doc.m)*(2.0*tlm_doc.l+1.0)*std::sqrt((2.0*tlm_d1c.l+1.0)*(2.0*tlm_d2c.l+1.0))*std::pow(2.0*l+1.0, -2)*CG(tlm_d1c.l, tlm_d2c.l, 0, 0, l, 0)*CG(tlm_doc.l, tlm_doc.l, 0, 0, l, 0)*CG(tlm_d1c.l, tlm_d2c.l, -tlm_d1c.m, tlm_d2c.m, l, m)*CG(tlm_doc.l, tlm_doc.l, -tlm_doc.m, tlm_doc.m, l, -m)*ok1*ok2*std::pow(oko, 2)*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;
-                      }
-                    }
+                    v += std::pow(-1, m+tlm_d1c.m+tlm_doc.m)*(2.0*tlm_doc.l+1.0)*
+                         std::sqrt((2.0*tlm_d1c.l+1.0)*(2.0*tlm_d2c.l+1.0))*std::pow(2.0*l+1.0, -2)*
+                         CG(tlm_d1c.l, tlm_d2c.l, 0, 0, l, 0)*CG(tlm_doc.l, tlm_doc.l, 0, 0, l, 0)*
+                         CG(tlm_d1c.l, tlm_d2c.l, -tlm_d1c.m, tlm_d2c.m, l, m)*CG(tlm_doc.l, tlm_doc.l, -tlm_doc.m, tlm_doc.m, l, -m)*
+                         _Y[10000*l + 100*k1c + 1*k2c][ir2]*ck1*ck2*
+                         std::pow(oko, 2)*
+                         std::pow(r2, 2)*dr2;
                   }
-
-                  _Jcorr(k1, k2) += v;
                 }
               }
-            }
-          }
-        }
-      }
+
+              _Jcorr(k1, k2) += v;
+            } // for m in sum_m
+          } // for l in sum_l
+        } // integrate on r2
+      } // for each ko, on which to project k1 and k2
+    } // for each k2
+  } // for each k1
+      
+  for (int k1 = 0; k1 < _o.size(); ++k1) { // for each orbital k1
+    lm tlm_d1(_o[k1]->l(), _o[k1]->m());
+    for (int k2 = 0; k2 < _o.size(); ++k2) { // for each orbital k2
+      lm tlm_d2(_o[k2]->l(), _o[k2]->m());
 
       std::cout << "Calculating matrix element <" << k1 << "|Vex|" << k2 << ">" << std::endl;
-      for (int ko = 0; ko < _o.size(); ++ko) {
+      for (int ko = 0; ko < _o.size(); ++ko) { // project on orbitals ko
         lm tlmo(_o[ko]->l(), _o[ko]->m());
         if (_o[ko]->spin()*_o[k1]->spin() < 0) continue; // spin component dot product
         if (_o[k2]->spin()*_o[ko]->spin() < 0) continue; // spin component dot product
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          ldouble r1 = (*_g)(ir1);
-          ldouble dr1 = 0;
-          if (ir1 < _g->N()-1) dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+        // integrate on r2
+        for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
+          ldouble r2 = (*_g)(ir2);
+          ldouble dr2 = 0;
+          if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
     
-          for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
-            ldouble r2 = (*_g)(ir2);
-            ldouble dr2 = 0;
-            if (ir2 < _g->N()-1) dr2 = (*_g)(ir2+1) - (*_g)(ir2);
-    
-            ldouble rsmall = r1;
-            ldouble rlarge = r2;
-            if (r2 < r1) {
-              rsmall = r2;
-              rlarge = r1;
-            }
-    
-            for (int l = 0; l <= lmax; ++l) {
-              for (int m = -l; m <= l; ++m) {
+          // sum on l and m due to 1/r12 = sum_l sum_m 4 pi/(2l + 1) int Ylm r_<^l/r_>^(l+1) dr
+          // the integral is absorbed in the Y factor below
+          for (int l = 0; l <= lmax; ++l) {
+            for (int m = -l; m <= l; ++m) {
 
-                ldouble v = 0;
-                for (int k1c = 0; k1c < _o.size(); ++k1c) {
-                  lm tlm_d1c(_o[k1c]->l(), _o[k1c]->m());
-                  ldouble ok1 = _c(k1, k1c).real()*_o[k1c]->getNorm(ir2, *_g);
-                  if (ok1 == 0) continue;
+              // the new orbital k1 and k2 are expressed as a linear combination of the original k1 and k2
+              // so:
+              // o^new_k1 = sum_k1c c(k1, k1c) o_k1c
+              // o^new_k2 = sum_k2c c(k2, k2c) o_k2c
+              ldouble v = 0;
+              for (int k1c = 0; k1c < _o.size(); ++k1c) {
+                lm tlm_d1c(_o[k1c]->l(), _o[k1c]->m());
+                ldouble ok1 = _c(k1, k1c).real()*_o[k1c]->getNorm(ir2, *_g);
+                if (ok1 == 0) continue;
 
-                  for (int k2c = 0; k2c < _o.size(); ++k2c) {
-                    lm tlm_d2c(_o[k2c]->l(), _o[k2c]->m());
-                    ldouble ok2 = _c(k2, k2c).real()*_o[k2c]->getNorm(ir1, *_g);
-                    if (ok2 == 0) continue;
+                for (int k2c = 0; k2c < _o.size(); ++k2c) {
+                  lm tlm_d2c(_o[k2c]->l(), _o[k2c]->m());
+                  ldouble ck2 = _c(k2, k2c).real();
+                  if (ck2 == 0) continue;
 
-                    for (int koc = 0; koc < _o.size(); ++koc) {
-                      lm tlm_doc(_o[koc]->l(), _o[koc]->m());
-                      ldouble okor1 = _c(ko, koc).real()*_o[koc]->getNorm(ir1, *_g);
-                      ldouble okor2 = _c(ko, koc).real()*_o[koc]->getNorm(ir2, *_g);
-                      if (okor1 == 0 || okor2 == 0) continue;
+                  for (int koc = 0; koc < _o.size(); ++koc) {
+                    lm tlm_doc(_o[koc]->l(), _o[koc]->m());
+                    ldouble ckor1 = _c(ko, koc).real();
+                    ldouble okor2 = _c(ko, koc).real()*_o[koc]->getNorm(ir2, *_g);
+                    if (ckor1 == 0 || okor2 == 0) continue;
 
-                      v += std::pow(-1, m + tlm_d2c.m + tlm_doc.m)*(2.0*tlm_d2c.l+1.0)*(2.0*tlm_doc.l+1.0)*std::pow(2.0*l+1.0, -2)*CG(tlm_d2c.l, tlm_doc.l, 0, 0, l, 0)*CG(tlm_doc.l, tlm_d1c.l, 0, 0, l, 0)*CG(tlm_d2c.l, tlm_doc.l, -tlm_d2c.m, tlm_doc.m, l, -m)*CG(tlm_doc.l, tlm_d1c.l, -tlm_doc.m, tlm_d1c.m, l, m)*ok2*okor1*okor2*ok1*std::pow(r1*r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr1*dr2;;
-                    }
+                    v += std::pow(-1, m + tlm_d2c.m + tlm_doc.m)*
+                         (2.0*tlm_d2c.l+1.0)*(2.0*tlm_doc.l+1.0)*
+                         std::pow(2.0*l+1.0, -2)*
+                         CG(tlm_d2c.l, tlm_doc.l, 0, 0, l, 0)*CG(tlm_doc.l, tlm_d1c.l, 0, 0, l, 0)*
+                         CG(tlm_d2c.l, tlm_doc.l, -tlm_d2c.m, tlm_doc.m, l, -m)*CG(tlm_doc.l, tlm_d1c.l, -tlm_doc.m, tlm_d1c.m, l, m)*
+                         ck2*ckor1*_Y[10000*l + 100*k2c + 1*koc][ir2]*
+                         okor2*ok1*std::pow(r2, 2)*dr2;;
                   }
                 }
-                _Kcorr(k1, k2) += v;
               }
+              _Kcorr(k1, k2) += v;
             }
           }
         }
+        
       }
 
 

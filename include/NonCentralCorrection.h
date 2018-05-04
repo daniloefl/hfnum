@@ -39,6 +39,14 @@ class NonCentralCorrection : public PerturbativeCorrection {
     ldouble getE0Uncorrected();
     
   protected:
+
+    /// \brief Calculate aux. variable Y.
+    void calculateY();
+
+    /// Auxiliary variables Y and Z
+    std::map<int, Vradial> _Y;
+    std::map<int, Vradial> _Zt;
+
     std::map<int, std::vector<ldouble> > _vd;
     std::map<std::pair<int,int> , std::vector<ldouble> > _vex;
 
