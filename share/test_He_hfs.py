@@ -34,5 +34,5 @@ print "Last r:", r[-1]
 print "First r:", r[0:5]
 h.gammaSCF(0.4)
 h.solve(NiterSCF, Niter, F0stop)
-h.save('output/results_He.txt')
+h.save('output/results_He_hfs.txt')
 
