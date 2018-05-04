@@ -259,6 +259,10 @@ void DFT::solve(int NiterSCF, int Niter, ldouble F0stop) {
 
   int nStepSCF = 0;
   while (nStepSCF < NiterSCF) {
+    if (nStepSCF != 0) {
+      calculateN(_gamma_scf);
+      calculateV(_gamma_scf);
+    }
     for (int k = 0; k < _o.size(); ++k) {
       icl[k] = -1;
 
@@ -294,8 +298,6 @@ void DFT::solve(int NiterSCF, int Niter, ldouble F0stop) {
     std::cout << "SCF step " << nStepSCF << std::endl;
     solveForFixedPotentials(Niter, F0stop);
     nStepSCF++;
-    calculateN(_gamma_scf);
-    calculateV(_gamma_scf);
   }
 }
 
