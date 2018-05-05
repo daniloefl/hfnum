@@ -474,7 +474,7 @@ ldouble SCF::stepStandard(ldouble gamma, bool checkE) {
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = 1e-3;
+    dE[k] = 1e-4;
     E[k] = _o[k]->E();
     l[k] = _o[k]->l();
   }
@@ -519,8 +519,11 @@ ldouble SCF::stepStandard(ldouble gamma, bool checkE) {
     }
   }
 
+
+  //JacobiSVD<MatrixXld> dec(Jn, ComputeThinU | ComputeThinV);
   VectorXld dD = Jn.inverse()*Fn;
   for (int k = 0; k < _o.size(); ++k) {
+    _dE[k] = 0;
     _dE[k] = dD(k); // for root finding
     _dE[k] *= -gamma;
     //if (std::fabs(_dE[k]) > 0.1) _dE[k] = 0.1*_dE[k]/std::fabs(_dE[k]);

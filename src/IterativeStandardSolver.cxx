@@ -51,7 +51,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   }
 
   // solve in direct order
-  for (int nIter = 0; nIter < 2; ++nIter) {
+  for (int nIter = 0; nIter < 3; ++nIter) {
 
   for (int idx = 0; idx < M; ++idx) {
     solveOutward(E, matched, idx, outward[idx]);
@@ -177,12 +177,10 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
 void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::map<int, Vradial> &matched, int idx, Vradial &solution) {
   int N = _g.N();
   solution.resize(N);
+  //solution[N-1] = std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-1));
+  //solution[N-2] = std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
   solution[N-1] = std::pow(_g(N-1), _Z/std::sqrt(2*std::fabs(E[idx]))-0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-1));
   solution[N-2] = std::pow(_g(N-2), _Z/std::sqrt(2*std::fabs(E[idx]))-0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
-  //if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
-  //  solution[N-1] *= -1;
-  //  solution[N-2] *= -1;
-  //}
   for (int k = N-2; k >= 1; --k) {
     solution[k-1] = ((12 - f[idx][k]*10)*solution[k] - f[idx][k+1]*solution[k+1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k-1];
   }
@@ -207,6 +205,31 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
 
 void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial &outward, ldouble c) {
   o.resize(_g.N());
+  ldouble ratio = outward[icl[k]]/inward[icl[k]];
+  for (int i = 0; i < _g.N(); ++i) {
+    if (i < icl[k]) {
+      o[i] = outward[i];
+    } else {
+      o[i] = ratio*inward[i];
+    }
+  }
+
+  ldouble norm = 0;
+  for (int i = 0; i < _g.N(); ++i) {
+    ldouble r = _g(i);
+    ldouble dr = 0;
+    if (i < _g.N()-1) dr = std::fabs(_g(i+1) - _g(i));
+    ldouble ov = o[i];
+    if (_g.isLog()) ov *= std::pow(r, -0.5);
+    //o_untransformed[i] = ov;
+    norm += std::pow(ov*r, 2)*dr;
+  }
+  norm = 1.0/std::sqrt(norm);
+  for (int i = 0; i < _g.N(); ++i) {
+    o[i] *= norm;
+  }
+
+  /*
   Vradial newO = o;
 
   ldouble ratio = outward[icl[k]]/inward[icl[k]];
@@ -251,4 +274,5 @@ void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial 
   for (int i = 0; i < _g.N(); ++i) {
     o[i] *= norm;
   }
+  */
 }
