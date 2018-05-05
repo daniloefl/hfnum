@@ -274,6 +274,7 @@ void HF::calculateVex(ldouble gamma) {
     }
     if (c == 2*(2*_o[k1]->l() + 1)) filled.push_back(true);
     else filled.push_back(false);
+    std::cout << "calculateVex: Assuming orbital " << k1 << ", filled: " << filled[k1] << std::endl;
   }
 
   for (int k = 0; k < _o.size(); ++k) {
@@ -295,31 +296,36 @@ void HF::calculateVex(ldouble gamma) {
       int l2 = _o[k2]->l();
       int m2 = _o[k2]->m();
 
-      // from C. Fischer, "The Hartree-Fock method for atoms"
-      // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
-      // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
       std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << std::endl;
       for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
         ldouble B = 0.0;
-        if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
-        if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/3.0;
+        if (filled[k2]) {
+          // exact for a filled shell
+          B = 1.0/((ldouble) (2*k + 1))*std::pow(CG(l1, l2, 0, 0, k, 0), 2);
+        } else {
+          // from C. Fischer, "The Hartree-Fock method for atoms"
+          // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
+          // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
+          if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
+          if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/3.0;
 
-        if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/3.0;
-        if (k == 1 && l1 == 1 && l2 == 0) B = 1.0/3.0;
+          if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/3.0;
+          if (k == 1 && l1 == 1 && l2 == 0) B = 1.0/3.0;
 
-        if (k == 2 && l1 == 1 && l2 == 1) B = 2.0/15.0;
+          if (k == 2 && l1 == 1 && l2 == 1) B = 2.0/15.0;
 
-        //if (k == 2 && l1 == 0 && l2 == 2) B = 1.0/10.0*2;
-        //if (k == 2 && l1 == 2 && l2 == 0) B = 1.0/10.0*2;
+          //if (k == 2 && l1 == 0 && l2 == 2) B = 1.0/10.0*2;
+          //if (k == 2 && l1 == 2 && l2 == 0) B = 1.0/10.0*2;
 
-        //if (k == 1 && l1 == 1 && l2 == 2) B = 1.0/15.0*2;
-        //if (k == 1 && l1 == 2 && l2 == 1) B = 1.0/15.0*2;
-        //if (k == 3 && l1 == 1 && l2 == 2) B = 3.0/70.0*2;
-        //if (k == 3 && l1 == 2 && l2 == 1) B = 3.0/70.0*2;
+          //if (k == 1 && l1 == 1 && l2 == 2) B = 1.0/15.0*2;
+          //if (k == 1 && l1 == 2 && l2 == 1) B = 1.0/15.0*2;
+          //if (k == 3 && l1 == 1 && l2 == 2) B = 3.0/70.0*2;
+          //if (k == 3 && l1 == 2 && l2 == 1) B = 3.0/70.0*2;
 
-        //if (k == 0 && l1 == 2 && l2 == 2) B = 1.0/10.0*2;
-        //if (k == 2 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
-        //if (k == 4 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
+          //if (k == 0 && l1 == 2 && l2 == 2) B = 1.0/10.0*2;
+          //if (k == 2 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
+          //if (k == 4 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
+        }
 
         if (B == 0) continue;
         // This is the extra k parts
@@ -435,7 +441,7 @@ void HF::calculateY() {
           ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir-1));
           _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir]*std::exp(-(k+1)*dx)*dx;
         }
-        for (int ir = 0; ir < _g->N()-1; ++ir) {
+        for (int ir = 0; ir < _g->N(); ++ir) {
           ldouble r = (*_g)(ir);
           _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
         }
@@ -482,8 +488,9 @@ void HF::calculateVd(ldouble gamma) {
         c++;
       }
     }
-    if (c == (2*_o[k1]->l() + 1)) filled.push_back(true);
+    if (c == 2*(2*_o[k1]->l() + 1)) filled.push_back(true);
     else filled.push_back(false);
+    std::cout << "calculateVd: Assuming orbital " << k1 << ", filled: " << filled[k1] << std::endl;
   }
 
   // calculate it first with filled orbitals, dividing by the number of orbitals
@@ -504,6 +511,8 @@ void HF::calculateVd(ldouble gamma) {
       for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
         _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
       }
+
+      if (filled[k2]) continue; // the following is an approximation in case of not-filled shells
 
       // from C. Fischer, "The Hartree-Fock method for atoms"
       // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
