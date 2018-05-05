@@ -103,6 +103,10 @@ void IterativeGordonSolver::solveInward(std::vector<ldouble> &E, std::vector<int
     int m = _om.m(idx);
     solution[N-1](idx) = 0;
     solution[N-2](idx) = 1;
+    if ((_o[k]->n() - _o[k]->l() - 1) % 2 == 1) {
+      solution[N-1](idx) *= -1;
+      solution[N-2](idx) *= -1;
+    }
     if (idx == k_init) solution[N-2](idx) *= 2;
   }
   for (int idx = 0; idx < M; ++idx) {
@@ -112,7 +116,7 @@ void IterativeGordonSolver::solveInward(std::vector<ldouble> &E, std::vector<int
     for (int i = N-2; i >= icl[k]-1; --i) {
       //JacobiSVD<MatrixXld> dec(Fm[i-1], ComputeThinU | ComputeThinV);
       //solution[i-1] = dec.solve((MatrixXld::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1]));
-      solution[i-1] = Km[i-1]*((MatrixXld::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1])) - Cm[i-1];
+      solution[i-1] = Km[i-1]*((MatrixXld::Identity(M,M)*12 - (Fm[i])*10)*solution[i] - (Fm[i+1]*solution[i+1]));
     }
   }
 }
@@ -129,10 +133,6 @@ void IterativeGordonSolver::solveOutward(std::vector<ldouble> &E, std::vector<in
     int m = _om.m(idx);
     solution[0](idx) = 0;
     solution[1](idx) = 1;
-    if ((_o[k]->n() - _o[k]->l() - 1) % 2 == 1) {
-      solution[0](idx) *= -1;
-      solution[1](idx) *= -1;
-    }
     if (idx == k_init) solution[1](idx) *= 2;
   }
   for (int idx = 0; idx < M; ++idx) {
@@ -142,7 +142,7 @@ void IterativeGordonSolver::solveOutward(std::vector<ldouble> &E, std::vector<in
     for (int i = 1; i <= icl[k]+1; ++i) {
       //JacobiSVD<MatrixXld> dec(Fm[i+1], ComputeThinU | ComputeThinV);
       //solution[i+1] = dec.solve((MatrixXld::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
-      solution[i+1] = Km[i+1]*((MatrixXld::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1])) - Cm[i+1];
+      solution[i+1] = Km[i+1]*((MatrixXld::Identity(M, M)*12 - (Fm[i])*10)*solution[i] - (Fm[i-1]*solution[i-1]));
     }
   }
 }
