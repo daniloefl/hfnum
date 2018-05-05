@@ -16,12 +16,12 @@ dx = 0.5e-1
 N = 421
 rmin = 1e-8
 dx = 0.25e-1
-N = 872
+N = 852
 rmin = 1e-8
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
-h.method(3)
+h.method(2)
 
 orb0 = hfnum.Orbital( 1, 1, 0, 0)
 orb1 = hfnum.Orbital(-1, 1, 0, 0)

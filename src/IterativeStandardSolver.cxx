@@ -20,7 +20,7 @@ void IterativeStandardSolver::setZ(ldouble Z) {
 }
 
 
-VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched, ldouble c) {
+VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched) {
   int M = _om.N();
 
   for (int idx = 0; idx < M; ++idx) {
@@ -51,12 +51,10 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   }
 
   // solve in direct order
-  for (int nIter = 0; nIter < 3; ++nIter) {
-
   for (int idx = 0; idx < M; ++idx) {
     solveOutward(E, matched, idx, outward[idx]);
     solveInward(E, matched, idx, inward[idx]);
-    match(idx, matched[idx], inward[idx], outward[idx], c);
+    match(idx, matched[idx], inward[idx], outward[idx]);
   
     // recalculate non-homogeneus term
     for (int idx1 = 0; idx1 < M; ++idx1) {
@@ -77,7 +75,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     for (int idxI = idx-1; idxI >= 0; --idxI) {
       solveOutward(E, matched, idxI, outward[idxI]);
       solveInward(E, matched, idxI, inward[idxI]);
-      match(idxI, matched[idxI], inward[idxI], outward[idxI], c);
+      match(idxI, matched[idxI], inward[idxI], outward[idxI]);
 
       // recalculate non-homogeneus term
       for (int idx1 = 0; idx1 < M; ++idx1) {
@@ -96,8 +94,6 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
 
     } // solving in inverse order
   } // solving it in the direct order
-
-  }
 
   VectorXld F(M);
   // calculate first derivative in icl[idx]
@@ -203,7 +199,7 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
   }
 }
 
-void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial &outward, ldouble c) {
+void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial &outward) {
   o.resize(_g.N());
   ldouble ratio = outward[icl[k]]/inward[icl[k]];
   for (int i = 0; i < _g.N(); ++i) {
@@ -229,50 +225,4 @@ void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial 
     o[i] *= norm;
   }
 
-  /*
-  Vradial newO = o;
-
-  ldouble ratio = outward[icl[k]]/inward[icl[k]];
-  for (int i = 0; i < _g.N(); ++i) {
-    if (i < icl[k]) {
-      newO[i] = outward[i];
-    } else {
-      newO[i] = ratio*inward[i];
-    }
-  }
-
-  // normalise it
-  ldouble norm = 0;
-  for (int i = 0; i < _g.N(); ++i) {
-    ldouble r = _g(i);
-    ldouble dr = 0;
-    if (i < _g.N()-1) dr = std::fabs(_g(i+1) - _g(i));
-    ldouble ov = newO[i];
-    if (_g.isLog()) ov *= std::pow(r, -0.5);
-    //o_untransformed[i] = ov;
-    norm += std::pow(ov*r, 2)*dr;
-  }
-  norm = 1.0/std::sqrt(norm);
-  for (int i = 0; i < _g.N(); ++i) {
-    newO[i] *= norm;
-  }
-  for (int i = 0; i < _g.N(); ++i) {
-    o[i] = o[i]*(1-c) + c*newO[i];
-  }
-
-  norm = 0;
-  for (int i = 0; i < _g.N(); ++i) {
-    ldouble r = _g(i);
-    ldouble dr = 0;
-    if (i < _g.N()-1) dr = std::fabs(_g(i+1) - _g(i));
-    ldouble ov = o[i];
-    if (_g.isLog()) ov *= std::pow(r, -0.5);
-    //o_untransformed[i] = ov;
-    norm += std::pow(ov*r, 2)*dr;
-  }
-  norm = 1.0/std::sqrt(norm);
-  for (int i = 0; i < _g.N(); ++i) {
-    o[i] *= norm;
-  }
-  */
 }

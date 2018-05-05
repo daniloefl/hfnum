@@ -251,6 +251,10 @@ class SCF {
 
     /// Set to true of the method uses vsum_up and vsum_dw for the standard method
     bool _isSpinDependent;
+
+    /// Past energy values when solving one SCF iteration
+    std::vector<VectorXld> _historyE;
+    std::vector<VectorXld> _historyF;
 };
 
 #endif

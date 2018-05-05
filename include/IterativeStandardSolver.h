@@ -38,9 +38,8 @@ class IterativeStandardSolver {
     /// \param vd Direct potential for each orbital.
     /// \param vex Exchange potential for each orbital.
     /// \param matched To be returned by reference.
-    /// \param c Convergence acceleration parameter.
     /// \return Minimisation function based on matching at classical crossing for the trial energy.
-    VectorXld solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched, ldouble c = 1.0);
+    VectorXld solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched);
 
     /// \brief Solve equation for a specific energy.
     /// \param E Trial energy.
@@ -68,8 +67,7 @@ class IterativeStandardSolver {
     /// \param o Matched orbitals.
     /// \param inward Inward solution.
     /// \param outward Outward solution.
-    /// \param c Convergence acceleration parameter
-    void match(int k, Vradial &o, Vradial &inward, Vradial &outward, ldouble c = 1.0);
+    void match(int k, Vradial &o, Vradial &inward, Vradial &outward);
 
     /// \brief Set Z value.
     /// \param Z New atomic number.
