@@ -474,7 +474,7 @@ ldouble SCF::stepStandard(ldouble gamma, bool checkE) {
 
   std::vector<ldouble> dE(_o.size(), 0);
   for (int k = 0; k < _o.size(); ++k) {
-    dE[k] = -1e-3;
+    dE[k] = 1e-3;
     E[k] = _o[k]->E();
     l[k] = _o[k]->l();
   }

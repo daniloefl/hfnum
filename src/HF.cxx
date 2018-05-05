@@ -161,23 +161,29 @@ ldouble HF::getE0() {
     int k = vditm.first;
     int l = _o[k]->l();
     int m = _o[k]->m();
-    for (int ir = 0; ir < _g->N(); ++ir) {
+    for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
+      ldouble rp1 = (*_g)(ir+1);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      J += _vd[k][ir]*std::pow(_o[k]->getNorm(ir, *_g), 2)*std::pow(r, 2)*dr;
+      ldouble fnp1 = _vd[k][ir+1]*std::pow(_o[k]->getNorm(ir+1, *_g), 2)*std::pow(rp1, 2);
+      ldouble fn = _vd[k][ir]*std::pow(_o[k]->getNorm(ir, *_g), 2)*std::pow(r, 2);
+      J += 0.5*(fn+fnp1)*dr;
     }
   }
   for (auto &vexitm : _vex) {
     const int k1 = vexitm.first.first;
     const int k2 = vexitm.first.second;
-    for (int ir = 0; ir < _g->N(); ++ir) {
+    for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
+      ldouble rp1 = (*_g)(ir+1);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      K += _vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2)*dr;
+      ldouble fnp1 = _vex[std::pair<int,int>(k1, k2)][ir+1]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
+      ldouble fn = _vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
+      K += 0.5*(fn+fnp1)*dr;
     }
   }
   E0 += -0.5*(J - K);
