@@ -367,7 +367,7 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
     } else {
       _dE[k] = 0;
     }
-    if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
+    //if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
     std::cout << "Orbital " << k << ", dE(Jacobian) = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
     if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
       std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;

@@ -425,77 +425,31 @@ void HF::calculateY() {
         //                 = exp(kx) *Pk1*r Pk2 *r *r
         // d(exp(- (k+1)x) (rY))/dx = -(k+1) exp(-(k+1)x) (rY) + exp(-(k+1)x) d(rY)/dx
         //                       = - (2k +1) Z exp(-(k+1)x)
-        // Solution for:
-        // dy/dx = f(y, x)
-        // y(x) = y(x-1) + dx/12 (5 f(n) + 8 f(n-1) - f(n-2))
-        // With y(0) = f(0) = f(-1) = 0
         _Zt[10000*k + 100*k1 + 1*k2][0] = 0;
         for (int ir = 0; ir < _g->N()-1; ++ir) {
           ldouble r = (*_g)(ir);
-          ldouble x = std::log(r);
-          ldouble dr = (*_g)(ir+1) - (*_g)(ir);
-          ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
-          _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g)*std::exp(dx*k)*dx;
-        }
-        /*
-        // solving it using a better integration method
-        // solve for exp(kx)*Z first
-        _Zt[10000*k + 100*k1 + 1*k2][0] = 0;
-        for (int ir = 0; ir < _g->N()-1; ++ir) {
-          ldouble r = (*_g)(ir);
-          ldouble rm1 = (*_g)(ir-1);
           ldouble rp1 = (*_g)(ir+1);
           ldouble x = std::log(r);
-          ldouble xm1 = std::log(rm1);
-          ldouble xp1 = std::log(rp1);
           ldouble dr = (*_g)(ir+1) - (*_g)(ir);
           ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
-          ldouble fn = std::exp(k*x)*std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g);
-          ldouble fnp1 = std::exp(k*xp1)*std::pow(rp1, 3)*_o[k1]->getNorm(ir+1, *_g) * _o[k2]->getNorm(ir+1, *_g);
-          ldouble fnm1 = std::exp(k*xm1)*std::pow(rm1, 3)*_o[k1]->getNorm(ir-1, *_g) * _o[k2]->getNorm(ir-1, *_g);
-          _Zt[10000*k + 100*k1 + 1*k2][ir+1] = _Zt[10000*k + 100*k1 + 1*k2][ir] + fn*dx;
+          ldouble fn = std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g);
+          ldouble fnp1 = std::pow(rp1, 3)*_o[k1]->getNorm(ir+1, *_g) * _o[k2]->getNorm(ir+1, *_g);
+          _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fnp1+fn)*std::exp(dx*k)*dx;
         }
-        for (int ir = 0; ir < _g->N(); ++ir) {
-          ldouble r = (*_g)(ir);
-          ldouble x = std::log(r);
-          _Zt[10000*k + 100*k1 + 1*k2][ir] = std::exp(-x*k)*_Zt[10000*k + 100*k1 + 1*k2][ir];
-        }
-        */
         _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
         for (int ir = _g->N()-1; ir >= 1; --ir) {
           ldouble r = (*_g)(ir);
           ldouble x = std::log(r);
           ldouble dr = (*_g)(ir) - (*_g)(ir-1);
           ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir-1));
-          _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir]*std::exp(-(k+1)*dx)*dx;
+          ldouble fn = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir];
+          ldouble fnm1 = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir-1];
+          _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fn+fnm1)*std::exp(-(k+1)*dx)*dx;
         }
         for (int ir = 0; ir < _g->N(); ++ir) {
           ldouble r = (*_g)(ir);
           _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
         }
-        /*
-        _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
-        for (int ir = _g->N()-1; ir >= 1; --ir) {
-          ldouble r = (*_g)(ir);
-          ldouble rm1 = (*_g)(ir-1);
-          ldouble rp1 = (*_g)(ir+1);
-          ldouble x = std::log(r);
-          ldouble xm1 = std::log(rm1);
-          ldouble xp1 = std::log(rp1);
-          ldouble dr = (*_g)(ir) - (*_g)(ir-1);
-          ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir-1));
-          ldouble fnp1 = -(2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir+1]*std::exp(-(k+1)*xp1);
-          ldouble fn = -(2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir]*std::exp(-(k+1)*x);
-          ldouble fnm1 = -(2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir-1]*std::exp(-(k+1)*xm1);
-          _Y[10000*k + 100*k1 + 1*k2][ir-1] = _Y[10000*k + 100*k1 + 1*k2][ir] - fn*dx;
-        }
-        for (int ir = 0; ir < _g->N(); ++ir) {
-          ldouble r = (*_g)(ir);
-          ldouble x = std::log(r);
-          _Y[10000*k + 100*k1 + 1*k2][ir] = std::exp(x*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir]/r;
-        }
-        */
-
 
         // classical integration:
         /*
