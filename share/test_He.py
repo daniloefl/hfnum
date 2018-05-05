@@ -25,7 +25,7 @@ h.method(3)
 h.addOrbital(orb0)
 h.addOrbital(orb1)
 
-NiterSCF = 40
+NiterSCF = 20
 Niter = 100
 F0stop = 1e-8
 r = h.getR()
