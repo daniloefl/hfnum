@@ -95,8 +95,8 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     } // solving in inverse order
   } // solving it in the direct order
 
-  // solve in inverse order from current index back to zero
-  for (int idxI = M-1; idxI >= 0; --idxI) {
+  // solve in direct order again
+  for (int idxI = 0; idxI < M; ++idxI) {
     solveOutward(E, matched, idxI, outward[idxI]);
     solveInward(E, matched, idxI, inward[idxI]);
     match(idxI, matched[idxI], inward[idxI], outward[idxI], c);
@@ -197,10 +197,10 @@ void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::map<int,
   solution.resize(N);
   solution[N-1] = std::pow(_g(N-1), _Z/std::sqrt(2*std::fabs(E[idx]))-0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-1));
   solution[N-2] = std::pow(_g(N-2), _Z/std::sqrt(2*std::fabs(E[idx]))-0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
-  if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
-    solution[N-1] *= -1;
-    solution[N-2] *= -1;
-  }
+  //if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
+  //  solution[N-1] *= -1;
+  //  solution[N-2] *= -1;
+  //}
   for (int k = N-2; k >= 1; --k) {
     solution[k-1] = ((12 - f[idx][k]*10)*solution[k] - f[idx][k+1]*solution[k+1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k-1];
   }
@@ -213,10 +213,10 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
   solution[1] = std::exp(-_g(1)/_o[idx]->n())*std::pow(_g(1), _o[idx]->l() + 0.5);
   //solution[0] = std::pow(_g(0), _o[idx]->l() + 0.5);
   //solution[1] = std::pow(_g(1), _o[idx]->l() + 0.5);
-  //if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
-  //  solution[0] *= -1;
-  //  solution[1] *= -1;
-  //}
+  if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
+    solution[0] *= -1;
+    solution[1] *= -1;
+  }
 
   for (int k = 1; k < N-2; ++k) {
     solution[k+1] = ((12.0 - f[idx][k]*10.0)*solution[k] - f[idx][k-1]*solution[k-1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k+1];
