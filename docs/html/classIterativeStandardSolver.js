@@ -2,9 +2,9 @@ var classIterativeStandardSolver =
 [
     [ "IterativeStandardSolver", "classIterativeStandardSolver.html#a3e334a50c7d97441a4e1fa9161f90154", null ],
     [ "~IterativeStandardSolver", "classIterativeStandardSolver.html#a3bd30ddf756f589354b5006d3a5b6c01", null ],
-    [ "match", "classIterativeStandardSolver.html#af2670a9995fcb96806ea2c7f774e907e", null ],
+    [ "match", "classIterativeStandardSolver.html#a9e75222c138786d4cbcdb83c984bae2d", null ],
     [ "setZ", "classIterativeStandardSolver.html#a9645a1f9983dcd178d690d9e1f28b0a4", null ],
-    [ "solve", "classIterativeStandardSolver.html#ae34135c8542e2ba3a30e6a7c7e2764a2", null ],
+    [ "solve", "classIterativeStandardSolver.html#af00c766e64b9cf1ff7b21df8fb532d09", null ],
     [ "solve", "classIterativeStandardSolver.html#ae36fd071c0f08b89b0e3a339fd54c17d", null ],
     [ "solveInward", "classIterativeStandardSolver.html#afd5e070973d6c6fc8f222b5fa6675325", null ],
     [ "solveOutward", "classIterativeStandardSolver.html#acb51f2102fe983eae8045f0ab579410f", null ],

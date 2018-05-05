@@ -29,7 +29,7 @@ var NAVTREEINDEX =
 [
 "Basis_8cxx.html",
 "classMatrixSCF.html#a1ce78390b94592f4db2ed2c3f5f34599",
-"feature__tests_8cxx.html"
+"classlm.html#adf1e663cee9dbf449147345adc61aae6"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

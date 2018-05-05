@@ -39,6 +39,8 @@ var classSCF =
     [ "_Emin", "classSCF.html#af8efcad62b6da7c70594d5bb35e583d0", null ],
     [ "_g", "classSCF.html#ab6d41e6f0a455af8f881485c9d612846", null ],
     [ "_gamma_scf", "classSCF.html#ab1db84acc2dc811d79cbe09b91defeea", null ],
+    [ "_historyE", "classSCF.html#a5201b85306a92e85ede4472eed79deaa", null ],
+    [ "_historyF", "classSCF.html#a41005508a3572ae4ee90b682dc56a5a1", null ],
     [ "_igs", "classSCF.html#a0cd199a66005b34679257de0f4d2ccb7", null ],
     [ "_irs", "classSCF.html#ac335e20d7d7ba1c62b7c1b3e5c8fa832", null ],
     [ "_iss", "classSCF.html#a4ec4bd82dc0cce70a6d62b34224c8f09", null ],

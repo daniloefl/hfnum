@@ -1,12 +1,14 @@
 var NAVTREEINDEX2 =
 {
+"classlm.html#adf1e663cee9dbf449147345adc61aae6":[0,0,11,1],
+"classlm.html#afea61e84b473af68de13bb69611124c6":[0,0,11,5],
 "feature__tests_8cxx.html":[1,0,4],
 "feature__tests_8cxx.html#a1582568e32f689337602a16bf8a5bff0":[1,0,4,1],
 "feature__tests_8cxx.html#a3c04138a5bfe5d72780bb7e82a18e627":[1,0,4,0],
 "feature__tests_8cxx_source.html":[1,0,4],
 "files.html":[1,0],
-"functions.html":[0,3,0,0],
 "functions.html":[0,3,0],
+"functions.html":[0,3,0,0],
 "functions_0x7e.html":[0,3,0,22],
 "functions_a.html":[0,3,0,1],
 "functions_b.html":[0,3,0,2],
