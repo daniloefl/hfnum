@@ -614,7 +614,9 @@ void NonCentralCorrection::correct() {
   std::cout << "Corrected E0:" << std::endl;
   ldouble E0 = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    E0 += _Ec[k] + _o[k]->E();
+    ldouble A = 1;
+    if (_o[k]->spin() == 0) A *= _o[k]->g();
+    E0 += A*(_Ec[k] + _o[k]->E());
   }
   for (int i = 0; i < _o.size(); ++i) {
     for (int j = 0; j < _o.size(); ++j) {
