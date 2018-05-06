@@ -15,18 +15,15 @@ Z = 1
 dx = 0.5e-1
 N = 421
 rmin = 1e-8
-dx = 0.1e-1
-N = 1300
-rmin = 1e-4
-dx = 1.0/16.0/Z
-N = 120*Z
-rmin = np.exp(-4)/Z
+#dx = 0.1e-1
+#N = 1300
+#rmin = 1e-4
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
 h.method(3)
 
-orb = hfnum.Orbital(1, 1, 0, 0)
+orb = hfnum.Orbital(1, 0, 1)
 
 h.addOrbital(orb)
 
@@ -39,7 +36,7 @@ h.solve(NiterSCF, Niter, F0stop)
 
 h.save('output/results_H.txt')
 
-o = [np.asarray(orb.getCentral())]
+o = [np.asarray(h.getCentral(0))]
 v = h.getNucleusPotential()
 H1s = 2*np.exp(-r)
 

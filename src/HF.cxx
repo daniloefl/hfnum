@@ -79,6 +79,7 @@ void HF::save(const std::string fout) {
     f << " " << std::setw(5) << "l" << " " << std::setw(5) << _o[i]->l();
     f << " " << std::setw(5) << "m" << " " << std::setw(5) << _o[i]->m();
     f << " " << std::setw(5) << "s" << " " << std::setw(5) << _o[i]->spin();
+    f << " " << std::setw(5) << "g" << " " << std::setw(5) << _o[i]->g();
     f << " " << std::setw(5) << "E" << " " << std::setw(64) << std::setprecision(60) << _o[i]->E();
     f << " " << std::setw(5) << "value";
     for (int ir = 0; ir < _g->N(); ++ir) {
@@ -153,7 +154,9 @@ void HF::load(const std::string fin) {
 ldouble HF::getE0() {
   ldouble E0 = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    E0 += _o[k]->E();
+    ldouble A = 1;
+    if (_o[k]->spin() == 0) A = _o[k]->g();
+    E0 += A*_o[k]->E();
   }
   ldouble J = 0;
   ldouble K = 0;
@@ -161,28 +164,32 @@ ldouble HF::getE0() {
     int k = vditm.first;
     int l = _o[k]->l();
     int m = _o[k]->m();
+    ldouble A = 1;
+    if (_o[k]->spin() == 0) A = _o[k]->g();
     for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
       ldouble rp1 = (*_g)(ir+1);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      ldouble fnp1 = _vd[k][ir+1]*std::pow(_o[k]->getNorm(ir+1, *_g), 2)*std::pow(rp1, 2);
-      ldouble fn = _vd[k][ir]*std::pow(_o[k]->getNorm(ir, *_g), 2)*std::pow(r, 2);
+      ldouble fnp1 = A*_vd[k][ir+1]*std::pow(_o[k]->getNorm(ir+1, *_g), 2)*std::pow(rp1, 2);
+      ldouble fn = A*_vd[k][ir]*std::pow(_o[k]->getNorm(ir, *_g), 2)*std::pow(r, 2);
       J += 0.5*(fn+fnp1)*dr;
     }
   }
   for (auto &vexitm : _vex) {
     const int k1 = vexitm.first.first;
     const int k2 = vexitm.first.second;
+    ldouble A = 1;
+    if (_o[k2]->spin() == 0) A *= _o[k2]->g();
     for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
       ldouble rp1 = (*_g)(ir+1);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      ldouble fnp1 = _vex[std::pair<int,int>(k1, k2)][ir+1]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
-      ldouble fn = _vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
+      ldouble fnp1 = A*_vex[std::pair<int,int>(k1, k2)][ir+1]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
+      ldouble fn = A*_vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
       K += 0.5*(fn+fnp1)*dr;
     }
   }
@@ -234,9 +241,9 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
 
     for (int k = 0; k < _o.size(); ++k) {
       _nodes[k] = 0;
-      _Emin[k] = -_Z*_Z*0.5/std::pow(_o[k]->n(), 2);
+      _Emin[k] = -_Z*_Z/std::pow(_o[k]->n(), 2);
       _Emax[k] = 0;
-      //_o[k]->E(-0.5*std::pow(_Z/((ldouble) _o[k]->n()), 2));
+      //_o[k]->E(-std::pow(_Z/((ldouble) _o[k]->n()), 2));
     }
 
     std::cout << "SCF step " << nStepSCF << std::endl;
@@ -275,7 +282,8 @@ void HF::calculateVex(ldouble gamma) {
     int c = 0;
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       if (_o[k2]->l() == _o[k1]->l() && _o[k2]->n() == _o[k1]->n()) {
-        c++;
+        if (_o[k2]->spin() == 0) c += _o[k2]->g();
+        else c++;
       }
     }
     if (c == 2*(2*_o[k1]->l() + 1)) filled.push_back(true);
@@ -296,7 +304,7 @@ void HF::calculateVex(ldouble gamma) {
     // calculate it first with filled orbitals, dividing by the number of orbitals
     // this is exact if all 2(2*l+1) orbitals in this level are filled
     for (int k2 = 0; k2 < _o.size(); ++k2) {
-      if (k1 == k2) continue; // cancels out with Vd, so remove it here and there
+      if (_o[k2]->spin() != 0 && k1 == k2) continue; // cancels out with Vd, so remove it here and there
       if (_o[k1]->spin()*_o[k2]->spin() < 0) continue; // only applies if same spin, otherwise it is zero
 
       int l2 = _o[k2]->l();
@@ -331,6 +339,7 @@ void HF::calculateVex(ldouble gamma) {
           //if (k == 0 && l1 == 2 && l2 == 2) B = 1.0/10.0*2;
           //if (k == 2 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
           //if (k == 4 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
+          if (_o[k2]->spin() == 0) B *= 0.5*_o[k2]->g();
         }
 
         if (B == 0) continue;
@@ -495,7 +504,8 @@ void HF::calculateVd(ldouble gamma) {
     int c = 0;
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       if (_o[k2]->l() == _o[k1]->l() && _o[k2]->n() == _o[k1]->n()) {
-        c++;
+        if (_o[k2]->spin() == 0) c += _o[k2]->g();
+        else c++;
       }
     }
     if (c == 2*(2*_o[k1]->l() + 1)) filled.push_back(true);
@@ -512,14 +522,16 @@ void HF::calculateVd(ldouble gamma) {
     std::cout << "Calculating Vd term from k = " << k1 << std::endl;
 
     for (int k2 = 0; k2 < _o.size(); ++k2) {
-      if (k2 == k1) continue; // cancels out with Vex ... we also remove it from there
+      if (_o[k2]->spin() != 0 && k2 == k1) continue; // cancels out with Vex ... we also remove it from there
 
       int l2 = _o[k2]->l();
       int m2 = _o[k2]->m();
 
       // This is the central part
+      ldouble A = 1.0;
+      if (_o[k2]->spin() == 0) A *= _o[k2]->g();
       for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-        _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
+        _vdsum[k1][ir1] += A*_Y[10000*0 + 100*k2 + 1*k2][ir1];
       }
 
       if (filled[k2]) continue; // the following is an approximation in case of not-filled shells
@@ -537,10 +549,11 @@ void HF::calculateVd(ldouble gamma) {
         if (k == 4 && l2 == 3) A = 2.0/143.0;
         if (k == 6 && l2 == 3) A = 100.0/5577.0;
  
+        if (_o[k2]->spin() == 0) A *= _o[k2]->g();
         if (A == 0) continue;
         // This is the extra k parts
         for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          _vdsum[k1][ir1] += A * _Y[10000*k + 100*k1 + 1*k1][ir1];
+          _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
         }
       } // end of vdsum averaging over angles
 
@@ -603,12 +616,11 @@ void HF::calculateVd(ldouble gamma) {
 }
 
 
-void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<MatrixXld> &C,std::vector<ldouble> &E) {
+void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E) {
   std::vector<MatrixXld> Lambda(_g->N());
   int N = _om.N();
   F.resize(_g->N());
   K.resize(_g->N());
-  C.resize(_g->N());
 
   for (int i = 0; i < _g->N(); ++i) {
     ldouble r = (*_g)(i);
@@ -618,8 +630,6 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, 
     Lambda[i].setZero();
     K[i].resize(N, N);
     K[i].setZero();
-    C[i].resize(N, N);
-    C[i].setZero();
 
     for (int idx1 = 0; idx1 < N; ++idx1) {
       int k1 = _om.orbital(idx1);

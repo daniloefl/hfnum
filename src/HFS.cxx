@@ -78,6 +78,7 @@ void HFS::save(const std::string fout) {
     f << " " << std::setw(5) << "l" << " " << std::setw(5) << _o[i]->l();
     f << " " << std::setw(5) << "m" << " " << std::setw(5) << _o[i]->m();
     f << " " << std::setw(5) << "s" << " " << std::setw(5) << _o[i]->spin();
+    f << " " << std::setw(5) << "g" << " " << std::setw(5) << _o[i]->g();
     f << " " << std::setw(5) << "E" << " " << std::setw(64) << std::setprecision(60) << _o[i]->E();
     f << " " << std::setw(5) << "value";
     for (int ir = 0; ir < _g->N(); ++ir) {
@@ -152,29 +153,41 @@ void HFS::load(const std::string fin) {
 ldouble HFS::getE0() {
   ldouble E0 = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    E0 += _o[k]->E();
+    ldouble A = 1;
+    if (_o[k]->spin() == 0) A = _o[k]->g();
+    E0 += A*_o[k]->E();
   }
   ldouble J = 0;
   ldouble K = 0;
   for (auto &vditm : _vd) {
     int k = vditm.first;
-    for (int ir = 0; ir < _g->N(); ++ir) {
+    ldouble A = 1;
+    if (_o[k]->spin() == 0) A = _o[k]->g();
+    for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
+      ldouble rp1 = (*_g)(ir+1);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      J += _vd[k][ir]*std::pow(_o[k]->getNorm(ir, *_g), 2)*std::pow(r, 2)*dr;
+      ldouble fnp1 = A*_vd[k][ir+1]*std::pow(_o[k]->getNorm(ir+1, *_g), 2)*std::pow(rp1, 2);
+      ldouble fn = A*_vd[k][ir]*std::pow(_o[k]->getNorm(ir, *_g), 2)*std::pow(r, 2);
+      J += 0.5*(fn+fnp1)*dr;
     }
   }
   for (auto &vexitm : _vex) {
     const int k1 = vexitm.first.first;
     const int k2 = vexitm.first.second;
-    for (int ir = 0; ir < _g->N(); ++ir) {
+    ldouble A = 1;
+    if (_o[k2]->spin() == 0) A *= _o[k2]->g();
+    for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
+      ldouble rp1 = (*_g)(ir+1);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      K += _vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2)*dr;
+      ldouble fnp1 = A*_vex[std::pair<int,int>(k1, k2)][ir+1]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
+      ldouble fn = A*_vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
+      K += 0.5*(fn+fnp1)*dr;
     }
   }
   E0 += -0.5*(J - K);
@@ -264,10 +277,13 @@ void HFS::calculateY() {
         _Zt[10000*k + 100*k1 + 1*k2][0] = 0;
         for (int ir = 0; ir < _g->N()-1; ++ir) {
           ldouble r = (*_g)(ir);
+          ldouble rp1 = (*_g)(ir+1);
           ldouble x = std::log(r);
           ldouble dr = (*_g)(ir+1) - (*_g)(ir);
           ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
-          _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g)*std::exp(dx*k)*dx;
+          ldouble fn = std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g);
+          ldouble fnp1 = std::pow(rp1, 3)*_o[k1]->getNorm(ir+1, *_g) * _o[k2]->getNorm(ir+1, *_g);
+          _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fnp1+fn)*std::exp(dx*k)*dx;
         }
         _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
         for (int ir = _g->N()-1; ir >= 1; --ir) {
@@ -275,7 +291,9 @@ void HFS::calculateY() {
           ldouble x = std::log(r);
           ldouble dr = (*_g)(ir) - (*_g)(ir-1);
           ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir-1));
-          _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir]*std::exp(-(k+1)*dx)*dx;
+          ldouble fn = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir];
+          ldouble fnm1 = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir-1];
+          _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fn+fnm1)*std::exp(-(k+1)*dx)*dx;
         }
         for (int ir = 0; ir < _g->N()-1; ++ir) {
           ldouble r = (*_g)(ir);
@@ -344,8 +362,10 @@ void HFS::calculateVd(ldouble gamma) {
       int m2 = _o[k2]->m();
 
       // This is the central part
+      ldouble A = 1.0;
+      if (_o[k2]->spin() == 0) A *= _o[k2]->g();
       for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-        _vdsum[k1][ir1] += _Y[10000*0 + 100*k2 + 1*k2][ir1];
+        _vdsum[k1][ir1] += A*_Y[10000*0 + 100*k2 + 1*k2][ir1];
       }
 
       // from C. Fischer, "The Hartree-Fock method for atoms"
@@ -361,10 +381,11 @@ void HFS::calculateVd(ldouble gamma) {
         if (k == 4 && l2 == 3) A = 2.0/143.0;
         if (k == 6 && l2 == 3) A = 100.0/5577.0;
  
+        if (_o[k2]->spin() == 0) A *= _o[k2]->g();
         if (A == 0) continue;
         // This is the extra k parts
         for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          _vdsum[k1][ir1] += A * _Y[10000*k + 100*k1 + 1*k1][ir1];
+          _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
         }
       } // end of vdsum averaging over angles
     }
@@ -404,8 +425,10 @@ void HFS::calculateVd(ldouble gamma) {
   for (int ko = 0; ko < _o.size(); ++ko) {
     int lo = _o[ko]->l();
     int mo = _o[ko]->m();
+    ldouble A = 1.0;
+    if (_o[ko]->spin() == 0) A *= _o[ko]->g()*0.5;
     for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
-      vex[ir2] += std::pow(_o[ko]->getNorm(ir2, *_g), 2.0);
+      vex[ir2] += A*std::pow(_o[ko]->getNorm(ir2, *_g), 2.0);
     }
   }
   for (int ko = 0; ko < _o.size(); ++ko) {
@@ -422,12 +445,11 @@ void HFS::calculateVd(ldouble gamma) {
 }
 
 
-void HFS::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<MatrixXld> &C, std::vector<ldouble> &E) {
+void HFS::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E) {
   std::vector<MatrixXld> Lambda(_g->N());
   int N = _om.N();
   F.resize(_g->N());
   K.resize(_g->N());
-  C.resize(_g->N());
 
   for (int i = 0; i < _g->N(); ++i) {
     ldouble r = (*_g)(i);
@@ -437,8 +459,6 @@ void HFS::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K,
     Lambda[i].setZero();
     K[i].resize(N, N);
     K[i].setZero();
-    C[i].resize(N, N);
-    C[i].setZero();
 
     for (int idx1 = 0; idx1 < N; ++idx1) {
       int k1 = _om.orbital(idx1);

@@ -4,7 +4,13 @@
 #include <cmath>
 
 Orbital::Orbital(int s, int n, int l, int m)
- : _N(2), _s(s), _n(n), _l(l), _m(m) {
+ : _N(2), _s(s), _n(n), _l(l), _m(m), _g(1) {
+  load();
+  _torenorm = true;
+}
+
+Orbital::Orbital(int n, int l, int g)
+ : _N(2), _s(0), _n(n), _l(l), _m(0), _g(g) {
   load();
   _torenorm = true;
 }
@@ -38,6 +44,10 @@ int Orbital::m() const {
   return _m;
 }
 
+int Orbital::g() const {
+  return _g;
+}
+
 Orbital::Orbital(const Orbital &o) {
   _N = o._N;
   load();
@@ -46,6 +56,7 @@ Orbital::Orbital(const Orbital &o) {
   _m = o._m;
   _E = o._E;
   _s = o._s;
+  _g = o._g;
   for (int i = 0; i < _N; ++i) _wf[i] = o._wf[i];
   for (int i = 0; i < _N; ++i) _wf_norm[i] = o._wf_norm[i];
   _torenorm = true;
@@ -60,6 +71,7 @@ Orbital &Orbital::operator =(const Orbital &o) {
   _l = o._l;
   _m = o._m;
   _s = o._s;
+  _g = o._g;
   for (int i = 0; i < _N; ++i) _wf[i] = o._wf[i];
   for (int i = 0; i < _N; ++i) _wf_norm[i] = o._wf_norm[i];
   _torenorm = true;

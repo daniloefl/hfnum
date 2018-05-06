@@ -4,7 +4,7 @@ var classSCF =
     [ "~SCF", "classSCF.html#a57aa7a99b7ef0d7e704bf9103ff9fc62", null ],
     [ "addOrbital", "classSCF.html#aacb5c429c2d2fcd3978077cbf7b8b443", null ],
     [ "addOrbitalPython", "classSCF.html#a1c202b9c4e6f5a0994da4ad6720bf2a6", null ],
-    [ "calculateFMatrix", "classSCF.html#a572feb9f923cf0354d68638680c30012", null ],
+    [ "calculateFMatrix", "classSCF.html#ae94a19ca8f966c0d00d38d420b7df1ff", null ],
     [ "gammaSCF", "classSCF.html#aeca6a51492bd3b1e5730888c479e23dd", null ],
     [ "getGrid", "classSCF.html#a363e16b107ec51a4205154919e4c4188", null ],
     [ "getNOrbitals", "classSCF.html#a3cfcfdc2808b251a4aa893d7ca590986", null ],

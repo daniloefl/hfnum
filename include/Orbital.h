@@ -31,7 +31,13 @@ class Orbital {
     /// \param n Quantum number n. For initial conditions.
     /// \param l Quantum number l. For initial conditions.
     /// \param m Quantum number m. For initial conditions.
-    Orbital(int s = 1, int n = 1, int l = 0, int m = 0);
+    Orbital(int s, int n, int l, int m);
+
+    /// \brief Constructor.
+    /// \param n Quantum number n. For initial conditions.
+    /// \param l Quantum number l. For initial conditions.
+    /// \param g Multiplicity.
+    Orbital(int n, int l, int g);
 
     /// \brief Constructor.
     /// \param o Object to copy.
@@ -58,6 +64,7 @@ class Orbital {
     int n() const;
     int l() const;
     int m() const;
+    int g() const;
 
     /// \brief Getter for spin.
     /// \return Spin
@@ -129,6 +136,9 @@ class Orbital {
 
     /// Quantum number m
     int _m;
+
+    /// Multiplicity
+    ldouble _g;
 
     /// Energy
     ldouble _E;

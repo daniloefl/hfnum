@@ -1,5 +1,8 @@
 var NAVTREEINDEX2 =
 {
+"classlm.html#a8289a9cdc429b766e68a6a9a5b924b78":[0,0,11,0],
+"classlm.html#ac270f49e480c9358305d1fdb28164039":[0,0,11,2],
+"classlm.html#adbdff6a3295fb654953ceb011085affc":[0,0,11,8],
 "classlm.html#adf1e663cee9dbf449147345adc61aae6":[0,0,11,1],
 "classlm.html#afea61e84b473af68de13bb69611124c6":[0,0,11,5],
 "feature__tests_8cxx.html":[1,0,4],

@@ -162,8 +162,8 @@ void DFT::load(const std::string fin) {
 
       std::string trash;
 
-      int o_N, o_L, o_M, o_S;
-      ss >> trash >> o_N >> trash >> o_L >> trash >> o_M >> trash >> o_S;
+      int o_N, o_L, o_M, o_S, o_G;
+      ss >> trash >> o_N >> trash >> o_L >> trash >> o_M >> trash >> o_S >> trash >> o_G;
 
       ldouble o_E;
       ss >> trash >> o_E;
@@ -391,12 +391,11 @@ void DFT::calculateV(ldouble gamma) {
 }
 
 
-void DFT::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<MatrixXld> &C, std::vector<ldouble> &E) {
+void DFT::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E) {
   std::vector<MatrixXld> Lambda(_g->N());
   int N = _om.N();
   F.resize(_g->N());
   K.resize(_g->N());
-  C.resize(_g->N());
 
   for (int i = 0; i < _g->N(); ++i) {
     ldouble r = (*_g)(i);
@@ -406,8 +405,6 @@ void DFT::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K,
     Lambda[i].setZero();
     K[i].resize(N, N);
     K[i].setZero();
-    C[i].resize(N, N);
-    C[i].setZero();
 
     for (int idx1 = 0; idx1 < N; ++idx1) {
       int k1 = _om.orbital(idx1);

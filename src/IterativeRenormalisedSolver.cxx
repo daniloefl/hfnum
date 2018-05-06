@@ -14,7 +14,7 @@ IterativeRenormalisedSolver::IterativeRenormalisedSolver(const Grid &g, std::vec
 IterativeRenormalisedSolver::~IterativeRenormalisedSolver() {
 }
 
-ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &Cm, std::vector<VectorXld> &matched) {
+VectorXld IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<VectorXld> &matched, std::vector<int> &nodes) {
   int M = _om.N();
   kl = _o.size()-1;
 
@@ -24,8 +24,8 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   std::vector<VectorXld> fix_outward(_g.N());
   matched.resize(_g.N());
 
-  solveOutward(E, l, Fm, Km, Cm, Ro);
-  solveInward(E, l, Fm, Km, Cm, Ri);
+  solveOutward(E, l, Fm, Km, Ro);
+  solveInward(E, l, Fm, Km, Ri);
 
   // originally the paper proposes to use the determinant
   // however, if there is perfect agreement in some orbitals
@@ -36,24 +36,12 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   //ldouble F = std::fabs((Ro[icl[kl]] - Ri[icl[kl]+1].inverse()).determinant());
   //A - B^-1 = B^-1 (B A - I)
   //det(A - B^-1) = 0 => det(BA - I) = 0
-  ldouble F = 0;
-  MatrixXld A = Ro[icl[kl]];
-  MatrixXld B = Ri[icl[kl]+1];
-  F += ((B*A - MatrixXld::Identity(M,M)).determinant());
-
-  /*
-  //JacobiSVD<MatrixXld> dec_BA(B*A - MatrixXld::Identity(M,M), ComputeThinU | ComputeThinV);
-  JacobiSVD<MatrixXld> dec_BA(B*A, ComputeThinU | ComputeThinV);
-  std::vector<ldouble> svd;
+  VectorXld F(_o.size());
   for (int idx = 0; idx < M; ++idx) {
-    ldouble s = dec_BA.singularValues()(idx);
-    //if (s < 0) s = -s;
-    svd.push_back(s);
+    MatrixXld A = Ro[icl[idx]];
+    MatrixXld B = Ri[icl[idx]+1];
+    F(idx) = ((B*A - MatrixXld::Identity(M,M)).determinant());
   }
-  ldouble F = 11;
-  for (int idx = 0; idx < M; ++idx) {
-    F *= (svd[idx] - 1);
-  }*/
 
   MatrixXld Mm = Ro[icl[kl]] - Ri[icl[kl]+1].inverse();
   VectorXld fm(M);
@@ -67,22 +55,6 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
       fm += dec_Mm.matrixV().block(0, idx, M, 1)/dec_Mm.singularValues()(idx);
     }
   }
-  //std::cout << "Mm:" << std::endl << Mm << std::endl;
-  //std::cout << "Mm SV:" << std::endl << dec_Mm.singularValues() << std::endl;
-  //std::cout << "Mm right-singular vectors:" << std::endl << dec_Mm.matrixV() << std::endl;
-  //std::cout << "fm:" << std::endl << fm << std::endl;
-
-  // this is the determinant, but scale it so that we avoid numerical errors
-  //ldouble F = 0;
-  //for (int idx = 0; idx < M; ++idx) {
-  //  F += std::log(std::fabs(dec_Mm.singularValues()(idx)));
-  //}
-  //if (first) {
-  //  first = false;
-  //  shiftF = -F; // use first calculation to shift F to zero and avoid numerical errors in the next iteration
-  //}
-  //F += shiftF;
-  //F = std::exp(F); // if this is commented out, the minimum is at - infinity, so F must be globally minimised and the minimum cannot be approximated with a paraboloid
 
   fix_outward[icl[kl]] = fm;
   for (int i = icl[kl]-1; i >= 0; --i) {
@@ -107,10 +79,21 @@ ldouble IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vector<
   }
   match(matched, fix_inward, fix_outward);
 
-  return F; //std::fabs(F);
+  nodes.clear();
+  nodes.push_back(0);
+  for (int i = icl[kl]-1; i >= 3; --i) {
+    if (Ro[i].determinant() < 0)
+      nodes[0]++;
+  }
+  for (int i = icl[kl]+1; i < _g.N()-3; ++i) {
+    if (Ri[i].determinant() < 0)
+      nodes[0]++;
+  }
+
+  return F;
 }
 
-void IterativeRenormalisedSolver::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &Cm, std::vector<MatrixXld> &R) {
+void IterativeRenormalisedSolver::solveInward(std::vector<ldouble> &E, std::vector<int> &l, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &R) {
   int N = _g.N();
   int M = _om.N();
   R.resize(N);
@@ -118,14 +101,13 @@ void IterativeRenormalisedSolver::solveInward(std::vector<ldouble> &E, std::vect
     R[i].resize(M, M);
   }
   R[N-1].setZero();
-  for (int i = N-1; i >= icl[kl]-1; --i) {
+  for (int i = N-1; i >= 1; --i) {
     R[i-1] = Km[i-1]*(MatrixXld::Identity(M, M)*12 - Fm[i-1]*10);
     if (i < N-1 && R[i].determinant() != 0) R[i-1] -= R[i].inverse();
-    R[i-1] -= Cm[i-1];
   }
 }
 
-void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &Cm, std::vector<MatrixXld> &R) {
+void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vector<int> &li, std::vector<MatrixXld> &Fm, std::vector<MatrixXld> &Km, std::vector<MatrixXld> &R) {
   int N = _g.N();
   int M = _om.N();
   R.resize(N);
@@ -137,19 +119,6 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
   MatrixXld psi1(M,M);
   psi0.setZero();
   psi1.setZero();
-  /*
-  for (int idx2 = 0; idx2 < M; ++idx2) {
-    for (int idx = 0; idx < M; ++idx) {
-      int k = _om.orbital(idx);
-      int l = _om.l(idx);
-      int m = _om.m(idx);
-      psi0(idx, idx) = 1;
-      psi1(idx, idx) = 10;
-      if (l == _o[k]->initialL() && m == _o[k]->initialM() && idx == idx2) psi1(idx, idx2) *= 10;
-    }
-  }
-  R[0] = Fm[1]*psi1*(Fm[0]*psi0).inverse();
-  */
   for (int idx = 0; idx < M; ++idx) {
     int k = _om.orbital(idx);
     int l = _om.l(idx);
@@ -159,10 +128,9 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
     if (l == 1)
       R[0](idx, idx) = - 5 + 1.5*_g.dx();
   }
-  for (int i = 1; i <= icl[kl]+1; ++i) {
+  for (int i = 1; i <= N-1; ++i) {
     R[i] = Km[i]*(MatrixXld::Identity(M, M)*12 - Fm[i]*10);
     if (R[i-1].determinant() != 0) R[i] -= R[i-1].inverse();
-    R[i] -= Cm[i];
   }
 }
 void IterativeRenormalisedSolver::match(std::vector<VectorXld> &o, std::vector<VectorXld> &inward, std::vector<VectorXld> &outward) {

@@ -9,25 +9,31 @@ import hfnum
 import seaborn
 import matplotlib.pyplot as plt
 
-Z = 2
+Z = 8
+
+# log grid
 dx = 0.5e-1/4
 N = 422*4
 rmin = 1e-8
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
-orb0 = hfnum.Orbital( 1, 0, 2)
 h.method(3)
-h.addOrbital(orb0)
 
-NiterSCF = 200
-Niter = 100
-F0stop = 1e-8
-r = h.getR()
-r = np.asarray(r)
+orb0 = hfnum.Orbital( 1, 0, 2)
+orb1 = hfnum.Orbital( 2, 0, 2)
+orb2 = hfnum.Orbital( 2, 1, 4)
+h.addOrbital(orb0)
+h.addOrbital(orb1)
+h.addOrbital(orb2)
+
+NiterSCF = 100
+Niter = 1000
+F0stop = 1e-6
+r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
-h.gammaSCF(0.7)
+h.gammaSCF(0.1)
 h.solve(NiterSCF, Niter, F0stop)
-h.save('output/results_He.txt')
+h.save("output/results_O.txt")
 

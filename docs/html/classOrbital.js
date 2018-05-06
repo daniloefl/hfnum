@@ -1,11 +1,13 @@
 var classOrbital =
 [
-    [ "Orbital", "classOrbital.html#aa77c24c32c259d3f8aed673fa5babe7c", null ],
+    [ "Orbital", "classOrbital.html#a726e7f4d52ed7a099827405dd4bf82b4", null ],
+    [ "Orbital", "classOrbital.html#a5c7e210662ca4e1b14850ebd432aceea", null ],
     [ "Orbital", "classOrbital.html#ab2e6fd7b02169832d6fcab7b365d6ee2", null ],
     [ "~Orbital", "classOrbital.html#a2b7ba4bdfb0c465d32883d3aae4d1d4b", null ],
     [ "E", "classOrbital.html#ab70dd81be0a76cf1ba1395dc1bb14d41", null ],
     [ "E", "classOrbital.html#a5ac5728cd3501bd4b25593b3cd14fdbd", null ],
     [ "EPython", "classOrbital.html#a400ca58edbe294868853a7e1e19f61d0", null ],
+    [ "g", "classOrbital.html#ada6daa9203f19942c7f9b541ba1728fe", null ],
     [ "getCentralNormPython", "classOrbital.html#a4273a90d345739cbcf4ffe55b90e9546", null ],
     [ "getNorm", "classOrbital.html#a369421ec859a40d5fd6bcf23c231272f", null ],
     [ "getNormPython", "classOrbital.html#a61f5db561359ab70da0dd52d5c3a5847", null ],
@@ -24,6 +26,7 @@ var classOrbital =
     [ "spin", "classOrbital.html#a448ce5d7c4f80f9b275dc55c3708d379", null ],
     [ "spin", "classOrbital.html#aeee7765ba1c844fcac5c16bff95df942", null ],
     [ "_E", "classOrbital.html#a0731b52110b2d1786fca7332c26806d9", null ],
+    [ "_g", "classOrbital.html#a20cc8b8dc5b23879ca47682c88b0609e", null ],
     [ "_l", "classOrbital.html#a98cb8fe229b4d79450acc9950417f7cf", null ],
     [ "_m", "classOrbital.html#a5abc89bd19c5bde7098f11c9672c55d1", null ],
     [ "_N", "classOrbital.html#ad018e37ff7353e2d4f5c8957ca9d1fdc", null ],

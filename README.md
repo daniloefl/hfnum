@@ -8,9 +8,9 @@ Four methods are available to solve the differential equation:
     * Creates one numerical equation per differential equation and Grid point and puts them all in an NxN sparse matrix. Extra equations are created to force the normalisation of the eigenfunctions to be 1. Since the normalisation condition is non-linear, the system is resolved using the Newton-Raphson method, by calculating the Jacobian matrix of partial derivatives and changing the energy and function values according to -X inverse(Jacobian), where X is the column-vector of wavefunction values and energies. This method is extremely slow, but it is simple and assumes only that the wave function first and last values are zero.
   * method 1: Iterative Numerov Method using Gordon's method to guess initial conditions
     * The system can be solved (up to a normalisation) using Numerov equation to get the third point based on the two points before it. However, we need two initial conditions and choosing the wrong initial conditions (particularly in non-symmetric systems, such as atoms with more than 2 electrons) can lead to divergence. Gordon's solution tries a set of linearly independent solutions and uses a clever method to discover the correct initial conditions. It is described here: http://aip.scitation.org/doi/pdf/10.1063/1.436421
-  * method 2: Iterative renormalised method (default and recommended)
+  * method 2: Iterative renormalised method (stable)
     * This method is an extension of the method proposed by Gordon. The method is only re-written in a different way using the ratio of solutions normalised by the differential equation coefficients. This procedure avoids overflows, which happen in method 1. It is recommended and it is explained here: http://aip.scitation.org/doi/pdf/10.1063/1.436421
-  * method 3: Standard Numerov method with non-homogeneus term
+  * method 3: Standard Numerov method with non-homogeneus term (faster, default)
     * This method solves the equations using the Numerov method multiplying out the terms that depend on other orbitals and leaving them as an independent non-homogeneous term. This procedure is repeated several times to achieve consistency before recalculating the energy and moving to the potential self-consistency step. This method is a simple and fast extension of the Numerov standard method, but it does not often converge easily. One paper using this method worth reading is: https://www.sciencedirect.com/science/article/pii/0010465576900400
 
 The software is a Python library, where the calculations are done in C++, but the configuration of the parameters is done in Python.
@@ -62,8 +62,8 @@ Z = 3
 # log grid
 # r = exp(log(rmin) + dx * i), where i = 0..N-1
 # change the Grid parameters below
-dx = 0.5e-1         # Grid step
-N = 421             # number of points
+dx = 0.5e-1/4       # Grid step
+N = 421*4           # number of points
 rmin = 1e-8         # first point in the Grid
 
 # this is the main solver
@@ -80,21 +80,18 @@ h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
 
 # use this (default) method for more stability
-h.method(2)
+h.method(3)
 
 # create an Orbital as many times as needed
 # the syntax is the following:
-# myVar = hfnum.Orbital(spin, n l, m)
-# n, l and m are the orbital's quantum numbers to set initial conditions of integration
-# spin can be +1 or -1
-orb0 = hfnum.Orbital( 1, 1, 0, 0)
-orb1 = hfnum.Orbital(-1, 1, 0, 0)
-orb2 = hfnum.Orbital( 1, 2, 0, 0)
+# myVar = hfnum.Orbital(n, l, multiplicity)
+# n, l are the orbital's quantum numbers to set initial conditions of integration
+orb0 = hfnum.Orbital( 1, 0, 2)
+orb2 = hfnum.Orbital( 2, 0, 1)
 
 # now add it to the calculator
 h.addOrbital(orb0)
 h.addOrbital(orb1)
-h.addOrbital(orb2)
 
 # number of self-consistent iterations
 NiterSCF = 20
@@ -106,8 +103,8 @@ Niter = 100
 F0stop = 1e-6
 
 # set velocity with which the self-consistent potentials are changed
-# 0.2 works well, but other numbers can be tried in case of divergence
-h.gammaSCF(0.2)
+# 0.1 works well, but other numbers can be tried in case of divergence
+h.gammaSCF(0.1)
 
 # actually solve the system
 # you can set NiterSCF to 1 and call this many times to plot the orbitals in
@@ -118,7 +115,7 @@ h.solve(NiterSCF, Niter, F0stop)
 r = np.asarray(h.getR())
 
 # get orbitals shape
-o = [np.asarray(orb0.get(0, 0)), np.asarray(orb1.get(0, 0)), np.asarray(orb2.get(0, 0))]
+o = [np.asarray(orb0.get()), np.asarray(orb1.get())]
 
 # get Coulomb attraction potential (just -Z/r)
 v = h.getNucleusPotential()
@@ -127,11 +124,9 @@ v = h.getNucleusPotential()
 vex = {}
 vd = {}
 vd[0] = h.getDirectPotential(0)
-vex[0] = [h.getExchangePotential(0, 0), h.getExchangePotential(0, 1), h.getExchangePotential(0, 2)]
+vex[0] = [h.getExchangePotential(0, 0), h.getExchangePotential(0, 1)]
 vd[1] = h.getDirectPotential(1)
-vex[1] = [h.getExchangePotential(1, 0), h.getExchangePotential(1, 1), h.getExchangePotential(1, 2)]
-vd[2] = h.getDirectPotential(2)
-vex[2] = [h.getExchangePotential(2, 0), h.getExchangePotential(2, 1), h.getExchangePotential(2, 2)]
+vex[1] = [h.getExchangePotential(1, 0), h.getExchangePotential(1, 1)]
 
 # one can now plot all the above as needed
 
