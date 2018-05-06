@@ -627,7 +627,9 @@ void NonCentralCorrection::correct() {
 ldouble NonCentralCorrection::getE0() {
   ldouble E0 = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    E0 += _Ec[k] + _o[k]->E();
+    ldouble A = 1;
+    if (_o[k]->spin() == 0) A *= _o[k]->g();
+    E0 += A*(_Ec[k] + _o[k]->E());
   }
   for (int i = 0; i < _o.size(); ++i) {
     for (int j = 0; j < _o.size(); ++j) {
@@ -640,7 +642,9 @@ ldouble NonCentralCorrection::getE0() {
 ldouble NonCentralCorrection::getE0Uncorrected() {
   ldouble E0 = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    E0 += _o[k]->E();
+    ldouble A = 1;
+    if (_o[k]->spin() == 0) A *= _o[k]->g();
+    E0 += A*_o[k]->E();
   }
   ldouble J = 0;
   ldouble K = 0;
