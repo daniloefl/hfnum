@@ -12,7 +12,7 @@ Orbital::Orbital(int s, int n, int l, int m)
       else if (_s > 0 && ms > 0 && ml == m)
         _term += '+';
       else
-        _term += ' ';
+        _term += 'N';
     }
   }
   load();
@@ -22,12 +22,12 @@ Orbital::Orbital(int s, int n, int l, int m)
 Orbital::Orbital(int n, int l, const std::string term)
  : _N(2), _s(0), _n(n), _l(l), _m(0), _g(0), _term(term) {
   if (_term.size() < 2*(2*l + 1)) {
-    for (int k = _term.size(); k < 2*(2*l + 1); ++k) _term += ' ';
+    for (int k = _term.size(); k < 2*(2*l + 1); ++k) _term += 'N';
   }
   for (int ml_idx = 0; ml_idx < _term.size(); ++ml_idx) {
     int ml = ml_idx/2 - l;
     int ms = 2*(ml_idx % 2) - 1;
-    if (_term[ml_idx] != ' ') _g++;
+    if (_term[ml_idx] == '+' || _term[ml_idx] == '-') _g++;
   }
   
   load();

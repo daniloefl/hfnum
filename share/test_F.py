@@ -22,7 +22,7 @@ h.method(3)
 
 orb0 = hfnum.Orbital( 1, 0, "+-")
 orb1 = hfnum.Orbital( 2, 0, "+-")
-orb2 = hfnum.Orbital( 2, 1, "+-+-+ ")
+orb2 = hfnum.Orbital( 2, 1, "+-+-+N")
 h.addOrbital(orb0)
 h.addOrbital(orb1)
 h.addOrbital(orb2)

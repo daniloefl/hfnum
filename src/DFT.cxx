@@ -322,12 +322,12 @@ void DFT::calculateN(ldouble gamma) {
         _nsum_dw[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
       } else if (s1 == 0) {
         for (int ml_idx = 0; ml_idx < _o[k1]->term().size(); ++ml_idx) {
-          int ml = ml_idx/2 - l;
-          if (_o[k1]->term()[ml_idx] == ' ') continue;
+          int ml = ml_idx/2 - l1;
           if (_o[k1]->term()[ml_idx] == '+')
             _nsum_up[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
-          if (_o[k1]->term()[ml_idx] == '-')
+          else if (_o[k1]->term()[ml_idx] == '-')
             _nsum_dw[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
+        }
       }
     }
   }

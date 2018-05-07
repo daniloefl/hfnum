@@ -16,7 +16,7 @@ rmin = 1e-8
 h = hfnum.HFS()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
-orb0 = hfnum.Orbital( 1, 0, 2)
+orb0 = hfnum.Orbital( 1, 0, "+-")
 h.method(3)
 h.addOrbital(orb0)
 

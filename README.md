@@ -86,12 +86,12 @@ h.method(3)
 # the syntax is the following:
 # myVar = hfnum.Orbital(n, l, electronDistribution)
 # n, l are the orbital's quantum numbers to set initial conditions of integration
-# electron distribution is a string with 2*(2*l + 1) characters, which must each be one of "+", "-" or " ".
+# electron distribution is a string with 2*(2*l + 1) characters, which must each be one of "+", "-" or "N".
 # It specifies the filled m_s and m_l shells in the order (m_l = -l, m_s = +1), (m_l = -l, m_s = -1), (m_l = -l+1, m_s = +1), etc.
-# For example: "+-+ + " specifies that there are 3 electrons up and one down. The electron down is in m_l = -1.
+# For example: "+-+NNN" specifies that there are 3 electrons up and one down. The electron down is in m_l = -1.
 # The three electrons up are in m_l = -1, 0 and 1.
 orb0 = hfnum.Orbital( 1, 0, "+-")
-orb2 = hfnum.Orbital( 2, 0, "+ ")
+orb2 = hfnum.Orbital( 2, 0, "+N")
 
 # now add it to the calculator
 h.addOrbital(orb0)

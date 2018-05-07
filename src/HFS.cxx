@@ -366,8 +366,6 @@ void HFS::calculateVd(ldouble gamma) {
         _vdsum[k1][ir1] += A*_Y[10000*0 + 100*k2 + 1*k2][ir1];
       }
 
-      if (filled[k2]) continue; // the following is an approximation in case of not-filled shells
-
       // from C. Fischer, "The Hartree-Fock method for atoms"
       // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
       // Values agree, but taken in abs value ... how to average them in km?
@@ -378,10 +376,10 @@ void HFS::calculateVd(ldouble gamma) {
           if (k == 2 && l2 == 1 && l1 == 1) {
             for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
               int ml1 = ml1_idx/2 - 1;
-              if (_o[k1]->term()[ml1_idx] == ' ') continue;
+              if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
               for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
                 int ml2 = ml2_idx/2 - 1;
-                if (_o[k2]->term()[ml2_idx] == ' ') continue;
+                if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
                 if (ml1 == -1 && ml2 == -1) A += 1.0/25.0;
                 if (ml1 == -1 && ml2 == 0) A += -2.0/25.0;
                 if (ml1 == -1 && ml2 == 1) A += 1.0/25.0;
@@ -461,7 +459,6 @@ void HFS::calculateVd(ldouble gamma) {
     ldouble B = 0.0;
     if (_o[ko]->spin() == 0) {
       for (int ml_idx = 0; ml_idx < _o[ko]->term().size(); ++ml_idx) {
-        if (_o[ko]->term()[ml_idx] == ' ') continue;
         if (_o[ko]->term()[ml_idx] == '+') A += 0.5;
         if (_o[ko]->term()[ml_idx] == '-') B += 0.5;
       }
