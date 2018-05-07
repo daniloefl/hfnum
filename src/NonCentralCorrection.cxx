@@ -205,7 +205,6 @@ void NonCentralCorrection::correct() {
       // - vd
       if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() >= 0) {
         ldouble A = 1;
-        if (_o[k1]->spin() == 0) A *= _o[k1]->g();
         for (int ir = 0; ir < _g->N()-1; ++ir) {
           ldouble r = (*_g)(ir);
           ldouble rp1 = (*_g)(ir+1);
@@ -229,7 +228,6 @@ void NonCentralCorrection::correct() {
       if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k2]->spin()*_o[k1]->spin() >= 0) {
         for (int ko = 0; ko < _o.size(); ++ko) {
           ldouble A = 1;
-          if (_o[ko]->spin() == 0) A *= _o[ko]->g();
           lm tlmo(_o[ko]->l(), _o[ko]->m());
           if (_o[ko]->spin()*_o[k1]->spin() < 0) continue; // vex == 0 here
           for (int ir = 0; ir < _g->N()-1; ++ir) {
@@ -261,7 +259,6 @@ void NonCentralCorrection::correct() {
         for (int ko = 0; ko < _o.size(); ++ko) {
           lm tlmo(_o[ko]->l(), _o[ko]->m());
           ldouble A = 1;
-          if (_o[ko]->spin() == 0) A *= _o[ko]->g();
           if (_o[ko]->spin() == 0) A *= _o[ko]->g();
           for (int ir2 = 0; ir2 < _g->N()-1; ++ir2) {
             ldouble r2 = (*_g)(ir2);
@@ -321,7 +318,6 @@ void NonCentralCorrection::correct() {
         if (_o[k2]->spin()*_o[ko]->spin() < 0) continue; // spin component dot product
         ldouble A = 1;
         if (_o[ko]->spin() == 0) A *= _o[ko]->g()*0.5;
-        if (_o[k1]->spin() == 0) A *= _o[k1]->g();
         for (int ir2 = 0; ir2 < _g->N()-1; ++ir2) {
           ldouble r2 = (*_g)(ir2);
           ldouble r2p1 = (*_g)(ir2+1);
@@ -622,7 +618,7 @@ void NonCentralCorrection::correct() {
     for (int j = 0; j < _o.size(); ++j) {
       ldouble A = 1;
       if (_o[j]->spin() == 0) A *= _o[j]->g();
-      if (_o[i]->spin() == 0) A *= _o[i]->g();
+      //if (_o[i]->spin() == 0) A *= _o[i]->g();
       E0 += -0.5*(A*_Jcorr(i, j) - A*_Kcorr(i, j));
     }
   }
@@ -640,7 +636,7 @@ ldouble NonCentralCorrection::getE0() {
     for (int j = 0; j < _o.size(); ++j) {
       ldouble A = 1;
       if (_o[j]->spin() == 0) A *= _o[j]->g();
-      if (_o[i]->spin() == 0) A *= _o[i]->g();
+      //if (_o[i]->spin() == 0) A *= _o[i]->g();
       E0 += -0.5*(A*_Jcorr(i, j) - A*_Kcorr(i, j));
     }
   }
