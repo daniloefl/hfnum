@@ -15,6 +15,9 @@ Z = 6
 dx = 0.5e-1/4.0
 N = 280*4
 rmin = 1e-5
+dx = 0.25e-1
+N = 580
+rmin = 1e-5
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)

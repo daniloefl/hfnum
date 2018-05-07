@@ -12,8 +12,11 @@ import matplotlib.pyplot as plt
 Z = 8
 
 # log grid
-dx = 0.5e-1/4.0
-N = 280*4
+dx = 0.25e-1
+N = 580
+rmin = 1e-5
+dx = 0.25e-1
+N = 580
 rmin = 1e-5
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
@@ -33,7 +36,7 @@ F0stop = 1e-8
 r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
-h.gammaSCF(0.1)
+h.gammaSCF(0.6)
 h.solve(NiterSCF, Niter, F0stop)
 h.save("output/results_O.txt")
 
