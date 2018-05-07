@@ -81,6 +81,7 @@ std::string PerturbativeCorrection::getOrbitalName(int no) {
   int l = _o[no]->l();
   int m = _o[no]->m();
   int s = _o[no]->spin();
+  int g = _o[no]->g();
   if (l == 0) name += "s";
   else if (l == 1) name += "p";
   else if (l == 2) name += "d";
@@ -88,13 +89,18 @@ std::string PerturbativeCorrection::getOrbitalName(int no) {
   else if (l == 4) name += "g";
   else if (l == 5) name += "h";
   else name += "?";
-  name += "_{m=";
-  name += std::to_string(m);
-  name += "}";
-  if (s > 0)
-    name += "^+";
-  else
-    name += "^-";
+  if (s == 0) {
+    name += "^";
+    name += std::to_string(g);
+  } else {
+    name += "_{m=";
+    name += std::to_string(m);
+    name += "}";
+    if (s > 0)
+      name += "^+";
+    else
+      name += "^-";
+  }
   return name;
 }
 

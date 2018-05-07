@@ -183,7 +183,7 @@ void NonCentralCorrection::correct() {
       std::cout << "Calculating matrix elements for element " << k1 << ", " << k2 << std::endl;
 
       std::cout << "Calculating matrix element <" << k1 << "|S|" << k2 << ">" << std::endl;
-      if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() > 0) {
+      if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() >= 0) {
         for (int ir = 0; ir < _g->N()-1; ++ir) {
           ldouble r = (*_g)(ir);
           ldouble rp1 = (*_g)(ir+1);
@@ -205,7 +205,7 @@ void NonCentralCorrection::correct() {
       // - vd
       if (tlm_d1.l == tlm_d2.l && tlm_d1.m == tlm_d2.m && _o[k1]->spin()*_o[k2]->spin() >= 0) {
         ldouble A = 1;
-        if (_o[k2]->spin() == 0) A *= _o[k2]->g();
+        if (_o[k1]->spin() == 0) A *= _o[k1]->g();
         for (int ir = 0; ir < _g->N()-1; ++ir) {
           ldouble r = (*_g)(ir);
           ldouble rp1 = (*_g)(ir+1);
@@ -262,6 +262,7 @@ void NonCentralCorrection::correct() {
           lm tlmo(_o[ko]->l(), _o[ko]->m());
           ldouble A = 1;
           if (_o[ko]->spin() == 0) A *= _o[ko]->g();
+          if (_o[ko]->spin() == 0) A *= _o[ko]->g();
           for (int ir2 = 0; ir2 < _g->N()-1; ++ir2) {
             ldouble r2 = (*_g)(ir2);
             ldouble r2p1 = (*_g)(ir2+1);
@@ -276,14 +277,14 @@ void NonCentralCorrection::correct() {
                             CG(tlm_d1.l, tlm_d2.l, 0, 0, l, 0)*CG(tlmo.l, tlmo.l, 0, 0, l, 0)*
                             CG(tlm_d1.l, tlm_d2.l, -tlm_d1.m, tlm_d2.m, l, m)*CG(tlmo.l, tlmo.l, -tlmo.m, tlmo.m, l, -m)*
                             _Y[10000*l + 100*k1 + 1*k2][ir2]*
-                            std::pow(A*_o[ko]->getNorm(ir2, *_g), 2)*std::pow(r2, 2);
+                            A*std::pow(_o[ko]->getNorm(ir2, *_g), 2)*std::pow(r2, 2);
                 ldouble vp1 = std::pow(-1, m+tlm_d1.m+tlmo.m)*(2.0*tlmo.l+1.0)*
                             std::sqrt((2.0*tlm_d1.l+1.0)*(2.0*tlm_d2.l+1.0))*
                             std::pow(2.0*l+1.0, -2)*
                             CG(tlm_d1.l, tlm_d2.l, 0, 0, l, 0)*CG(tlmo.l, tlmo.l, 0, 0, l, 0)*
                             CG(tlm_d1.l, tlm_d2.l, -tlm_d1.m, tlm_d2.m, l, m)*CG(tlmo.l, tlmo.l, -tlmo.m, tlmo.m, l, -m)*
                             _Y[10000*l + 100*k1 + 1*k2][ir2+1]*
-                            std::pow(A*_o[ko]->getNorm(ir2+1, *_g), 2)*std::pow(r2p1, 2);
+                            A*std::pow(_o[ko]->getNorm(ir2+1, *_g), 2)*std::pow(r2p1, 2);
                 dH(k1, k2) += 0.5*(v+vp1)*dr2;
                 _J(k1, k2) += 0.5*(v+vp1)*dr2;
               }
@@ -319,7 +320,8 @@ void NonCentralCorrection::correct() {
         if (_o[ko]->spin()*_o[k1]->spin() < 0) continue; // spin component dot product
         if (_o[k2]->spin()*_o[ko]->spin() < 0) continue; // spin component dot product
         ldouble A = 1;
-        if (_o[ko]->spin() == 0) A *= _o[ko]->g();
+        if (_o[ko]->spin() == 0) A *= _o[ko]->g()*0.5;
+        if (_o[k1]->spin() == 0) A *= _o[k1]->g();
         for (int ir2 = 0; ir2 < _g->N()-1; ++ir2) {
           ldouble r2 = (*_g)(ir2);
           ldouble r2p1 = (*_g)(ir2+1);
@@ -503,8 +505,7 @@ void NonCentralCorrection::correct() {
                     if (oko == 0 && okop1 == 0) continue;
 
                     ldouble A = 1;
-                    if (_o[k1]->spin() == 0) A *= _o[k1]->g();
-                    if (_o[k2]->spin() == 0) A *= _o[k2]->g();
+                    if (_o[ko]->spin() == 0) A *= _o[ko]->g();
 
                     ldouble fn = std::pow(-1, m+tlm_d1c.m+tlm_doc.m)*(2.0*tlm_doc.l+1.0)*
                          std::sqrt((2.0*tlm_d1c.l+1.0)*(2.0*tlm_d2c.l+1.0))*std::pow(2.0*l+1.0, -2)*
@@ -579,8 +580,7 @@ void NonCentralCorrection::correct() {
                     if (ckor1 == 0 || okor2 == 0) continue;
 
                     ldouble A = 1;
-                    if (_o[ko]->spin() == 0) A *= _o[ko]->g();
-                    if (_o[k2]->spin() == 0) A *= _o[k2]->g();
+                    if (_o[ko]->spin() == 0) A *= _o[ko]->g()*0.5;
 
                     ldouble fn = std::pow(-1, m + tlm_d2c.m + tlm_doc.m)*
                          (2.0*tlm_d2c.l+1.0)*(2.0*tlm_doc.l+1.0)*
@@ -620,7 +620,10 @@ void NonCentralCorrection::correct() {
   }
   for (int i = 0; i < _o.size(); ++i) {
     for (int j = 0; j < _o.size(); ++j) {
-      E0 += -0.5*(_Jcorr(i, j) - _Kcorr(i, j));
+      ldouble A = 1;
+      if (_o[j]->spin() == 0) A *= _o[j]->g();
+      if (_o[i]->spin() == 0) A *= _o[i]->g();
+      E0 += -0.5*(A*_Jcorr(i, j) - A*_Kcorr(i, j));
     }
   }
   std::cout << E0 << std::endl;
@@ -635,7 +638,10 @@ ldouble NonCentralCorrection::getE0() {
   }
   for (int i = 0; i < _o.size(); ++i) {
     for (int j = 0; j < _o.size(); ++j) {
-      E0 += -0.5*(_Jcorr(i, j) - _Kcorr(i, j));
+      ldouble A = 1;
+      if (_o[j]->spin() == 0) A *= _o[j]->g();
+      if (_o[i]->spin() == 0) A *= _o[i]->g();
+      E0 += -0.5*(A*_Jcorr(i, j) - A*_Kcorr(i, j));
     }
   }
   return E0;
