@@ -36,8 +36,8 @@ class Orbital {
     /// \brief Constructor.
     /// \param n Quantum number n. For initial conditions.
     /// \param l Quantum number l. For initial conditions.
-    /// \param g Multiplicity.
-    Orbital(int n, int l, int g);
+    /// \param term Content to be specified in the format "+-+-  ", indicating + or - for filled electrons and " " for non-filled ones. The first characters refer to ml = -l and the last ones to ml = +l..
+    Orbital(int n, int l, const std::string term = "");
 
     /// \brief Constructor.
     /// \param o Object to copy.
@@ -65,6 +65,7 @@ class Orbital {
     int l() const;
     int m() const;
     int g() const;
+    const std::string &term() const;
 
     /// \brief Getter for spin.
     /// \return Spin
@@ -139,6 +140,9 @@ class Orbital {
 
     /// Multiplicity
     ldouble _g;
+
+    /// term name
+    std::string _term;
 
     /// Energy
     ldouble _E;

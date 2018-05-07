@@ -94,6 +94,7 @@ void DFT::save(const std::string fout) {
     f << " " << std::setw(5) << "l" << " " << std::setw(5) << _o[i]->l();
     f << " " << std::setw(5) << "m" << " " << std::setw(5) << _o[i]->m();
     f << " " << std::setw(5) << "s" << " " << std::setw(5) << _o[i]->spin();
+    f << " " << std::setw(5) << "term" << " " << std::setw(5) << _o[i]->term();
     f << " " << std::setw(5) << "E" << " " << std::setw(64) << std::setprecision(60) << _o[i]->E();
     f << " " << std::setw(5) << "value";
     for (int ir = 0; ir < _g->N(); ++ir) {
@@ -317,8 +318,16 @@ void DFT::calculateN(ldouble gamma) {
     for (int k = 0; k < _g->N(); ++k) {
       if (s1 > 0) {
         _nsum_up[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
-      } else {
+      } else if (s1 < 0) {
         _nsum_dw[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
+      } else if (s1 == 0) {
+        for (int ml_idx = 0; ml_idx < _o[k1]->term().size(); ++ml_idx) {
+          int ml = ml_idx/2 - l;
+          if (_o[k1]->term()[ml_idx] == ' ') continue;
+          if (_o[k1]->term()[ml_idx] == '+')
+            _nsum_up[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
+          if (_o[k1]->term()[ml_idx] == '-')
+            _nsum_dw[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
       }
     }
   }

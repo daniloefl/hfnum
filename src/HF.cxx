@@ -79,7 +79,7 @@ void HF::save(const std::string fout) {
     f << " " << std::setw(5) << "l" << " " << std::setw(5) << _o[i]->l();
     f << " " << std::setw(5) << "m" << " " << std::setw(5) << _o[i]->m();
     f << " " << std::setw(5) << "s" << " " << std::setw(5) << _o[i]->spin();
-    f << " " << std::setw(5) << "g" << " " << std::setw(5) << _o[i]->g();
+    f << " " << std::setw(5) << "term" << " " << std::setw(5) << _o[i]->term();
     f << " " << std::setw(5) << "E" << " " << std::setw(64) << std::setprecision(60) << _o[i]->E();
     f << " " << std::setw(5) << "value";
     for (int ir = 0; ir < _g->N(); ++ir) {
@@ -311,44 +311,77 @@ void HF::calculateVex(ldouble gamma) {
       int m2 = _o[k2]->m();
 
       std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << std::endl;
-      for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
-        ldouble B = 0.0;
-        if (filled[k2]) {
-          // exact for a filled shell
-          B = 1.0/((ldouble) (2*k + 1))*std::pow(CG(l1, l2, 0, 0, k, 0), 2);
-        } else {
+      if (_o[k2]->spin() == 0) {
+        for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
+          ldouble A = 0.0;
           // from C. Fischer, "The Hartree-Fock method for atoms"
           // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
           // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
           // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
-          if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
+          if (l1 == 0 && l2 == 0 && k == 0) A = 1.0;
+          if (l2 == 1 && l1 == 1) {
+            for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
+              int ml1 = ml1_idx/2 - l1;
+              if (_o[k1]->term()[ml1_idx] == ' ') continue;
+              for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
+                int ml2 = ml2_idx/2 - l2;
+                if (_o[k2]->term()[ml2_idx] == ' ') continue;
+                if (_o[k1]->term()[ml1_idx] == '+' && _o[k2]->term()[ml2_idx] == '-') continue;
+                if (_o[k1]->term()[ml1_idx] == '-' && _o[k2]->term()[ml2_idx] == '+') continue;
+                if (k == 1 && ml1 == ml2) A += 1.0;
+                if (k == 2 && ml1 == -1 && ml2 == -1) A += 1.0/25.0;
+                if (k == 2 && ml1 == 0 && ml2 == 0) A += 4.0/25.0;
+                if (k == 2 && ml1 == 1 && ml2 == 1) A += 1.0/25.0;
+              }
+            }
+          }
 
-          if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/3.0;
-
-          if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/3.0;
-          if (k == 1 && l1 == 1 && l2 == 0) B = 1.0/3.0;
-
-          if (k == 2 && l1 == 1 && l2 == 1) B = 2.0/15.0;
-
-          //if (k == 2 && l1 == 0 && l2 == 2) B = 1.0/10.0*2;
-          //if (k == 2 && l1 == 2 && l2 == 0) B = 1.0/10.0*2;
-
-          //if (k == 1 && l1 == 1 && l2 == 2) B = 1.0/15.0*2;
-          //if (k == 1 && l1 == 2 && l2 == 1) B = 1.0/15.0*2;
-          //if (k == 3 && l1 == 1 && l2 == 2) B = 3.0/70.0*2;
-          //if (k == 3 && l1 == 2 && l2 == 1) B = 3.0/70.0*2;
-
-          //if (k == 0 && l1 == 2 && l2 == 2) B = 1.0/10.0*2;
-          //if (k == 2 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
-          //if (k == 4 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
-          if (_o[k2]->spin() == 0) B *= 0.5*_o[k2]->g();
+          if (A == 0) continue;
+          // This is the extra k parts
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            _vexsum[std::pair<int,int>(k1, k2)][ir1] += A * _Y[10000*k + 100*k1 + 1*k2][ir1];
+          }
         }
+      } else {
+        for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
+          ldouble B = 0.0;
+          if (filled[k2]) {
+            // exact for a filled shell
+            B = 1.0/((ldouble) (2*k + 1))*std::pow(CG(l1, l2, 0, 0, k, 0), 2);
+          } else {
+            // from C. Fischer, "The Hartree-Fock method for atoms"
+            // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
+            // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
+            // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
+            if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
 
-        if (B == 0) continue;
-        // This is the extra k parts
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          ldouble r1 = (*_g)(ir1);
-          _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
+            if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/3.0;
+ 
+            if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/3.0;
+            if (k == 1 && l1 == 1 && l2 == 0) B = 1.0/3.0;
+ 
+            if (k == 2 && l1 == 1 && l2 == 1) B = 2.0/15.0;
+ 
+            //if (k == 2 && l1 == 0 && l2 == 2) B = 1.0/10.0*2;
+            //if (k == 2 && l1 == 2 && l2 == 0) B = 1.0/10.0*2;
+  
+            //if (k == 1 && l1 == 1 && l2 == 2) B = 1.0/15.0*2;
+            //if (k == 1 && l1 == 2 && l2 == 1) B = 1.0/15.0*2;
+            //if (k == 3 && l1 == 1 && l2 == 2) B = 3.0/70.0*2;
+            //if (k == 3 && l1 == 2 && l2 == 1) B = 3.0/70.0*2;
+
+            //if (k == 0 && l1 == 2 && l2 == 2) B = 1.0/10.0*2;
+            //if (k == 2 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
+            //if (k == 4 && l1 == 2 && l2 == 2) B = 1.0/35.0*2;
+          }
+
+          if (B == 0) continue;
+          // This is the extra k parts
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
+          }
         }
       }
 
@@ -542,23 +575,53 @@ void HF::calculateVd(ldouble gamma) {
       // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
       // Values agree, but taken in abs value ... how to average them in km?
       // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
-      for (int k = 2; k <= 2*l2; k += 2) {
-        ldouble A = 0.0;
-        if (k == 2 && l2 == 1 && l1 == 1) A = 2.0/25.0;
-
-        if (k == 2 && l2 == 2) A = 2.0/63.0;
-        if (k == 4 && l2 == 2) A = 2.0/63.0;
-        if (k == 2 && l2 == 3) A = 4.0/195.0;
-        if (k == 4 && l2 == 3) A = 2.0/143.0;
-        if (k == 6 && l2 == 3) A = 100.0/5577.0;
+      if (_o[k2]->spin() == 0) {
+        for (int k = 2; k <= 2*l2; k += 2) {
+          ldouble A = 0.0;
+          if (k == 2 && l2 == 1 && l1 == 1) {
+            for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
+              int ml1 = ml1_idx/2 - l1;
+              if (_o[k1]->term()[ml1_idx] == ' ') continue;
+              for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
+                int ml2 = ml2_idx/2 - l2;
+                if (_o[k2]->term()[ml2_idx] == ' ') continue;
+                if (ml1 == -1 && ml2 == -1) A += 1.0/25.0;
+                if (ml1 == -1 && ml2 == 0) A += -2.0/25.0;
+                if (ml1 == -1 && ml2 == 1) A += 1.0/25.0;
+                if (ml1 == 0 && ml2 == -1) A += -2.0/25.0;
+                if (ml1 == 0 && ml2 == 0) A += 4.0/25.0;
+                if (ml1 == 0 && ml2 == 1) A += -2.0/25.0;
+                if (ml1 == 1 && ml2 == -1) A += 1.0/25.0;
+                if (ml1 == 1 && ml2 == 0) A += -2.0/25.0;
+                if (ml1 == 1 && ml2 == 1) A += 1.0/25.0;
+              }
+            }
+          }
  
-        if (_o[k2]->spin() == 0) A *= _o[k2]->g();
-        if (A == 0) continue;
-        // This is the extra k parts
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
+          if (A == 0) continue;
+          // This is the extra k parts
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
+          }
         }
-      } // end of vdsum averaging over angles
+      } else {
+        for (int k = 2; k <= 2*l2; k += 2) {
+          ldouble A = 0.0;
+          if (k == 2 && l2 == 1) A = 2.0/25.0;
+ 
+          if (k == 2 && l2 == 2) A = 2.0/63.0;
+          if (k == 4 && l2 == 2) A = 2.0/63.0;
+          if (k == 2 && l2 == 3) A = 4.0/195.0;
+          if (k == 4 && l2 == 3) A = 2.0/143.0;
+          if (k == 6 && l2 == 3) A = 100.0/5577.0;
+ 
+          if (A == 0) continue;
+          // This is the extra k parts
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
+          }
+        } // end of vdsum averaging over angles
+      }
 
       
     }

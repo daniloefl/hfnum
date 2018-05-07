@@ -13,23 +13,23 @@ Z = 10
 
 # log grid
 dx = 0.5e-1/16.0
-N = 421*16
+N = 422*16
 rmin = 1e-8
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
 h.method(3)
 
-orb0 = hfnum.Orbital( 1, 0, 2)
-orb1 = hfnum.Orbital( 2, 0, 2)
-orb2 = hfnum.Orbital( 2, 1, 6)
+orb0 = hfnum.Orbital( 1, 0, "+-")
+orb1 = hfnum.Orbital( 2, 0, "+-")
+orb2 = hfnum.Orbital( 2, 1, "+-+-+-")
 h.addOrbital(orb0)
 h.addOrbital(orb1)
 h.addOrbital(orb2)
 
-NiterSCF = 50
+NiterSCF = 100
 Niter = 1000
-F0stop = 1e-5
+F0stop = 1e-6
 r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]

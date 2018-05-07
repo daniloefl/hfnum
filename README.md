@@ -16,7 +16,7 @@ Four methods are available to solve the differential equation:
 The software is a Python library, where the calculations are done in C++, but the configuration of the parameters is done in Python.
 Example Python configurations for the Hydrogen, Helium, Lithium, Beryllium, Boron and Carbon can be seen in the share directory.
 Note that the central potential approximation is used to solve the equations in the radial variable, so the energies found will only be a first approximation.
-Perturbative corrections can be applied further using the code in src/NonCentralCorrection.cxx.
+Perturbative corrections can be applied further using the code in src/NonCentralCorrection.cxx (but it has some bugs: TODO).
 
 The actual equation set up can be done either using several methods, which implement different potential models:
   * Hartree-Fock with central potential approximation: this is implemented in the hfnum.HF class. It projects the potentials in the spherical harmonic of the orbitla being calculated in case of non-filled shells. This should give the most accurate result, but it is the slowest. The examples below show this method being used.
@@ -79,15 +79,19 @@ h.resetGrid(1, dx, int(N), rmin)
 # set atomic number
 h.setZ(Z)
 
-# use this (default) method for more stability
+# use this (default) method for speed, but change it to 2 for more stability
 h.method(3)
 
 # create an Orbital as many times as needed
 # the syntax is the following:
-# myVar = hfnum.Orbital(n, l, multiplicity)
+# myVar = hfnum.Orbital(n, l, electronDistribution)
 # n, l are the orbital's quantum numbers to set initial conditions of integration
-orb0 = hfnum.Orbital( 1, 0, 2)
-orb2 = hfnum.Orbital( 2, 0, 1)
+# electron distribution is a string with 2*(2*l + 1) characters, which must each be one of "+", "-" or " ".
+# It specifies the filled m_s and m_l shells in the order (m_l = -l, m_s = +1), (m_l = -l, m_s = -1), (m_l = -l+1, m_s = +1), etc.
+# For example: "+-+ + " specifies that there are 3 electrons up and one down. The electron down is in m_l = -1.
+# The three electrons up are in m_l = -1, 0 and 1.
+orb0 = hfnum.Orbital( 1, 0, "+-")
+orb2 = hfnum.Orbital( 2, 0, "+ ")
 
 # now add it to the calculator
 h.addOrbital(orb0)

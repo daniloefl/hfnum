@@ -12,22 +12,22 @@ import matplotlib.pyplot as plt
 Z = 6
 
 # log grid
-dx = 0.5e-1/8.0
-N = 422*8
+dx = 0.5e-1/4
+N = 422*4
 rmin = 1e-8
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
 h.method(3)
 
-orb0 = hfnum.Orbital( 1, 0, 2)
-orb1 = hfnum.Orbital( 2, 0, 2)
-orb2 = hfnum.Orbital( 2, 1, 2)
+orb0 = hfnum.Orbital( 1, 0, "+-")
+orb1 = hfnum.Orbital( 2, 0, "+-")
+orb2 = hfnum.Orbital( 2, 1, "+ +   ")
 h.addOrbital(orb0)
 h.addOrbital(orb1)
 h.addOrbital(orb2)
 
-NiterSCF = 100
+NiterSCF = 80
 Niter = 1000
 F0stop = 1e-6
 r = np.asarray(h.getR())

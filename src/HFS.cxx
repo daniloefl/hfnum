@@ -78,7 +78,7 @@ void HFS::save(const std::string fout) {
     f << " " << std::setw(5) << "l" << " " << std::setw(5) << _o[i]->l();
     f << " " << std::setw(5) << "m" << " " << std::setw(5) << _o[i]->m();
     f << " " << std::setw(5) << "s" << " " << std::setw(5) << _o[i]->spin();
-    f << " " << std::setw(5) << "g" << " " << std::setw(5) << _o[i]->g();
+    f << " " << std::setw(5) << "term" << " " << std::setw(5) << _o[i]->term();
     f << " " << std::setw(5) << "E" << " " << std::setw(64) << std::setprecision(60) << _o[i]->E();
     f << " " << std::setw(5) << "value";
     for (int ir = 0; ir < _g->N(); ++ir) {
@@ -356,8 +356,6 @@ void HFS::calculateVd(ldouble gamma) {
     std::cout << "Calculating Vd term from k = " << k1 << std::endl;
 
     for (int k2 = 0; k2 < _o.size(); ++k2) {
-      //if (k2 == k1) continue; // cancels out with Vex ... we also remove it from there
-
       int l2 = _o[k2]->l();
       int m2 = _o[k2]->m();
 
@@ -368,26 +366,60 @@ void HFS::calculateVd(ldouble gamma) {
         _vdsum[k1][ir1] += A*_Y[10000*0 + 100*k2 + 1*k2][ir1];
       }
 
+      if (filled[k2]) continue; // the following is an approximation in case of not-filled shells
+
       // from C. Fischer, "The Hartree-Fock method for atoms"
       // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
       // Values agree, but taken in abs value ... how to average them in km?
-      for (int k = 2; k <= 2*l2; k += 2) {
-        ldouble A = 0.0;
-        if (k == 2 && l2 == 1) A = 2.0/25.0;
-
-        if (k == 2 && l2 == 2) A = 2.0/63.0;
-        if (k == 4 && l2 == 2) A = 2.0/63.0;
-        if (k == 2 && l2 == 3) A = 4.0/195.0;
-        if (k == 4 && l2 == 3) A = 2.0/143.0;
-        if (k == 6 && l2 == 3) A = 100.0/5577.0;
+      // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
+      if (_o[k2]->spin() == 0) {
+        for (int k = 2; k <= 2*l2; k += 2) {
+          ldouble A = 0.0;
+          if (k == 2 && l2 == 1 && l1 == 1) {
+            for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
+              int ml1 = ml1_idx/2 - 1;
+              if (_o[k1]->term()[ml1_idx] == ' ') continue;
+              for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
+                int ml2 = ml2_idx/2 - 1;
+                if (_o[k2]->term()[ml2_idx] == ' ') continue;
+                if (ml1 == -1 && ml2 == -1) A += 1.0/25.0;
+                if (ml1 == -1 && ml2 == 0) A += -2.0/25.0;
+                if (ml1 == -1 && ml2 == 1) A += 1.0/25.0;
+                if (ml1 == 0 && ml2 == -1) A += -2.0/25.0;
+                if (ml1 == 0 && ml2 == 0) A += 4.0/25.0;
+                if (ml1 == 0 && ml2 == 1) A += -2.0/25.0;
+                if (ml1 == 1 && ml2 == -1) A += 1.0/25.0;
+                if (ml1 == 1 && ml2 == 0) A += -2.0/25.0;
+                if (ml1 == 1 && ml2 == 1) A += 1.0/25.0;
+              }
+            }
+          }
  
-        if (_o[k2]->spin() == 0) A *= _o[k2]->g();
-        if (A == 0) continue;
-        // This is the extra k parts
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
+          if (A == 0) continue;
+          // This is the extra k parts
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
+          }
         }
-      } // end of vdsum averaging over angles
+      } else {
+        for (int k = 2; k <= 2*l2; k += 2) {
+          ldouble A = 0.0;
+          if (k == 2 && l2 == 1) A = 2.0/25.0;
+ 
+          if (k == 2 && l2 == 2) A = 2.0/63.0;
+          if (k == 4 && l2 == 2) A = 2.0/63.0;
+          if (k == 2 && l2 == 3) A = 4.0/195.0;
+          if (k == 4 && l2 == 3) A = 2.0/143.0;
+          if (k == 6 && l2 == 3) A = 100.0/5577.0;
+ 
+          if (A == 0) continue;
+          // This is the extra k parts
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
+          }
+        } // end of vdsum averaging over angles
+      }
+
     }
 
     /*
@@ -425,10 +457,20 @@ void HFS::calculateVd(ldouble gamma) {
   for (int ko = 0; ko < _o.size(); ++ko) {
     int lo = _o[ko]->l();
     int mo = _o[ko]->m();
-    ldouble A = 1.0;
-    if (_o[ko]->spin() == 0) A *= _o[ko]->g()*0.5;
+    ldouble A = 0.0;
+    ldouble B = 0.0;
+    if (_o[ko]->spin() == 0) {
+      for (int ml_idx = 0; ml_idx < _o[ko]->term().size(); ++ml_idx) {
+        if (_o[ko]->term()[ml_idx] == ' ') continue;
+        if (_o[ko]->term()[ml_idx] == '+') A += 0.5;
+        if (_o[ko]->term()[ml_idx] == '-') B += 0.5;
+      }
+    } else {
+      A = 0.5;
+      B = 0.5;
+    }
     for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
-      vex[ir2] += A*std::pow(_o[ko]->getNorm(ir2, *_g), 2.0);
+      vex[ir2] += (A+B)*std::pow(_o[ko]->getNorm(ir2, *_g), 2.0);
     }
   }
   for (int ko = 0; ko < _o.size(); ++ko) {

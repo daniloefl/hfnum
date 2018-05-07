@@ -20,12 +20,12 @@ h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
 h.method(3)
 
-orb0 = hfnum.Orbital( 1, 0, 2)
-orb1 = hfnum.Orbital( 2, 0, 2)
+orb0 = hfnum.Orbital( 1, 0, "+-")
+orb1 = hfnum.Orbital( 2, 0, "+-")
 h.addOrbital(orb0)
 h.addOrbital(orb1)
 
-NiterSCF = 100
+NiterSCF = 40
 Niter = 1000
 F0stop = 1e-8
 r = np.asarray(h.getR())

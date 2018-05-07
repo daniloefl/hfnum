@@ -23,7 +23,7 @@ h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
 h.method(3)
 
-orb = hfnum.Orbital(1, 0, 1)
+orb = hfnum.Orbital(1, 0, "+ ")
 
 h.addOrbital(orb)
 

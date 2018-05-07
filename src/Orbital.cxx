@@ -4,13 +4,32 @@
 #include <cmath>
 
 Orbital::Orbital(int s, int n, int l, int m)
- : _N(2), _s(s), _n(n), _l(l), _m(m), _g(1) {
+ : _N(2), _s(s), _n(n), _l(l), _m(m), _g(1), _term("") {
+  for (int ml = -l; ml <= l; ++ml) {
+    for (int ms = -1; ms <= 1; ms += 2) {
+      if (_s < 0 && ms < 0 && ml == m)
+        _term += '-';
+      else if (_s > 0 && ms > 0 && ml == m)
+        _term += '+';
+      else
+        _term += ' ';
+    }
+  }
   load();
   _torenorm = true;
 }
 
-Orbital::Orbital(int n, int l, int g)
- : _N(2), _s(0), _n(n), _l(l), _m(0), _g(g) {
+Orbital::Orbital(int n, int l, const std::string term)
+ : _N(2), _s(0), _n(n), _l(l), _m(0), _g(0), _term(term) {
+  if (_term.size() < 2*(2*l + 1)) {
+    for (int k = _term.size(); k < 2*(2*l + 1); ++k) _term += ' ';
+  }
+  for (int ml_idx = 0; ml_idx < _term.size(); ++ml_idx) {
+    int ml = ml_idx/2 - l;
+    int ms = 2*(ml_idx % 2) - 1;
+    if (_term[ml_idx] != ' ') _g++;
+  }
+  
   load();
   _torenorm = true;
 }
@@ -18,6 +37,10 @@ Orbital::Orbital(int n, int l, int g)
 Orbital::~Orbital() {
   delete [] _wf;
   delete [] _wf_norm;
+}
+
+const std::string &Orbital::term() const {
+  return _term;
 }
 
 int Orbital::length() const {

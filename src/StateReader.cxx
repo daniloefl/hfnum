@@ -66,17 +66,14 @@ void StateReader::load(const std::string &fin) {
 
       std::string trash;
 
-      int o_N, o_L, o_M, o_S, o_G;
-      ss >> trash >> o_N >> trash >> o_L >> trash >> o_M >> trash >> o_S >> trash >> o_G;
+      int o_N, o_L, o_M, o_S;
+      std::string o_T;
+      ss >> trash >> o_N >> trash >> o_L >> trash >> o_M >> trash >> o_S >> trash >> o_T;
 
       ldouble o_E;
       ss >> trash >> o_E;
 
-      if (o_G == 1) {
-        _o.push_back(new Orbital(o_S, o_N, o_L, o_M));
-      } else {
-        _o.push_back(new Orbital(o_N, o_L, o_G));
-      }
+      _o.push_back(new Orbital(o_N, o_L, o_T));
       int k = _o.size()-1;
       _o[k]->N(_i["grid.N"]);
       _o[k]->E(o_E);
