@@ -199,6 +199,8 @@ void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::map<int,
   //solution[N-2] = std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
   solution[N-1] = std::pow(_g(N-1), _Z/std::sqrt(2*std::fabs(E[idx]))-0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-1));
   solution[N-2] = std::pow(_g(N-2), _Z/std::sqrt(2*std::fabs(E[idx]))-0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
+  //solution[N-1] = 0;
+  //solution[N-2] = 1e-12;
   for (int k = N-2; k >= 1; --k) {
     solution[k-1] = ((12 - f[idx][k]*10)*solution[k] - f[idx][k+1]*solution[k+1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k-1];
   }

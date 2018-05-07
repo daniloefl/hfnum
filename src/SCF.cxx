@@ -210,7 +210,7 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     } else if (_method == 2) {
       F = stepRenormalised(gamma);
     } else if (_method == 3) {
-      F = stepStandard(gamma, true);
+      F = stepStandard(0.8);
     }
 
     // change orbital energies
@@ -360,8 +360,7 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
         dE[k] = _o[k]->E()*1e-2/((ldouble) _o[k]->n());
     }
   }
-  MatrixXld J(_o.size(), _o.size());
-  J.setZero();
+  VectorXld dEv(_o.size());
   for (int k = 0; k < _o.size(); ++k) {
     std::vector<ldouble> EdE = E;
     EdE[k] += dE[k];
@@ -373,14 +372,8 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
 
     // recalculate the function being minimized, because we are changing energy for orbital k independently from the others
     VectorXld Fd = _irs.solve(EdE, l, Fmd, Kmd, matched, Rnodesd);
-    //for (int ko = 0; ko < _o.size(); ++ko) {
-    //  J(ko, k) = (Fd(ko) - Fn(ko))/dE[k];
-    //}
-    J(k, k) = (Fd(k) - Fn(k))/dE[k];
+    dEv(k) = Fn(k)*dE[k]/(Fd(k) - Fn(k));
   }
-
-  //std::cout << "J " << J << " det = " << J.determinant() << ", invJ = " << J.inverse() << std::endl;
-  VectorXld dEv = J.inverse()*Fn;
 
   // check node count
   for (int k = 0; k < _o.size(); ++k) {
@@ -491,7 +484,7 @@ ldouble SCF::stepSparse(ldouble gamma) {
 }
 
 // solve for a fixed energy and calculate _dE for the next step
-ldouble SCF::stepStandard(ldouble gamma, bool checkE) {
+ldouble SCF::stepStandard(ldouble gamma) {
   int N = _om.N();
 
   std::vector<ldouble> E(_o.size(), 0);
@@ -523,6 +516,7 @@ ldouble SCF::stepStandard(ldouble gamma, bool checkE) {
     }
   }
 
+  /*
   // to get the next energy, based on the procedure described in page 65 of:
   // L.V. CHERNYSHEVA and N.A. CHEREPKOV and N.A. CHEREPKOV, Computer Physics Communications 11(1976) 57—73
   // SELF-CONSISTENT FIELD HARTREE—FOCK PROGRAM FOR ATOMS
@@ -531,9 +525,187 @@ ldouble SCF::stepStandard(ldouble gamma, bool checkE) {
   for (int k = 0; k < _o.size(); ++k) {
     int idx = _om.index(k);
 
+    bool foundSolution = false;
+    if (iterE >= 2) { // if there are at least 3 points, fit a parabola
+
+      VectorXld hE, hF;
+      hE.resize(3);
+      hF.resize(3);
+
+      // could use those, but as other orbitals change, the correlation can cause instabilities
+      hE(0) = _historyE[iterE-0](idx);     hF(0) = _historyF[iterE-0](idx);
+      hE(1) = _historyE[iterE-1](idx);     hF(1) = _historyF[iterE-1](idx);
+      hE(2) = _historyE[iterE-2](idx);     hF(2) = _historyF[iterE-2](idx);
+
+      // it is better to recalculate previous steps, because the other orbitals energy changed
+      std::vector<ldouble> EdE = E;
+      VectorXld Fd;
+
+      EdE = E;
+      EdE[k] += - hE(0) + hE(1);
+      if (_isSpinDependent) {
+        Fd = _iss.solve(EdE, _pot, _vsum_up, _vsum_dw, matchedSt);
+      } else {
+        Fd = _iss.solve(EdE, _pot, _vd, _vex, matchedSt);
+      }
+      hE(1) = EdE[k];    hF(1) = Fd(idx);
+
+      EdE = E;
+      EdE[k] += - hE(0) + hE(2);
+      if (_isSpinDependent) {
+        Fd = _iss.solve(EdE, _pot, _vsum_up, _vsum_dw, matchedSt);
+      } else {
+        Fd = _iss.solve(EdE, _pot, _vd, _vex, matchedSt);
+      }
+      hE(2) = EdE[k];    hF(2) = Fd(idx);
+
+      MatrixXld A;
+      VectorXld F;
+      A.resize(3, 3);
+      F.resize(3);
+
+      // f(E) = a E^2 + b E + c
+      // e = sum_k=0^3 (f(E_k) - F_k)^2
+      // grad e = 0
+      // de/da = 2 sum_k (f(E_k) - F_k) (E_k^2) = 2 a sum_k E_k^4 + 2 b sum_k E_k^3 + 2 c sum_k E_k^2 - sum_k F_k E_k^2
+      // de/db = 2 sum_k (f(E_k) - F_k) (E_k)   = 2 a sum_k E_k^3 + 2 b sum_k E_k^2 + 2 c sum_k E_k   - sum_k F_k E_k
+      // de/dc = 2 sum_k (f(E_k) - F_k) (1)     = 2 a sum_k E_k^2 + 2 b sum_k E_k   + 2 c sum_k 1     - sum_k F_k
+      A(0,0) = 2*(std::pow(hE(0), 4) + std::pow(hE(1), 4) + std::pow(hE(2), 4));
+      A(0,1) = 2*(std::pow(hE(0), 3) + std::pow(hE(1), 3) + std::pow(hE(2), 3));
+      A(0,2) = 2*(std::pow(hE(0), 2) + std::pow(hE(1), 2) + std::pow(hE(2), 2));
+      F(0) = hF(0)*std::pow(hE(0), 2) + hF(1)*std::pow(hE(1), 2) + hF(2)*std::pow(hE(2), 2);
+      A(1,0) = 2*(std::pow(hE(0), 3) + std::pow(hE(1), 3) + std::pow(hE(2), 3));
+      A(1,1) = 2*(std::pow(hE(0), 2) + std::pow(hE(1), 2) + std::pow(hE(2), 2));
+      A(1,2) = 2*(std::pow(hE(0), 1) + std::pow(hE(1), 1) + std::pow(hE(2), 1));
+      F(1) = hF(0)*std::pow(hE(0), 1) + hF(1)*std::pow(hE(1), 1) + hF(2)*std::pow(hE(2), 1);
+      A(2,0) = 2*(std::pow(hE(0), 2) + std::pow(hE(1), 2) + std::pow(hE(2), 1));
+      A(2,1) = 2*(std::pow(hE(0), 1) + std::pow(hE(1), 1) + std::pow(hE(2), 1));
+      A(2,2) = 2*(std::pow(hE(0), 0) + std::pow(hE(1), 0) + std::pow(hE(2), 0));
+      F(2) = hF(0)*std::pow(hE(0), 0) + hF(1)*std::pow(hE(1), 0) + hF(2)*std::pow(hE(2), 0);
+
+      ldouble a, b, c;
+      if (std::fabs(A.determinant()) > 1e-14) {
+        VectorXld p = A.inverse()*F;
+        a = p(0);
+        b = p(1);
+        c = p(2);
+        ldouble delta = b*b - 4*a*c;
+        if (delta > 0 && std::fabs(a) > 1e-14 && !std::isnan(a) && !std::isnan(b) && !std::isnan(c)) {
+          ldouble E1 = (-b + std::sqrt(delta))/(2*a);
+          ldouble E2 = (-b - std::sqrt(delta))/(2*a);
+          if (E1 > 0 && E2 < 0) {
+            _dE[k] = E2 - _o[k]->E();
+            if (std::fabs(_dE[k]) < 0.5)
+              foundSolution = true;
+          } else if (E1 < 0 && E2 > 0) {
+            _dE[k] = E1 - _o[k]->E();
+            if (std::fabs(_dE[k]) < 0.5)
+              foundSolution = true;
+          } else if (E1 < 0 && E2 < 0) {
+            ldouble dE1 = E1 - _o[k]->E();
+            ldouble dE2 = E2 - _o[k]->E();
+            if (std::fabs(dE1) < std::fabs(dE2)) {
+              _dE[k] = dE1;
+            } else {
+              _dE[k] = dE2;
+            }
+            if (std::fabs(_dE[k]) < 0.5)
+              foundSolution = true;
+          }
+          _dE[k] *= gamma;
+        }
+      }
+      if (foundSolution)
+        std::cout << "INFO: Orbital " << k << " (with parabola fit), dE = " << _dE[k] << " (det(A), a,b,c = " << A.determinant() << ", " << a << ", " << b << ", " << c << ")" << std::endl;
+      else
+        std::cout << "INFO: Orbital " << k << " (failed parabola fit), (det(A), a,b,c = " << A.determinant() << ", " << a << ", " << b << ", " << c << ")" << std::endl;
+    }
+
     // try the secant method
-    // if we have no past iterations or the differences are too small, calculate the effect
-    // of shifting E by an arbitrary amount
+    if (!foundSolution) {
+      // if we have no past iterations or the differences are too small, calculate the effect
+      // of shifting E by an arbitrary amount
+      dE[k] = E[k]*1e-2/((ldouble) _o[k]->n());
+      if (iterE >= 1) {
+        dE[k] = _historyE[iterE-1][k] - _historyE[iterE][k];
+      }
+      if (dE[k] == 0)
+        dE[k] = E[k]*1e-2/_o[k]->n();
+
+      std::vector<ldouble> EdE = E;
+      EdE[k] += dE[k];
+
+      VectorXld Fd;
+      if (_isSpinDependent) {
+        Fd = _iss.solve(EdE, _pot, _vsum_up, _vsum_dw, matchedSt);
+      } else {
+        Fd = _iss.solve(EdE, _pot, _vd, _vex, matchedSt);
+      }
+
+      int nodes = 0;
+      for (int i = 0; i < _g->N(); ++i) {
+        if (i >= 10 && i < _g->N() - 4 && (*_o[k])(i)*(*_o[k])(i-1) < 0) {
+          nodes += 1;
+        }
+      }
+
+      _dE[k] = 0;
+      if (nodes != _nodes[k]) {
+        std::cout << "INFO: Found " << nodes << " nodes != " << _nodes[k] << ", after probe step in secant method for orbital " << k << "." << std::endl;
+      } else {
+        if (std::fabs(Fn(idx) - Fd(idx)) != 0) {
+          _dE[k] = Fn(idx)*(-dE[k])/(Fn(idx) - Fd(idx));
+        }
+        _dE[k] *= -gamma;
+      }
+
+      if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
+      std::cout << "INFO: Orbital " << k << " (with secant method), dE = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
+    }
+
+    if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "INFO: Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emin[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/((ldouble) 20.0*_o[k]->n());
+      std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      _historyE.clear();
+      _historyF.clear();
+    } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "INFO: Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emax[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/( (ldouble) 20.0*_o[k]->n());
+      std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      _historyE.clear();
+      _historyF.clear();
+    } else {
+      if (_dE[k] > 0) {
+        _Emin[k] = _o[k]->E();
+      } else if (_dE[k] < 0) {
+        _Emax[k] = _o[k]->E();
+      }
+
+      VectorXld tmp;
+      tmp.resize(_o.size());
+      for (int k = 0; k < _o.size(); ++k) {
+        tmp(k) = _o[k]->E();
+      }
+      _historyE.push_back(tmp);
+      _historyF.push_back(Fn);
+    }
+  }
+  */
+
+  VectorXld dEv(_o.size());
+  dEv.setZero();
+  MatrixXld J(_o.size(), _o.size());
+  J.setZero();
+
+  int iterE = _historyE.size()-1;
+  std::vector<ldouble> dE(_o.size(), 0);
+  for (int k = 0; k < _o.size(); ++k) {
+    int idx = _om.index(k);
     dE[k] = E[k]*1e-2/((ldouble) _o[k]->n());
     if (iterE >= 1) {
       dE[k] = _historyE[iterE-1][k] - _historyE[iterE][k];
@@ -550,57 +722,53 @@ ldouble SCF::stepStandard(ldouble gamma, bool checkE) {
     } else {
       Fd = _iss.solve(EdE, _pot, _vd, _vex, matchedSt);
     }
-
-    int nodes = 0;
-    for (int i = 0; i < _g->N(); ++i) {
-      if (i >= 10 && i < _g->N() - 4 && (*_o[k])(i)*(*_o[k])(i-1) < 0) {
-        nodes += 1;
-      }
+    for (int j = 0; j < _o.size(); ++j) {
+      J(j, k) = (Fd(j) - Fn(j))/dE[k];
     }
 
-    _dE[k] = 0;
-    if (nodes != _nodes[k]) {
-      std::cout << "INFO: Found " << nodes << " nodes != " << _nodes[k] << ", after probe step in secant method for orbital " << k << "." << std::endl;
-    } else {
-      if (std::fabs(Fn(idx) - Fd(idx)) != 0) {
-        _dE[k] = Fn(idx)*(-dE[k])/(Fn(idx) - Fd(idx));
-      }
-      _dE[k] *= -gamma;
-    }
-
-    if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
-    std::cout << "INFO: Orbital " << k << " (with secant method), dE = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
-
-    if (checkE) {
-      if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
-        std::cout << "INFO: Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
-        _Emin[k] = _o[k]->E();
-        _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
-        //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/((ldouble) 20.0*_o[k]->n());
-        std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
-      } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
-        std::cout << "INFO: Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
-        _Emax[k] = _o[k]->E();
-        _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
-        //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/( (ldouble) 20.0*_o[k]->n());
-        std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
-      } else {
-        if (_dE[k] > 0) {
-          _Emin[k] = _o[k]->E();
-        } else if (_dE[k] < 0) {
-          _Emax[k] = _o[k]->E();
-        }
-      }
-    }
   }
+  dEv = J.inverse()*Fn;
 
-  VectorXld tmp;
-  tmp.resize(_o.size());
   for (int k = 0; k < _o.size(); ++k) {
-    tmp(k) = _o[k]->E();
+    _dE[k] = -gamma*dEv(k);
+    if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
+    std::cout << "INFO: Orbital " << k << " (with the Newton-Raphson method), dE = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
   }
-  _historyE.push_back(tmp);
-  _historyF.push_back(Fn);
+
+  for (int k = 0; k < _o.size(); ++k) {
+    int idx = _om.index(k);
+    if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "INFO: Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emin[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/((ldouble) 20.0*_o[k]->n());
+      std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      _historyE.clear();
+      _historyF.clear();
+    } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "INFO: Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emax[k] = _o[k]->E();
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/( (ldouble) 20.0*_o[k]->n());
+      std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      _historyE.clear();
+      _historyF.clear();
+    } else {
+      if (_dE[k] > 0) {
+        _Emin[k] = _o[k]->E();
+      } else if (_dE[k] < 0) {
+        _Emax[k] = _o[k]->E();
+      }
+
+      VectorXld tmp;
+      tmp.resize(_o.size());
+      for (int k = 0; k < _o.size(); ++k) {
+        tmp(k) = _o[k]->E();
+      }
+      _historyE.push_back(tmp);
+      _historyF.push_back(Fn);
+    }
+  }
   
   ldouble F = Fn.norm();
   return F;
