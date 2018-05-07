@@ -210,7 +210,7 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     } else if (_method == 2) {
       F = stepRenormalised(gamma);
     } else if (_method == 3) {
-      F = stepStandard(1.0, true); //gamma, true);
+      F = stepStandard(gamma, true);
     }
 
     // change orbital energies

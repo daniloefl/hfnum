@@ -320,7 +320,9 @@ void HF::calculateVex(ldouble gamma) {
           // from C. Fischer, "The Hartree-Fock method for atoms"
           // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
           // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
+          // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
           if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
+
           if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/3.0;
 
           if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/3.0;
@@ -539,9 +541,10 @@ void HF::calculateVd(ldouble gamma) {
       // from C. Fischer, "The Hartree-Fock method for atoms"
       // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
       // Values agree, but taken in abs value ... how to average them in km?
+      // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
       for (int k = 2; k <= 2*l2; k += 2) {
         ldouble A = 0.0;
-        if (k == 2 && l2 == 1) A = 2.0/25.0;
+        if (k == 2 && l2 == 1 && l1 == 1) A = 2.0/25.0;
 
         if (k == 2 && l2 == 2) A = 2.0/63.0;
         if (k == 4 && l2 == 2) A = 2.0/63.0;
