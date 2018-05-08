@@ -153,16 +153,14 @@ void HFS::load(const std::string fin) {
 ldouble HFS::getE0() {
   ldouble E0 = 0;
   for (int k = 0; k < _o.size(); ++k) {
-    ldouble A = 1;
-    if (_o[k]->spin() == 0) A = _o[k]->g();
+    ldouble A = _o[k]->g();
     E0 += A*_o[k]->E();
   }
   ldouble J = 0;
   ldouble K = 0;
   for (auto &vditm : _vd) {
     int k = vditm.first;
-    ldouble A = 1;
-    if (_o[k]->spin() == 0) A = _o[k]->g();
+    ldouble A = _o[k]->g();
     for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
       ldouble rp1 = (*_g)(ir+1);
@@ -177,8 +175,7 @@ ldouble HFS::getE0() {
   for (auto &vexitm : _vex) {
     const int k1 = vexitm.first.first;
     const int k2 = vexitm.first.second;
-    ldouble A = 1;
-    if (_o[k2]->spin() == 0) A *= _o[k2]->g();
+    ldouble A = _o[k2]->g();
     for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
       ldouble rp1 = (*_g)(ir+1);
@@ -300,28 +297,6 @@ void HFS::calculateY() {
           _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
         }
 
-
-        // classical integration:
-        /*
-        for (int ir = 0; ir < _g->N()-1; ++ir) {
-          ldouble r = (*_g)(ir);
-
-          // integrate r1 from 0 to r
-          for (int ir1 = 0; ir1 < ir; ++ir1) {
-            ldouble r1 = (*_g)(ir1);
-            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
-            _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r1/r, k)/r * r1 * r1 * dr1;
-          }
-
-          // integrate r1 from r to inf
-          for (int ir1 = ir; ir1 < _g->N()-1; ++ir1) {
-            ldouble r1 = (*_g)(ir1);
-            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
-            _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r/r1, k)/r1 * r1 * r1 * dr1;
-          }
-        }
-        */
-
       }
     }
   }
@@ -360,8 +335,7 @@ void HFS::calculateVd(ldouble gamma) {
       int m2 = _o[k2]->m();
 
       // This is the central part
-      ldouble A = 1.0;
-      if (_o[k2]->spin() == 0) A *= _o[k2]->g();
+      ldouble A = _o[k2]->g();
       for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
         _vdsum[k1][ir1] += A*_Y[10000*0 + 100*k2 + 1*k2][ir1];
       }
@@ -370,86 +344,36 @@ void HFS::calculateVd(ldouble gamma) {
       // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
       // Values agree, but taken in abs value ... how to average them in km?
       // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
-      if (_o[k2]->spin() == 0) {
-        for (int k = 2; k <= 2*l2; k += 2) {
-          ldouble A = 0.0;
-          if (k == 2 && l2 == 1 && l1 == 1) {
-            for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
-              int ml1 = ml1_idx/2 - 1;
-              if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
-              for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
-                int ml2 = ml2_idx/2 - 1;
-                if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
-                if (ml1 == -1 && ml2 == -1) A += 1.0/25.0;
-                if (ml1 == -1 && ml2 == 0) A += -2.0/25.0;
-                if (ml1 == -1 && ml2 == 1) A += 1.0/25.0;
-                if (ml1 == 0 && ml2 == -1) A += -2.0/25.0;
-                if (ml1 == 0 && ml2 == 0) A += 4.0/25.0;
-                if (ml1 == 0 && ml2 == 1) A += -2.0/25.0;
-                if (ml1 == 1 && ml2 == -1) A += 1.0/25.0;
-                if (ml1 == 1 && ml2 == 0) A += -2.0/25.0;
-                if (ml1 == 1 && ml2 == 1) A += 1.0/25.0;
-              }
+      for (int k = 2; k <= 2*l2; k += 2) {
+        ldouble A = 0.0;
+        if (k == 2 && l2 == 1 && l1 == 1) {
+          for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
+            int ml1 = ml1_idx/2 - 1;
+            if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
+            for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
+              int ml2 = ml2_idx/2 - 1;
+              if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
+              if (ml1 == -1 && ml2 == -1) A += 1.0/25.0;
+              if (ml1 == -1 && ml2 == 0) A += -2.0/25.0;
+              if (ml1 == -1 && ml2 == 1) A += 1.0/25.0;
+              if (ml1 == 0 && ml2 == -1) A += -2.0/25.0;
+              if (ml1 == 0 && ml2 == 0) A += 4.0/25.0;
+              if (ml1 == 0 && ml2 == 1) A += -2.0/25.0;
+              if (ml1 == 1 && ml2 == -1) A += 1.0/25.0;
+              if (ml1 == 1 && ml2 == 0) A += -2.0/25.0;
+              if (ml1 == 1 && ml2 == 1) A += 1.0/25.0;
             }
           }
- 
-          if (A == 0) continue;
-          // This is the extra k parts
-          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
-          }
         }
-      } else {
-        for (int k = 2; k <= 2*l2; k += 2) {
-          ldouble A = 0.0;
-          if (k == 2 && l2 == 1) A = 2.0/25.0;
  
-          if (k == 2 && l2 == 2) A = 2.0/63.0;
-          if (k == 4 && l2 == 2) A = 2.0/63.0;
-          if (k == 2 && l2 == 3) A = 4.0/195.0;
-          if (k == 4 && l2 == 3) A = 2.0/143.0;
-          if (k == 6 && l2 == 3) A = 100.0/5577.0;
- 
-          if (A == 0) continue;
-          // This is the extra k parts
-          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
-          }
-        } // end of vdsum averaging over angles
-      }
-
-    }
-
-    /*
-    int lmax = 2;
-    // temporary variable
-    std::vector<ldouble> vd(_g->N(), 0); // calculate it here first
-
-    for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-      ldouble r1 = (*_g)(ir1);
-      for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
-        ldouble r2 = (*_g)(ir2);
-        ldouble dr = 0;
-        if (ir2 < _g->N()-1) dr = (*_g)(ir2+1) - (*_g)(ir2);
-
-        ldouble rsmall = r1;
-        ldouble rlarge = r2;
-        if (r2 < r1) {
-          rsmall = r2;
-          rlarge = r1;
+        if (A == 0) continue;
+        // This is the extra k parts
+        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+          _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
         }
-        int l = 0;
-        int m = 0;
-        vd[ir1] += (2*l1+1.0)/std::sqrt(2*l+1.0)*CG(l1, l1, 0, 0, l, 0)*CG(l1, l1, m1, m1, l, m)*(1.0/(2*l+1.0))*std::pow(_o[k1]->getNorm(ir2, *_g), 2)*std::pow(r2, 2)*std::pow(rsmall, l)/std::pow(rlarge, l+1)*dr;
       }
     }
 
-    for (int ko = 0; ko < _o.size(); ++ko) {
-      for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
-        _vdsum[ko][ir2] += vd[ir2];
-      }
-    }
-    */
   }
 
   for (int ko = 0; ko < _o.size(); ++ko) {
@@ -457,14 +381,9 @@ void HFS::calculateVd(ldouble gamma) {
     int mo = _o[ko]->m();
     ldouble A = 0.0;
     ldouble B = 0.0;
-    if (_o[ko]->spin() == 0) {
-      for (int ml_idx = 0; ml_idx < _o[ko]->term().size(); ++ml_idx) {
-        if (_o[ko]->term()[ml_idx] == '+') A += 0.5;
-        if (_o[ko]->term()[ml_idx] == '-') B += 0.5;
-      }
-    } else {
-      A = 0.5;
-      B = 0.5;
+    for (int ml_idx = 0; ml_idx < _o[ko]->term().size(); ++ml_idx) {
+      if (_o[ko]->term()[ml_idx] == '+') A += 0.5;
+      if (_o[ko]->term()[ml_idx] == '-') B += 0.5;
     }
     for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
       vex[ir2] += (A+B)*std::pow(_o[ko]->getNorm(ir2, *_g), 2.0);

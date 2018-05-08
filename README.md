@@ -91,11 +91,24 @@ h.method(3)
 # For example: "+-+NNN" specifies that there are 3 electrons up and one down. The electron down is in m_l = -1.
 # The three electrons up are in m_l = -1, 0 and 1.
 orb0 = hfnum.Orbital( 1, 0, "+-")
-orb2 = hfnum.Orbital( 2, 0, "+N")
+orb1 = hfnum.Orbital( 2, 0, "+N")
 
 # now add it to the calculator
 h.addOrbital(orb0)
 h.addOrbital(orb1)
+
+# Note: all electrons in an Orbital have the same radial dependence
+# If you want two electrons to have independent radial wave functions above, you can simply split them in two Orbital objects:
+# 
+# orb0 = hfnum.Orbital( 1, 0, "+N")
+# orb1 = hfnum.Orbital( 1, 0, "N-")
+# orb2 = hfnum.Orbital( 2, 0, "+N")
+# h.addOrbital(orb0)
+# h.addOrbital(orb1)
+# h.addOrbital(orb2)
+#
+# This allows their radial functions and energies to vary independently.
+# It will take longer, but might give more freedom to achieve a better approximation.
 
 # number of self-consistent iterations
 NiterSCF = 20

@@ -153,16 +153,16 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   for (int idx = 0; idx < M; ++idx) {
     if (_g.isLog()) {
       for (int k = 0; k < _g.N(); ++k) {
-        if (_o[idx]->spin() > 0)
+        if (_o[idx]->term().find('+') != std::string::npos)
           f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*(2*std::pow(_g(k), 2)*(E[idx] - pot[k] - vup[k]) - std::pow(((ldouble ) _o[idx]->l()) + 0.5, 2));
-        else
+        if (_o[idx]->term().find('-') != std::string::npos)
           f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*(2*std::pow(_g(k), 2)*(E[idx] - pot[k] - vdw[k]) - std::pow(((ldouble ) _o[idx]->l()) + 0.5, 2));
       }
     } else {
       for (int k = 0; k < _g.N(); ++k) {
-        if (_o[idx]->spin() > 0)
+        if (_o[idx]->term().find('+') != std::string::npos)
           f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*((E[idx] - pot[k] - vup[k]) - std::pow(_o[idx]->l() + 0.5, 2));
-        else
+        if (_o[idx]->term().find('-') != std::string::npos)
           f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*((E[idx] - pot[k] - vdw[k]) - std::pow(_o[idx]->l() + 0.5, 2));
       }
     }
@@ -244,9 +244,8 @@ void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial 
     //o_untransformed[i] = ov;
     norm += std::pow(ov*r, 2)*dr;
   }
-  norm = 1.0/std::sqrt(norm);
   for (int i = 0; i < _g.N(); ++i) {
-    o[i] *= norm;
+    o[i] /= std::sqrt(norm);
   }
 
 }

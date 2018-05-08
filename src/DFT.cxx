@@ -311,23 +311,16 @@ void DFT::calculateN(ldouble gamma) {
   for (int k1 = 0; k1 < _o.size(); ++k1) {
     int l1 = _o[k1]->l();
     int m1 = _o[k1]->m();
-    int s1 = _o[k1]->spin();
 
     std::cout << "Calculating n term from k = " << k1 << " (averaging over orbitals assuming filled orbitals)" << std::endl;
 
     for (int k = 0; k < _g->N(); ++k) {
-      if (s1 > 0) {
-        _nsum_up[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
-      } else if (s1 < 0) {
-        _nsum_dw[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
-      } else if (s1 == 0) {
-        for (int ml_idx = 0; ml_idx < _o[k1]->term().size(); ++ml_idx) {
-          int ml = ml_idx/2 - l1;
-          if (_o[k1]->term()[ml_idx] == '+')
-            _nsum_up[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
-          else if (_o[k1]->term()[ml_idx] == '-')
-            _nsum_dw[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
-        }
+      for (int ml_idx = 0; ml_idx < _o[k1]->term().size(); ++ml_idx) {
+        int ml = ml_idx/2 - l1;
+        if (_o[k1]->term()[ml_idx] == '+')
+          _nsum_up[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
+        else if (_o[k1]->term()[ml_idx] == '-')
+          _nsum_dw[k] += std::pow(_o[k1]->getNorm(k, *_g), 2);
       }
     }
   }

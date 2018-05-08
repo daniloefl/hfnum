@@ -12,15 +12,9 @@ import matplotlib.pyplot as plt
 Z = 3
 
 # log grid
-dx = 0.5e-1/4
-N = 422*4
-rmin = 1e-8
-dx = 0.5e-1/4.0
-N = 280*4
-rmin = 1e-5
 dx = 0.25e-1
-N = 580
-rmin = 1e-5
+N = 500
+rmin = 1e-4
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
@@ -32,7 +26,7 @@ h.addOrbital(orb1)
 
 h.method(3)
 
-NiterSCF = 100
+NiterSCF = 40
 Niter = 200
 F0stop = 1e-8
 r = np.asarray(h.getR())

@@ -13,11 +13,8 @@ Z = 8
 
 # log grid
 dx = 0.25e-1
-N = 580
-rmin = 1e-5
-dx = 0.25e-1
-N = 580
-rmin = 1e-5
+N = 500
+rmin = 1e-4
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
@@ -30,13 +27,13 @@ h.addOrbital(orb0)
 h.addOrbital(orb1)
 h.addOrbital(orb2)
 
-NiterSCF = 100
+NiterSCF = 40
 Niter = 1000
 F0stop = 1e-8
 r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
-h.gammaSCF(0.6)
+h.gammaSCF(0.3)
 h.solve(NiterSCF, Niter, F0stop)
 h.save("output/results_O.txt")
 
