@@ -572,7 +572,7 @@ void HF::calculateVd(ldouble gamma) {
       ldouble A = 1.0;
       if (_o[k2]->spin() == 0) A *= _o[k2]->g();
       for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-        _vdsum[k1][ir1] += A*_Y[10000*0 + 100*k1 + 1*k2][ir1];
+        _vdsum[k1][ir1] += A*_Y[10000*0 + 100*k2 + 1*k2][ir1];
       }
 
       // from C. Fischer, "The Hartree-Fock method for atoms"
@@ -605,7 +605,7 @@ void HF::calculateVd(ldouble gamma) {
           if (A == 0) continue;
           // This is the extra k parts
           for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            _vdsum[k1][ir1] += A * _Y[10000*k + 100*k1 + 1*k2][ir1];
+            _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
           }
         }
       } else {
