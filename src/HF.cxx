@@ -322,7 +322,6 @@ void HF::calculateVex(ldouble gamma) {
             int ml1 = ml1_idx/2 - l1;
             if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
             ldouble A = 0;
-            ldouble Ac = 0;
             for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
               int ml2 = ml2_idx/2 - l2;
               if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
@@ -333,21 +332,37 @@ void HF::calculateVex(ldouble gamma) {
               if (l1 == 1 && l2 == 0 && k == 1) A += 1.0/3.0; // CHECK
               if (l2 == 1 && l1 == 1) {
                 if (k == 0 && ml1 == ml2) A += 1.0;
+
                 if (k == 2 && ml1 == -1 && ml2 == -1) A += 1.0/25.0;
-                if (k == 2 && ml1 == 0 && ml2 == 0) A += 4.0/25.0;
                 if (k == 2 && ml1 == 1 && ml2 == 1) A += 1.0/25.0;
+
+                if (k == 2 && ml1 == 1 && ml2 == 0) A += 3.0/25.0;  // CHECK
+                if (k == 2 && ml1 == -1 && ml2 == 0) A += 3.0/25.0;  // CHECK
+                if (k == 2 && ml1 == 0 && ml2 == 1) A += 3.0/25.0;  // CHECK
+                if (k == 2 && ml1 == 0 && ml2 == -1) A += 3.0/25.0;  // CHECK
+
+                if (k == 2 && ml1 == 0 && ml2 == 0) A += 4.0/25.0;
+
                 if (k == 2 && ml1 == 1 && ml2 == -1) A += 6.0/25.0; // CHECK
                 if (k == 2 && ml1 == -1 && ml2 == 1) A += 6.0/25.0; // CHECK
-                if (k == 2 && ml1 == 1 && ml2 == 0) A += 3.0/25.0;  // CHECK
-                if (k == 2 && ml1 == 0 && ml2 == 1) A += 3.0/25.0;  // CHECK
               }
             }
-            // average over multiplicity of the k1, since the sum here is over the "other" orbitals
-            // we should not sum the contribution of "this" (k1) orbital more than once
-            A /= (ldouble) _o[k1]->g();
             B += A;
           }
           
+          // average over multiplicity of the k1, since the sum here is over the "other" orbitals
+          // we should not sum the contribution of "this" (k1) orbital more than once
+          B /= (ldouble) _o[k1]->g();
+
+          //B = 0;
+          //if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
+
+          //if (k == 0 && l1 == 1 && l2 == 1) B = 1.0/3.0;
+ 
+          //if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/3.0;
+          //if (k == 1 && l1 == 1 && l2 == 0) B = 1.0/3.0;
+          //if (k == 2 && l1 == 1 && l2 == 1) B = 2.0/15.0;
+          //B *= _o[k2]->g()*0.5;
 
           if (B == 0) continue;
           // This is the extra k parts
@@ -608,13 +623,17 @@ void HF::calculateVd(ldouble gamma) {
                 if (ml1 == 1 && ml2 == 1) A += 1.0/25.0;
               }
             }
-            // average over multiplicity of the k1, since the sum here is over the "other" orbitals
-            // we should not sum the contribution of "this" (k1) orbital more than once
-            A /= (ldouble) _o[k1]->g();
             B += A;
           }
  
+          // average over multiplicity of the k1, since the sum here is over the "other" orbitals
+          // we should not sum the contribution of "this" (k1) orbital more than once
+          B /= (ldouble) _o[k1]->g();
           if (B == 0) continue;
+
+          //B = 0.0;
+          //if (k == 2 && l2 == 1 && l1 == 1) B = 2.0/25.0;
+          //B *= _o[k2]->g();
 
           // This is the extra k parts
           for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
