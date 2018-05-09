@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 Z = 9
 
 # log grid
-dx = 0.25e-1
-N = 500
+dx = 0.25e-1/2.0
+N = 500*2
 rmin = 1e-4
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
@@ -29,11 +29,11 @@ h.addOrbital(orb2)
 
 NiterSCF = 40
 Niter = 1000
-F0stop = 1e-6
+F0stop = 1e-8
 r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]
-h.gammaSCF(0.4)
+h.gammaSCF(0.3)
 h.solve(NiterSCF, Niter, F0stop)
 h.save("output/results_F.txt")
 
