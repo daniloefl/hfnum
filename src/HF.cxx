@@ -307,6 +307,7 @@ void HF::calculateVex(ldouble gamma) {
       // not sure why this gives too small energy ...
       for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
         ldouble B = 0.0;
+        ldouble multiplicity = 0;
         // from C. Fischer, "The Hartree-Fock method for atoms"
         // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
         // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
@@ -315,14 +316,17 @@ void HF::calculateVex(ldouble gamma) {
           int ml1 = ml1_idx/2 - l1;
           if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
           ldouble A = 0;
+          ldouble m = 0;
           for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
             int ml2 = ml2_idx/2 - l2;
             if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
             if (_o[k1]->term()[ml1_idx] == '+' && _o[k2]->term()[ml2_idx] == '-') continue;
             if (_o[k1]->term()[ml1_idx] == '-' && _o[k2]->term()[ml2_idx] == '+') continue;
+            if (_o[k1]->term()[ml1_idx] == _o[k2]->term()[ml2_idx]) m += 1;
+
             if (l1 == 0 && l2 == 0 && k == 0) A += 1.0;
-            ////if (l1 == 0 && l2 == 1 && k == 1) A += 1.0/3.0; // CHECK
-            ////if (l1 == 1 && l2 == 0 && k == 1) A += 1.0/3.0; // CHECK
+            //if (l1 == 0 && l2 == 1 && k == 1) A += 1.0/3.0; // CHECK
+            //if (l1 == 1 && l2 == 0 && k == 1) A += 1.0/3.0; // CHECK
             if (l2 == 1 && l1 == 1) {
               if (k == 0 && ml1 == ml2) A += 1.0;
 
@@ -344,12 +348,13 @@ void HF::calculateVex(ldouble gamma) {
               //if (k == 2 && ml1 == -1 && ml2 == 1) A += 6.0/25.0; // CHECK
             }
           }
+          if (m > multiplicity) multiplicity = m;
           B += A;
         }
         
         // average over multiplicity of the k1, since the sum here is over the "other" orbitals
         // we should not sum the contribution of "this" (k1) orbital more than once
-        B /= (ldouble) _o[k1]->g();
+        B /= multiplicity;
 
         //B = 0;
         //if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
@@ -398,7 +403,15 @@ void HF::calculateY() {
         // r Y(r) = int_0^r Pk1*t Pk2*t (t/r)^k dt +
         //         int_r^inf Pk1*t Pk2*t (r/t)^(k+1) dt
         // Z(r) = int_0^r Pk1*t Pk2*t (t/r)^k dt
+        // dZ/dr = d/dr[int Pk1*t Pk2*t (t/r)^k dt](r) - d/dr[int Pk1*t Pk2*t (t/r)^k dt](0)
+        // dZ/dr = d/dr[int Pk1*t Pk2*t (t/r)^k dt](r) + k/r [int Pk1*t Pk2*t (t/r)^k dt](0)
+        // dZ/dr = d/dr(r^-k) [int Pk1*t Pk2*t t^k dt](r) + r^-k d/dr[int Pk1*t Pk2*t (t)^k dt](r)+ k/r [int Pk1*t Pk2*t (t/r)^k dt](0)
+        // dZ/dr = d/dr(r^-k) [int Pk1*t Pk2*t t^k dt](r) + Pk1*r Pk2*r (t/r)^k + k/r [int Pk1*t Pk2*t (t/r)^k dt](0)
+        // dZ/dr = -k/r r^-k [int Pk1*t Pk2*t t^k dt](r) + Pk1*r Pk2*r (r/r)^k + k/r [int Pk1*t Pk2*t (t/r)^k dt](0)
         // dZ/dr = Pk1*r Pk2*r - k/r Z
+        // d(rY)/dr = -k/r [int_0^r Pk1*t Pk2*t (t/r)^k dt] + (k+1)/r [int_r^inf Pk1*t Pk2*t (t/r)^k dt] for k >= 2
+        //           --> for k < 2, there is a term from Pk1*t Pk2*t (r/t)^(k+1)|t = infinity
+        // d(rY)/dr = (k+1)/r (rY) - k/r Z - (k+1)/r Z
         // d(rY)/dr = 1/r [ (k+1) (rY) - (2k + 1) Z ]
         // Z (r=0) = 0
         // lim Y when r -> infinity = Z
@@ -409,47 +422,55 @@ void HF::calculateY() {
         //                 = exp(kx) *Pk1*r Pk2 *r *r
         // d(exp(- (k+1)x) (rY))/dx = -(k+1) exp(-(k+1)x) (rY) + exp(-(k+1)x) d(rY)/dx
         //                       = - (2k +1) Z exp(-(k+1)x)
-        //_Zt[10000*k + 100*k1 + 1*k2][0] = 0;
-        //for (int ir = 0; ir < _g->N()-1; ++ir) {
-        //  ldouble r = (*_g)(ir);
-        //  ldouble rp1 = (*_g)(ir+1);
-        //  ldouble x = std::log(r);
-        //  ldouble dr = (*_g)(ir+1) - (*_g)(ir);
-        //  ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
-        //  ldouble fn = std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g);
-        //  ldouble fnp1 = std::pow(rp1, 3)*_o[k1]->getNorm(ir+1, *_g) * _o[k2]->getNorm(ir+1, *_g);
-        //  _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fnp1+fn)*std::exp(dx*k)*dx;
-        //}
-        //_Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
-        //for (int ir = _g->N()-1; ir >= 1; --ir) {
-        //  ldouble r = (*_g)(ir);
-        //  ldouble x = std::log(r);
-        //  ldouble dr = (*_g)(ir) - (*_g)(ir-1);
-        //  ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir - 1));
-        //  ldouble fn = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir];
-        //  ldouble fnm1 = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir-1];
-        //  _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fn+fnm1)*std::exp(-(k+1)*dx)*dx;
-        //}
-        //for (int ir = 0; ir < _g->N(); ++ir) {
-        //  ldouble r = (*_g)(ir);
-        //  _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
-        //}
-
-        for (int ir = 0; ir < _g->N()-1; ++ir) {
-          ldouble r = (*_g)(ir);
-          // integrate r1 from 0 to r
-          for (int ir1 = 0; ir1 < ir; ++ir1) {
-            ldouble r1 = (*_g)(ir1);
-            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
-            _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r1/r, k)/r * r1 * r1 * dr1;
+        //if (k >= 2) {
+        //  _Zt[10000*k + 100*k1 + 1*k2][0] = 0;
+        //  for (int ir = 0; ir < _g->N()-1; ++ir) {
+        //    ldouble r = (*_g)(ir);
+        //    ldouble rp1 = (*_g)(ir+1);
+        //    ldouble x = std::log(r);
+        //    ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+        //    ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
+        //    ldouble fn = std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g);
+        //    ldouble fnp1 = std::pow(rp1, 3)*_o[k1]->getNorm(ir+1, *_g) * _o[k2]->getNorm(ir+1, *_g);
+        //    _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fnp1+fn)*std::exp(dx*k)*dx;
+        //  }
+        //  _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
+        //  for (int ir = _g->N()-1; ir >= 1; --ir) {
+        //    ldouble r = (*_g)(ir);
+        //    ldouble x = std::log(r);
+        //    ldouble dr = (*_g)(ir) - (*_g)(ir-1);
+        //    ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir - 1));
+        //    ldouble fn = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir];
+        //    ldouble fnm1 = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir-1];
+        //    _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fn+fnm1)*std::exp(-(k+1)*dx)*dx;
+        //  }
+        //  for (int ir = 0; ir < _g->N(); ++ir) {
+        //    ldouble r = (*_g)(ir);
+        //    _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
+        //  }
+        //} else {
+          for (int ir = 0; ir < _g->N()-1; ++ir) {
+            ldouble r = (*_g)(ir);
+            // integrate r1 from 0 to r
+            for (int ir1 = 0; ir1 < ir; ++ir1) {
+              ldouble r1 = (*_g)(ir1);
+              ldouble r1p1 = (*_g)(ir1+1);
+              ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+              ldouble fn = _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r1/r, k)/r * r1 * r1;
+              ldouble fnp1 = _o[k1]->getNorm(ir1+1, *_g) * _o[k2]->getNorm(ir1+1, *_g) * std::pow(r1p1/r, k)/r * r1p1 * r1p1;
+              _Y[10000*k + 100*k1 + 1*k2][ir] += 0.5*(fn+fnp1) * dr1;
+            }
+            // integrate r1 from r to inf
+            for (int ir1 = ir; ir1 < _g->N()-1; ++ir1) {
+              ldouble r1 = (*_g)(ir1);
+              ldouble r1p1 = (*_g)(ir1+1);
+              ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+              ldouble fn = _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r/r1, k)/r1 * r1 * r1;
+              ldouble fnp1 = _o[k1]->getNorm(ir1+1, *_g) * _o[k2]->getNorm(ir1+1, *_g) * std::pow(r/r1p1, k)/r1p1 * r1p1 * r1p1;
+              _Y[10000*k + 100*k1 + 1*k2][ir] += 0.5*(fn+fnp1) * dr1;
+            }
           }
-          // integrate r1 from r to inf
-          for (int ir1 = ir; ir1 < _g->N()-1; ++ir1) {
-            ldouble r1 = (*_g)(ir1);
-            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
-            _Y[10000*k + 100*k1 + 1*k2][ir] += _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r/r1, k)/r1 * r1 * r1 * dr1;
-          }
-        }
+        //}
 
       }
     }
