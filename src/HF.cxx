@@ -258,60 +258,25 @@ void HF::calculateVex(ldouble gamma) {
     }
   }
 
-  std::vector<bool> filled;
-  for (int k1 = 0; k1 < _o.size(); ++k1) {
-    int l1 = _o[k1]->l();
-    int c1 = 0;
-    for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
-      int ml1 = ml1_idx/2 - l1;
-      if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
-      c1 += 1;
-    }
-    if (c1 == 2*(2*l1+1)) filled.push_back(true);
-    else filled.push_back(false);
-  }
-
   for (int k1 = 0; k1 < _o.size(); ++k1) {
     int l1 = _o[k1]->l();
 
     // calculate it first with filled orbitals, dividing by the number of orbitals
     // this is exact if all 2(2*l+1) orbitals in this level are filled
     for (int k2 = 0; k2 < _o.size(); ++k2) {
+
       int l2 = _o[k2]->l();
 
       std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << std::endl;
 
-      if (filled[k2]) {
-        for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
-          ldouble B = ((ldouble) (2*l2 + 1))/((ldouble) (2*k + 1))*std::pow(CG(l1, l2, 0, 0, k, 0), 2);
-          if (B == 0) continue;
-          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            ldouble r1 = (*_g)(ir1);
-            _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
-          }
-        }
-        continue;
-      }
-
-      // average it out
-      //for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
-      //  ldouble B = ((ldouble) _o[k2]->g()*0.5)/((ldouble) (2*k + 1))*std::pow(CG(l1, l2, 0, 0, k, 0), 2);
-      //  if (B == 0) continue;
-      //  for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-      //    ldouble r1 = (*_g)(ir1);
-      //    _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
-      //  }
-      //}
-      //continue;
-
       // not sure why this gives too small energy ...
       for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
         ldouble B = 0.0;
-        ldouble multiplicity = 0;
         // from C. Fischer, "The Hartree-Fock method for atoms"
         // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
         // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
         // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
+        ldouble multiplicity = 0;
         for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
           int ml1 = ml1_idx/2 - l1;
           if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
@@ -320,41 +285,36 @@ void HF::calculateVex(ldouble gamma) {
           for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
             int ml2 = ml2_idx/2 - l2;
             if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
-            if (_o[k1]->term()[ml1_idx] == '+' && _o[k2]->term()[ml2_idx] == '-') continue;
-            if (_o[k1]->term()[ml1_idx] == '-' && _o[k2]->term()[ml2_idx] == '+') continue;
-            if (_o[k1]->term()[ml1_idx] == _o[k2]->term()[ml2_idx]) m += 1;
+            if (_o[k1]->term()[ml1_idx] != _o[k2]->term()[ml2_idx]) continue;
+            m += 1;
 
             if (l1 == 0 && l2 == 0 && k == 0) A += 1.0;
-            //if (l1 == 0 && l2 == 1 && k == 1) A += 1.0/3.0; // CHECK
-            //if (l1 == 1 && l2 == 0 && k == 1) A += 1.0/3.0; // CHECK
+            if (l1 == 0 && l2 == 1 && k == 1) A += 1.0/3.0; // CHECK
+            if (l1 == 1 && l2 == 0 && k == 1) A += 1.0/3.0; // CHECK
             if (l2 == 1 && l1 == 1) {
               if (k == 0 && ml1 == ml2) A += 1.0;
 
-              if (k == 2 && ml1 == 1 && ml2 == 1) A += 1.0/25.0;
-              if (k == 2 && ml1 == 0 && ml2 == 0) A += 4.0/25.0;
               if (k == 2 && ml1 == -1 && ml2 == -1) A += 1.0/25.0;
+              if (k == 2 && ml1 == 1 && ml2 == 1) A += 1.0/25.0;
 
-              //if (k == 2 && ml1 == -1 && ml2 == -1) A += 1.0/25.0;
-              //if (k == 2 && ml1 == 1 && ml2 == 1) A += 1.0/25.0;
+              if (k == 2 && ml1 == 1 && ml2 == 0) A += 3.0/25.0;  // CHECK
+              if (k == 2 && ml1 == -1 && ml2 == 0) A += 3.0/25.0;  // CHECK
+              if (k == 2 && ml1 == 0 && ml2 == 1) A += 3.0/25.0;  // CHECK
+              if (k == 2 && ml1 == 0 && ml2 == -1) A += 3.0/25.0;  // CHECK
 
-              //if (k == 2 && ml1 == 1 && ml2 == 0) A += 3.0/25.0;  // CHECK
-              //if (k == 2 && ml1 == -1 && ml2 == 0) A += 3.0/25.0;  // CHECK
-              //if (k == 2 && ml1 == 0 && ml2 == 1) A += 3.0/25.0;  // CHECK
-              //if (k == 2 && ml1 == 0 && ml2 == -1) A += 3.0/25.0;  // CHECK
+              if (k == 2 && ml1 == 0 && ml2 == 0) A += 4.0/25.0;
 
-              //if (k == 2 && ml1 == 0 && ml2 == 0) A += 4.0/25.0;
-
-              //if (k == 2 && ml1 == 1 && ml2 == -1) A += 6.0/25.0; // CHECK
-              //if (k == 2 && ml1 == -1 && ml2 == 1) A += 6.0/25.0; // CHECK
+              if (k == 2 && ml1 == 1 && ml2 == -1) A += 6.0/25.0; // CHECK
+              if (k == 2 && ml1 == -1 && ml2 == 1) A += 6.0/25.0; // CHECK
             }
           }
-          if (m > multiplicity) multiplicity = m;
+          multiplicity += m;
           B += A;
         }
         
         // average over multiplicity of the k1, since the sum here is over the "other" orbitals
         // we should not sum the contribution of "this" (k1) orbital more than once
-        B /= multiplicity;
+        B /= (ldouble) _o[k1]->g(); //multiplicity;
 
         //B = 0;
         //if (k == 0 && l1 == 0 && l2 == 0) B = 1.0;
@@ -364,7 +324,7 @@ void HF::calculateVex(ldouble gamma) {
         //if (k == 1 && l1 == 0 && l2 == 1) B = 1.0/3.0;
         //if (k == 1 && l1 == 1 && l2 == 0) B = 1.0/3.0;
         //if (k == 2 && l1 == 1 && l2 == 1) B = 2.0/15.0;
-        //B *= _o[k2]->g()*0.5;
+        //B *= _o[k2]->g();
 
         if (B == 0) continue;
         // This is the extra k parts
@@ -422,55 +382,52 @@ void HF::calculateY() {
         //                 = exp(kx) *Pk1*r Pk2 *r *r
         // d(exp(- (k+1)x) (rY))/dx = -(k+1) exp(-(k+1)x) (rY) + exp(-(k+1)x) d(rY)/dx
         //                       = - (2k +1) Z exp(-(k+1)x)
-        //if (k >= 2) {
-        //  _Zt[10000*k + 100*k1 + 1*k2][0] = 0;
-        //  for (int ir = 0; ir < _g->N()-1; ++ir) {
-        //    ldouble r = (*_g)(ir);
-        //    ldouble rp1 = (*_g)(ir+1);
-        //    ldouble x = std::log(r);
-        //    ldouble dr = (*_g)(ir+1) - (*_g)(ir);
-        //    ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
-        //    ldouble fn = std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g);
-        //    ldouble fnp1 = std::pow(rp1, 3)*_o[k1]->getNorm(ir+1, *_g) * _o[k2]->getNorm(ir+1, *_g);
-        //    _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fnp1+fn)*std::exp(dx*k)*dx;
-        //  }
-        //  _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
-        //  for (int ir = _g->N()-1; ir >= 1; --ir) {
-        //    ldouble r = (*_g)(ir);
-        //    ldouble x = std::log(r);
-        //    ldouble dr = (*_g)(ir) - (*_g)(ir-1);
-        //    ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir - 1));
-        //    ldouble fn = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir];
-        //    ldouble fnm1 = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir-1];
-        //    _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fn+fnm1)*std::exp(-(k+1)*dx)*dx;
-        //  }
-        //  for (int ir = 0; ir < _g->N(); ++ir) {
-        //    ldouble r = (*_g)(ir);
-        //    _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
-        //  }
-        //} else {
-          for (int ir = 0; ir < _g->N()-1; ++ir) {
-            ldouble r = (*_g)(ir);
-            // integrate r1 from 0 to r
-            for (int ir1 = 0; ir1 < ir; ++ir1) {
-              ldouble r1 = (*_g)(ir1);
-              ldouble r1p1 = (*_g)(ir1+1);
-              ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
-              ldouble fn = _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r1/r, k)/r * r1 * r1;
-              ldouble fnp1 = _o[k1]->getNorm(ir1+1, *_g) * _o[k2]->getNorm(ir1+1, *_g) * std::pow(r1p1/r, k)/r * r1p1 * r1p1;
-              _Y[10000*k + 100*k1 + 1*k2][ir] += 0.5*(fn+fnp1) * dr1;
-            }
-            // integrate r1 from r to inf
-            for (int ir1 = ir; ir1 < _g->N()-1; ++ir1) {
-              ldouble r1 = (*_g)(ir1);
-              ldouble r1p1 = (*_g)(ir1+1);
-              ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
-              ldouble fn = _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r/r1, k)/r1 * r1 * r1;
-              ldouble fnp1 = _o[k1]->getNorm(ir1+1, *_g) * _o[k2]->getNorm(ir1+1, *_g) * std::pow(r/r1p1, k)/r1p1 * r1p1 * r1p1;
-              _Y[10000*k + 100*k1 + 1*k2][ir] += 0.5*(fn+fnp1) * dr1;
-            }
-          }
+        //_Zt[10000*k + 100*k1 + 1*k2][0] = 0;
+        //for (int ir = 0; ir < _g->N()-1; ++ir) {
+        //  ldouble r = (*_g)(ir);
+        //  ldouble rp1 = (*_g)(ir+1);
+        //  ldouble x = std::log(r);
+        //  ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+        //  ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
+        //  ldouble fn = std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g);
+        //  ldouble fnp1 = std::pow(rp1, 3)*_o[k1]->getNorm(ir+1, *_g) * _o[k2]->getNorm(ir+1, *_g);
+        //  _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fnp1+fn)*std::exp(dx*k)*dx;
         //}
+        //_Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
+        //for (int ir = _g->N()-1; ir >= 1; --ir) {
+        //  ldouble r = (*_g)(ir);
+        //  ldouble x = std::log(r);
+        //  ldouble dr = (*_g)(ir) - (*_g)(ir-1);
+        //  ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir - 1));
+        //  ldouble fn = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir];
+        //  ldouble fnm1 = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir-1];
+        //  _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fn+fnm1)*std::exp(-(k+1)*dx)*dx;
+        //}
+        //for (int ir = 0; ir < _g->N(); ++ir) {
+        //  ldouble r = (*_g)(ir);
+        //  _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
+        //}
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble r = (*_g)(ir);
+          // integrate r1 from 0 to r
+          for (int ir1 = 0; ir1 < ir; ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble r1p1 = (*_g)(ir1+1);
+            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+            ldouble fn = _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r1/r, k)/r * r1 * r1;
+            ldouble fnp1 = _o[k1]->getNorm(ir1+1, *_g) * _o[k2]->getNorm(ir1+1, *_g) * std::pow(r1p1/r, k)/r * r1p1 * r1p1;
+            _Y[10000*k + 100*k1 + 1*k2][ir] += 0.5*(fn+fnp1) * dr1;
+          }
+          // integrate r1 from r to inf
+          for (int ir1 = ir; ir1 < _g->N()-1; ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble r1p1 = (*_g)(ir1+1);
+            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+            ldouble fn = _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r/r1, k)/r1 * r1 * r1;
+            ldouble fnp1 = _o[k1]->getNorm(ir1+1, *_g) * _o[k2]->getNorm(ir1+1, *_g) * std::pow(r/r1p1, k)/r1p1 * r1p1 * r1p1;
+            _Y[10000*k + 100*k1 + 1*k2][ir] += 0.5*(fn+fnp1) * dr1;
+          }
+        }
 
       }
     }
@@ -484,21 +441,6 @@ void HF::calculateVd(ldouble gamma) {
     _vdsum[k] = Vradial(_g->N(), 0);
   }
 
-  std::vector<bool> filled;
-  for (int k1 = 0; k1 < _o.size(); ++k1) {
-    int l1 = _o[k1]->l();
-    int c1 = 0;
-    for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
-      int ml1 = ml1_idx/2 - l1;
-      if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
-      c1 += 1;
-    }
-    if (c1 == 2*(2*l1+1)) filled.push_back(true);
-    else filled.push_back(false);
-  }
-      
-    
-
   // calculate it first with filled orbitals, dividing by the number of orbitals
   // this is exact if all 2(2*l+1) orbitals in this level are filled
   for (int k1 = 0; k1 < _o.size(); ++k1) {
@@ -507,20 +449,14 @@ void HF::calculateVd(ldouble gamma) {
     std::cout << "Calculating Vd term from k = " << k1 << std::endl;
 
     for (int k2 = 0; k2 < _o.size(); ++k2) {
+
       int l2 = _o[k2]->l();
 
       // This is the central part
-      ldouble B = 1.0;
-      if (filled[k2]) {
-        B = 2*(2*l2+1);
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          _vdsum[k1][ir1] += B*_Y[10000*0 + 100*k2 + 1*k2][ir1];
-        }
-        continue;
-      }
-      B = _o[k2]->g();
+      ldouble C = 1.0;
+      C = _o[k2]->g();
       for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-        _vdsum[k1][ir1] += B*_Y[10000*0 + 100*k2 + 1*k2][ir1];
+        _vdsum[k1][ir1] += C*_Y[10000*0 + 100*k2 + 1*k2][ir1];
       }
 
       // from C. Fischer, "The Hartree-Fock method for atoms"
