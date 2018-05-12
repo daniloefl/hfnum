@@ -179,10 +179,10 @@ void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::map<int,
   int N = _g.N();
   solution.resize(N);
   ldouble a0 = std::sqrt(2*std::fabs(E[idx]))/_Z;
-  solution[N-1] = std::pow(_g(N-1), _Z/std::sqrt(2*std::fabs(E[idx]))+0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-1));
-  solution[N-2] = std::pow(_g(N-2), _Z/std::sqrt(2*std::fabs(E[idx]))+0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
-  solution[N-1] = std::pow(_g(N-1), a0+0.5)*std::exp(-_g(N-1)*a0);
-  solution[N-2] = std::pow(_g(N-2), a0+0.5)*std::exp(-_g(N-2)*a0);
+  //solution[N-1] = std::pow(_g(N-1), _Z/std::sqrt(2*std::fabs(E[idx]))+0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-1));
+  //solution[N-2] = std::pow(_g(N-2), _Z/std::sqrt(2*std::fabs(E[idx]))+0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
+  solution[N-1] = std::pow(_g(N-1), 0.5)*std::exp(-_g(N-1)*a0);
+  solution[N-2] = std::pow(_g(N-2), 0.5)*std::exp(-_g(N-2)*a0);
   for (int k = N-2; k >= 1; --k) {
     solution[k-1] = ((12 - f[idx][k]*10)*solution[k] - f[idx][k+1]*solution[k+1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k-1];
   }
@@ -194,10 +194,10 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
   ldouble a0 = std::sqrt(2*std::fabs(E[idx]))/_Z;
   solution[0] = std::exp(-_g(0)/_o[idx]->n())*std::pow(_g(0), _o[idx]->l() + 0.5);
   solution[1] = std::exp(-_g(1)/_o[idx]->n())*std::pow(_g(1), _o[idx]->l() + 0.5);
-  if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
-    solution[0] *= -1;
-    solution[1] *= -1;
-  }
+  //if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
+  //  solution[0] *= -1;
+  //  solution[1] *= -1;
+  //}
   if (_o[idx]->n() == 1) {
     solution[0] = std::pow(_g(0), 0.5)*std::exp(-_g(0)/a0);
     solution[1] = std::pow(_g(1), 0.5)*std::exp(-_g(1)/a0);
@@ -208,7 +208,6 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
     solution[0] = std::pow(_g(0), 1.5)/a0*std::exp(-_g(0)/(2.0*a0));
     solution[1] = std::pow(_g(1), 1.5)/a0*std::exp(-_g(1)/(2.0*a0));
   }
-
   for (int k = 1; k < N-2; ++k) {
     solution[k+1] = ((12.0 - f[idx][k]*10.0)*solution[k] - f[idx][k-1]*solution[k-1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k+1];
   }
