@@ -271,30 +271,52 @@ void HFS::calculateY() {
         //                 = exp(kx) *Pk1*r Pk2 *r *r
         // d(exp(- (k+1)x) (rY))/dx = -(k+1) exp(-(k+1)x) (rY) + exp(-(k+1)x) d(rY)/dx
         //                       = - (2k +1) Z exp(-(k+1)x)
-        _Zt[10000*k + 100*k1 + 1*k2][0] = 0;
+        //_Zt[10000*k + 100*k1 + 1*k2][0] = 0;
+        //for (int ir = 0; ir < _g->N()-1; ++ir) {
+        //  ldouble r = (*_g)(ir);
+        //  ldouble rp1 = (*_g)(ir+1);
+        //  ldouble x = std::log(r);
+        //  ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+        //  ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
+        //  ldouble fn = std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g);
+        //  ldouble fnp1 = std::pow(rp1, 3)*_o[k1]->getNorm(ir+1, *_g) * _o[k2]->getNorm(ir+1, *_g);
+        //  _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fnp1+fn)*std::exp(dx*k)*dx;
+        //}
+        //_Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
+        //for (int ir = _g->N()-1; ir >= 1; --ir) {
+        //  ldouble r = (*_g)(ir);
+        //  ldouble x = std::log(r);
+        //  ldouble dr = (*_g)(ir) - (*_g)(ir-1);
+        //  ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir-1));
+        //  ldouble fn = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir];
+        //  ldouble fnm1 = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir-1];
+        //  _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fn+fnm1)*std::exp(-(k+1)*dx)*dx;
+        //}
+        //for (int ir = 0; ir < _g->N()-1; ++ir) {
+        //  ldouble r = (*_g)(ir);
+        //  _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
+        //}
+
         for (int ir = 0; ir < _g->N()-1; ++ir) {
           ldouble r = (*_g)(ir);
-          ldouble rp1 = (*_g)(ir+1);
-          ldouble x = std::log(r);
-          ldouble dr = (*_g)(ir+1) - (*_g)(ir);
-          ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
-          ldouble fn = std::pow(r, 3)*_o[k1]->getNorm(ir, *_g) * _o[k2]->getNorm(ir, *_g);
-          ldouble fnp1 = std::pow(rp1, 3)*_o[k1]->getNorm(ir+1, *_g) * _o[k2]->getNorm(ir+1, *_g);
-          _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fnp1+fn)*std::exp(dx*k)*dx;
-        }
-        _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
-        for (int ir = _g->N()-1; ir >= 1; --ir) {
-          ldouble r = (*_g)(ir);
-          ldouble x = std::log(r);
-          ldouble dr = (*_g)(ir) - (*_g)(ir-1);
-          ldouble dx = std::log((*_g)(ir)) - std::log((*_g)(ir-1));
-          ldouble fn = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir];
-          ldouble fnm1 = (2*k+1)*_Zt[10000*k + 100*k1 + 1*k2][ir-1];
-          _Y[10000*k + 100*k1 + 1*k2][ir-1] = std::exp(-dx*(k+1))*_Y[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fn+fnm1)*std::exp(-(k+1)*dx)*dx;
-        }
-        for (int ir = 0; ir < _g->N()-1; ++ir) {
-          ldouble r = (*_g)(ir);
-          _Y[10000*k + 100*k1 + 1*k2][ir] = _Y[10000*k + 100*k1 + 1*k2][ir]/r;
+          // integrate r1 from 0 to r
+          for (int ir1 = 0; ir1 < ir; ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble r1p1 = (*_g)(ir1+1);
+            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+            ldouble fn = _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r1/r, k)/r * r1 * r1;
+            ldouble fnp1 = _o[k1]->getNorm(ir1+1, *_g) * _o[k2]->getNorm(ir1+1, *_g) * std::pow(r1p1/r, k)/r * r1p1 * r1p1;
+            _Y[10000*k + 100*k1 + 1*k2][ir] += 0.5*(fn+fnp1) * dr1;
+          }
+          // integrate r1 from r to inf
+          for (int ir1 = ir; ir1 < _g->N()-1; ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            ldouble r1p1 = (*_g)(ir1+1);
+            ldouble dr1 = (*_g)(ir1+1) - (*_g)(ir1);
+            ldouble fn = _o[k1]->getNorm(ir1, *_g) * _o[k2]->getNorm(ir1, *_g) * std::pow(r/r1, k)/r1 * r1 * r1;
+            ldouble fnp1 = _o[k1]->getNorm(ir1+1, *_g) * _o[k2]->getNorm(ir1+1, *_g) * std::pow(r/r1p1, k)/r1p1 * r1p1 * r1p1;
+            _Y[10000*k + 100*k1 + 1*k2][ir] += 0.5*(fn+fnp1) * dr1;
+          }
         }
 
       }
@@ -382,8 +404,8 @@ void HFS::calculateVd(ldouble gamma) {
     ldouble A = 0.0;
     ldouble B = 0.0;
     for (int ml_idx = 0; ml_idx < _o[ko]->term().size(); ++ml_idx) {
-      if (_o[ko]->term()[ml_idx] == '+') A += 0.5;
-      if (_o[ko]->term()[ml_idx] == '-') B += 0.5;
+      if (_o[ko]->term()[ml_idx] == '+') A += 1.0;
+      if (_o[ko]->term()[ml_idx] == '-') B += 1.0;
     }
     for (int ir2 = 0; ir2 < _g->N(); ++ir2) {
       vex[ir2] += (A+B)*std::pow(_o[ko]->getNorm(ir2, *_g), 2.0);

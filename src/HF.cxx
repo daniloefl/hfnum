@@ -178,7 +178,7 @@ ldouble HF::getE0() {
   for (auto &vexitm : _vex) {
     const int k1 = vexitm.first.first;
     const int k2 = vexitm.first.second;
-    ldouble A = ((ldouble) _o[k2]->g());
+    ldouble A = ((ldouble) _o[k1]->g());
     for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
       ldouble rp1 = (*_g)(ir+1);
