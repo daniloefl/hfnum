@@ -50,6 +50,9 @@ class NonCentralCorrection : public PerturbativeCorrection {
     std::map<int, std::vector<ldouble> > _vd;
     std::map<std::pair<int,int> , std::vector<ldouble> > _vex;
 
+    MatrixXld _Jold;
+    MatrixXld _Kold;
+
     MatrixXld _J;
     MatrixXld _K;
 

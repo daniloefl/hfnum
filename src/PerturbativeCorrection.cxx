@@ -20,13 +20,13 @@ ldouble PerturbativeCorrection::Z() {
 
 std::vector<ldouble> PerturbativeCorrection::getCorrectedE() {
   std::vector<ldouble> o;
-  for (int i = 0; i < _Ec.size(); ++i) o.push_back(_Ec[i]+_o[i]->E());
+  for (int i = 0; i < _Ec.size(); ++i) o.push_back(_Ec[i] + _o[i]->E());
   return o;
 }
 
 boost::python::list PerturbativeCorrection::getCorrectedEPython() {
   python::list l;
-  for (int i = 0; i < _Ec.size(); ++i) l.append(_Ec[i]+_o[i]->E());
+  for (int i = 0; i < _Ec.size(); ++i) l.append(_Ec[i] + _o[i]->E());
   return l;
 }
 

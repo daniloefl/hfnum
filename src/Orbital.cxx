@@ -80,6 +80,7 @@ Orbital::Orbital(const Orbital &o) {
   _E = o._E;
   _s = o._s;
   _g = o._g;
+  _term = o._term;
   for (int i = 0; i < _N; ++i) _wf[i] = o._wf[i];
   for (int i = 0; i < _N; ++i) _wf_norm[i] = o._wf_norm[i];
   _torenorm = true;
@@ -95,6 +96,7 @@ Orbital &Orbital::operator =(const Orbital &o) {
   _m = o._m;
   _s = o._s;
   _g = o._g;
+  _term = o._term;
   for (int i = 0; i < _N; ++i) _wf[i] = o._wf[i];
   for (int i = 0; i < _N; ++i) _wf_norm[i] = o._wf_norm[i];
   _torenorm = true;
