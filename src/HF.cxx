@@ -210,12 +210,6 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
 
   int nStepSCF = 0;
   while (nStepSCF < NiterSCF) {
-    if (nStepSCF != 0) {
-      calculateY();
-      calculateVex(_gamma_scf);
-      calculateVd(_gamma_scf);
-    }
-
     for (int k = 0; k < _o.size(); ++k) {
       icl[k] = -1;
 
@@ -251,6 +245,10 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
 
     std::cout << "SCF step " << nStepSCF << std::endl;
     solveForFixedPotentials(Niter, F0stop);
+    calculateY();
+    calculateVex(_gamma_scf);
+    calculateVd(_gamma_scf);
+
     nStepSCF++;
   }
 }
@@ -427,8 +425,8 @@ void HF::calculateY() {
           ldouble fnp1 = 0;
           for (int z = 0; z < _o.size(); ++z) {
             for (int y = 0; y < _o.size(); ++y) {
-              fn += std::pow(r, 3)*Si(k1, z)*_o[z]->getNorm(ir, *_g) *Si(k2, y)* _o[y]->getNorm(ir, *_g);
-              fnp1 += std::pow(rp1, 3)*Si(k1, z)*_o[z]->getNorm(ir+1, *_g) *Si(k2, y)* _o[y]->getNorm(ir+1, *_g);
+              fn += std::pow(r, 3)*Si(k1,z)*_o[z]->getNorm(ir, *_g)*Si(k2,y)*_o[y]->getNorm(ir, *_g);
+              fnp1 += std::pow(rp1, 3)*Si(k1,z)*_o[z]->getNorm(ir+1, *_g)*Si(k2,y)*_o[y]->getNorm(ir+1, *_g);
             }
           }
           _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fnp1+fn)*std::exp(dx*k)*dx;
