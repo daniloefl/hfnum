@@ -217,11 +217,11 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   _lambda.resize(lcount, 0);
   _dlambda.resize(lcount, 0);
 
-  ldouble Lstop = 1e-6;
+  ldouble Lstop = 1e-3;
 
   ldouble F = 0;
   int lambdaStep = 0;
-  int NlambdaSteps = 5;
+  int NlambdaSteps = 3;
   while (lambdaStep < NlambdaSteps) { // do it twice: once to adjust the energy and a second time to fix lambdas
     int nStep = 0;
     while (nStep < Niter) {
@@ -267,6 +267,18 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     lambdaStep += 1; // redo it to fix lambda
   }
 
+  if (_method == 3) {
+    _iss._i0.resize(_o.size());
+    _iss._i1.resize(_o.size());
+    _iss._oN.resize(_o.size());
+    _iss._oN1.resize(_o.size());
+    for (int k = 0; k < _o.size(); ++k) {
+      _iss._i0[k] = _o[k]->getNorm(0, *_g);
+      _iss._i1[k] = _o[k]->getNorm(1, *_g);
+      _iss._oN[k] = _o[k]->getNorm(_g->N()-1, *_g);
+      _iss._oN1[k] = _o[k]->getNorm(_g->N()-2, *_g);
+    }
+  }
 
   return F;
 }
@@ -549,6 +561,8 @@ ldouble SCF::stepStandard(ldouble gamma, bool findLambda) {
   ldouble S_off = 0;
   for (int k1 = 0; k1 < _o.size(); ++k1) {
     for (int k2 = 0; k2 < _o.size(); ++k2) {
+      if (k1 == k2) continue;
+      if (_o[k1]->l() != _o[k2]->l()) continue;
       for (int ir = 0; ir < _g->N()-1; ++ir) {
         ldouble dr = (*_g)(ir+1) - (*_g)(ir);
         if (_g->isLog())
@@ -822,6 +836,8 @@ ldouble SCF::stepStandard(ldouble gamma, bool findLambda) {
 
       for (int k1 = 0; k1 < _o.size(); ++k1) {
         for (int k2 = 0; k2 < _o.size(); ++k2) {
+          if (k1 == k2) continue;
+          if (_o[k1]->l() != _o[k2]->l()) continue;
           for (int ir = 0; ir < _g->N()-1; ++ir) {
             ldouble dr = (*_g)(ir+1) - (*_g)(ir);
             if (_g->isLog())

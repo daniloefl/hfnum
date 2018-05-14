@@ -73,6 +73,12 @@ class IterativeStandardSolver {
     /// \param Z New atomic number.
     void setZ(ldouble Z);
 
+
+    std::vector<ldouble> _i0;
+    std::vector<ldouble> _i1;
+    std::vector<ldouble> _oN;
+    std::vector<ldouble> _oN1;
+
   private:
 
     /// Grid.

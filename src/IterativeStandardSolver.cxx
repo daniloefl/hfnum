@@ -199,6 +199,11 @@ void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::map<int,
   //solution[N-2] = std::pow(_g(N-2), _Z/std::sqrt(2*std::fabs(E[idx]))+0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
   solution[N-1] = std::pow(_g(N-1), 0.5)*std::exp(-_g(N-1)*a0);
   solution[N-2] = std::pow(_g(N-2), 0.5)*std::exp(-_g(N-2)*a0);
+  //if (_oN.size() > idx && _oN1.size() > idx) {
+  //  solution[N-1] = std::pow(_g(N-1), 0.5)*_oN[idx];
+  //  solution[N-2] = std::pow(_g(N-2), 0.5)*_oN1[idx];
+  //  std::cout << "BBB " << solution[N-1] << " " << std::pow(_g(N-1), 0.5)*std::exp(-_g(N-1)*a0) << " " << solution[N-2] << " " << std::pow(_g(N-2), 0.5)*std::exp(-_g(N-2)*a0) << std::endl;
+  //}
   for (int k = N-2; k >= 1; --k) {
     solution[k-1] = ((12 - f[idx][k]*10)*solution[k] - f[idx][k+1]*solution[k+1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k-1];
   }
@@ -223,6 +228,13 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
   } else if (_o[idx]->n() == 2 && _o[idx]->l() == 1) {
     solution[0] = std::pow(_g(0), 1.5)/a0*std::exp(-_g(0)/(2.0*a0));
     solution[1] = std::pow(_g(1), 1.5)/a0*std::exp(-_g(1)/(2.0*a0));
+  }
+  solution[0] = std::pow(_g(0), _o[idx]->l() + 0.5);
+  solution[1] = std::pow(_g(1), _o[idx]->l() + 0.5);
+  if (_i0.size() > idx && _i1.size() > idx) {
+    solution[0] = std::pow(_g(0), 0.5)*_i0[idx];
+    solution[1] = std::pow(_g(1), 0.5)*_i1[idx];
+    //std::cout << "AAAA " << solution[0] << " " << std::pow(_g(0), _o[idx]->l() + 0.5) << " " << solution[1] << " " << std::pow(_g(1), _o[idx]->l() + 0.5) << std::endl;
   }
   for (int k = 1; k < N-2; ++k) {
     solution[k+1] = ((12.0 - f[idx][k]*10.0)*solution[k] - f[idx][k-1]*solution[k-1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k+1];
