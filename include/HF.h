@@ -91,6 +91,9 @@ class HF : public SCF {
 
   private:
 
+    // use average coefficients for non-filled groups
+    bool _averageCoefficients;
+
     /// \brief Calculate aux. variable Y.
     void calculateY();
 
@@ -111,7 +114,6 @@ class HF : public SCF {
 
     /// temporary variable for the new Vex
     std::map<std::pair<int, int>, Vradial>  _vexsum;
-
 
 };
 

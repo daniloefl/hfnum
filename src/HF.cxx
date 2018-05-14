@@ -30,11 +30,13 @@ using namespace boost;
 
 HF::HF()
   : SCF() {
+  _averageCoefficients = true;
 }
 
 HF::HF(const std::string fname)
   : SCF() {
   load(fname);
+  _averageCoefficients = true;
 }
 
 HF::~HF() {
@@ -164,37 +166,35 @@ ldouble HF::getE0() {
     int l = _o[k]->l();
     int m = _o[k]->m();
     ldouble A = ((ldouble) _o[k]->g());
-    ldouble T = 0;
     for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
       ldouble rp1 = (*_g)(ir+1);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      ldouble fnp1 = A*_vd[k][ir+1]*std::pow(_o[k]->getNorm(ir+1, *_g), 2)*std::pow(rp1, 2);
-      ldouble fn = A*_vd[k][ir]*std::pow(_o[k]->getNorm(ir, *_g), 2)*std::pow(r, 2);
+      ldouble fnp1 = 0;
+      ldouble fn = 0;
+      fnp1 += A*_vd[k][ir+1]*_o[k]->getNorm(ir+1, *_g)*_o[k]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
+      fn += A*_vd[k][ir]*_o[k]->getNorm(ir, *_g)*_o[k]->getNorm(ir, *_g)*std::pow(r, 2);
       J += 0.5*(fn+fnp1)*dr;
-      T += 0.5*(fn+fnp1)*dr;
     }
-    std::cout << "Vd " << k << " " << T << std::endl;
   }
   for (auto &vexitm : _vex) {
     const int k1 = vexitm.first.first;
     const int k2 = vexitm.first.second;
     ldouble A = ((ldouble) _o[k1]->g());
-    ldouble T = 0;
     for (int ir = 0; ir < _g->N()-1; ++ir) {
       ldouble r = (*_g)(ir);
       ldouble rp1 = (*_g)(ir+1);
       ldouble dr = 0;
       if (ir < _g->N()-1)
         dr = (*_g)(ir+1) - (*_g)(ir);
-      ldouble fnp1 = A*_vex[std::pair<int,int>(k1, k2)][ir+1]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
-      ldouble fn = A*_vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
+      ldouble fnp1 = 0;
+      ldouble fn = 0;
+      fnp1 += A*_vex[std::pair<int,int>(k1, k2)][ir+1]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
+      fn += A*_vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
       K += 0.5*(fn+fnp1)*dr;
-      T += 0.5*(fn+fnp1)*dr;
     }
-    std::cout << "Vex " << k1 << " " << k2 << " " << T << std::endl;
   }
   E0 += -0.5*(J - K);
   return E0;
@@ -279,67 +279,115 @@ void HF::calculateVex(ldouble gamma) {
 
       std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << std::endl;
 
-      // not sure why this gives too small energy ...
-      for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
-        ldouble B = 0.0;
-        // from C. Fischer, "The Hartree-Fock method for atoms"
-        // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
-        // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
-        // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
-        if (!filled[k2]) {
-          for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
-            int ml1 = ml1_idx/2 - l1;
-            if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
-            ldouble A = 0;
-            for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
-              int ml2 = ml2_idx/2 - l2;
-              if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
-              if (_o[k1]->term()[ml1_idx] != _o[k2]->term()[ml2_idx]) continue;
-
-              if (l1 == 0 && l2 == 0 && k == 0) A += 1.0;
-              if (l1 == 0 && l2 == 1 && k == 1) A += 1.0/3.0; // CHECK
-              if (l1 == 1 && l2 == 0 && k == 1) A += 1.0/3.0; // CHECK
-              if (l2 == 1 && l1 == 1) {
-                if (k == 0 && ml1 == ml2) A += 1.0;
-
-                if (k == 2 && ml1 == -1 && ml2 == -1) A += 1.0/25.0;
-                if (k == 2 && ml1 == 1 && ml2 == 1) A += 1.0/25.0;
-
-                if (k == 2 && ml1 == 1 && ml2 == 0) A += 3.0/25.0;  // CHECK
-                if (k == 2 && ml1 == -1 && ml2 == 0) A += 3.0/25.0;  // CHECK
-                if (k == 2 && ml1 == 0 && ml2 == 1) A += 3.0/25.0;  // CHECK
-                if (k == 2 && ml1 == 0 && ml2 == -1) A += 3.0/25.0;  // CHECK
-
-                if (k == 2 && ml1 == 0 && ml2 == 0) A += 4.0/25.0;
-
-                if (k == 2 && ml1 == 1 && ml2 == -1) A += 6.0/25.0; // CHECK
-                if (k == 2 && ml1 == -1 && ml2 == 1) A += 6.0/25.0; // CHECK
-              }
-            }
-            B += A;
+      if (_averageCoefficients) {
+        if (filled[k2]) {
+          if (l1 == l2) {
+            if (_o[k2]->n() == _o[k1]->n()) continue;
           }
-          
-          // average over multiplicity of the k1, since the sum here is over the "other" orbitals
-          // we should not sum the contribution of "this" (k1) orbital more than once
-          B /= (ldouble) _o[k1]->g();
-        } else if (filled[k2]) {
-          if (k == 0 && l1 == 0 && l2 == 0) B += 1.0*_o[k2]->g()*0.5;
-  
-          if (k == 0 && l1 == 1 && l2 == 1) B += 1.0/3.0*_o[k2]->g()*0.5;
+          for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
+            ldouble B = 0.0;
+            if (k == 0 && l1 == 0 && l2 == 0) B += 2.0;
+            if (k == 1 && l1 == 1 && l2 == 0) B += 2.0;
+            if (k == 1 && l1 == 0 && l2 == 1) B += 2.0;
+            if (k == 0 && l1 == 1 && l2 == 1) B += 6.0;
+            if (k == 2 && l1 == 1 && l2 == 1) B += 12.0/5.0;
+   
+            B /= (ldouble) (2*l1 + 1);
+
+            if (B == 0) continue;
+            // This is the extra k parts
+            for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+              ldouble r1 = (*_g)(ir1);
+              _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
+            }
+          }
+        } else { // not filled
+          if (l1 == l2) {
+            if (_o[k2]->n() == _o[k1]->n()) continue;
+          }
+          for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
+            ldouble B = 0.0;
+            if (k == 0 && l1 == 0 && l2 == 0) B += 2.0;
+            if (k == 1 && l1 == 1 && l2 == 0) B += 2.0;
+            if (k == 1 && l1 == 0 && l2 == 1) B += 2.0;
+            if (k == 0 && l1 == 1 && l2 == 1) B += 6.0;
+            if (k == 2 && l1 == 1 && l2 == 1) B += 12.0/5.0;
+   
+            B /= (ldouble) (2*l1 + 1);
+
+            B *= _o[k2]->g()/((ldouble) 2*(2*l2 + 1));
+
+            if (B == 0) continue;
+            // This is the extra k parts
+            for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+              ldouble r1 = (*_g)(ir1);
+              _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
+            }
+          }
+        }
+      } else {
+        // not sure why this gives too small energy ...
+        for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
+          ldouble B = 0.0;
+          // from C. Fischer, "The Hartree-Fock method for atoms"
+          // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
+          // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
+          // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
+          if (!filled[k2]) {
+            for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
+              int ml1 = ml1_idx/2 - l1;
+              if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
+              ldouble A = 0;
+              for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
+                int ml2 = ml2_idx/2 - l2;
+                if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
+                if (_o[k1]->term()[ml1_idx] != _o[k2]->term()[ml2_idx]) continue;
+
+                if (l1 == 0 && l2 == 0 && k == 0) A += 1.0;
+                if (l1 == 0 && l2 == 1 && k == 1) A += 1.0/3.0; // CHECK
+                if (l1 == 1 && l2 == 0 && k == 1) A += 1.0/3.0; // CHECK
+                if (l2 == 1 && l1 == 1) {
+                  if (k == 0 && ml1 == ml2) A += 1.0;
  
-          if (k == 1 && l1 == 0 && l2 == 1) B += 1.0/3.0*_o[k2]->g()*0.5;
-          if (k == 1 && l1 == 1 && l2 == 0) B += 1.0/3.0*_o[k2]->g()*0.5;
+                  if (k == 2 && ml1 == -1 && ml2 == -1) A += 1.0/25.0;
+                  if (k == 2 && ml1 == 1 && ml2 == 1) A += 1.0/25.0;
 
-          if (k == 2 && l1 == 1 && l2 == 1) B += 2.0/15.0*_o[k2]->g()*0.5;
-        }
+                  if (k == 2 && ml1 == 1 && ml2 == 0) A += 3.0/25.0;  // CHECK
+                  if (k == 2 && ml1 == -1 && ml2 == 0) A += 3.0/25.0;  // CHECK
+                  if (k == 2 && ml1 == 0 && ml2 == 1) A += 3.0/25.0;  // CHECK
+                  if (k == 2 && ml1 == 0 && ml2 == -1) A += 3.0/25.0;  // CHECK
 
-        if (B == 0) continue;
-        // This is the extra k parts
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          ldouble r1 = (*_g)(ir1);
-          _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
+                  if (k == 2 && ml1 == 0 && ml2 == 0) A += 4.0/25.0;
+
+                  if (k == 2 && ml1 == 1 && ml2 == -1) A += 6.0/25.0; // CHECK
+                  if (k == 2 && ml1 == -1 && ml2 == 1) A += 6.0/25.0; // CHECK
+                }
+              }
+              B += A;
+            }
+          
+            // average over multiplicity of the k1, since the sum here is over the "other" orbitals
+            // we should not sum the contribution of "this" (k1) orbital more than once
+            B /= (ldouble) _o[k1]->g();
+          } else if (filled[k2]) {
+            if (k == 0 && l1 == 0 && l2 == 0) B += 1.0*_o[k2]->g()*0.5;
+  
+            if (k == 0 && l1 == 1 && l2 == 1) B += 1.0/3.0*_o[k2]->g()*0.5;
+  
+            if (k == 1 && l1 == 0 && l2 == 1) B += 1.0/3.0*_o[k2]->g()*0.5;
+            if (k == 1 && l1 == 1 && l2 == 0) B += 1.0/3.0*_o[k2]->g()*0.5;
+
+            if (k == 2 && l1 == 1 && l2 == 1) B += 2.0/15.0*_o[k2]->g()*0.5;
+          }
+
+          if (B == 0) continue;
+          // This is the extra k parts
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
+          }
         }
-      }
+      } // if average coefficients
     }
   }
 
@@ -501,53 +549,96 @@ void HF::calculateVd(ldouble gamma) {
       // Values agree, but taken in abs value ... how to average them in km?
       // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
       ldouble C = 1.0;
-      if (filled[k2]) {
-        // This is the central part
-        C = _o[k2]->g();
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          _vdsum[k1][ir1] += C*_Y[10000*0 + 100*k2 + 1*k2][ir1];
-        }
-      } else if (!filled[k2]) {
-        C = _o[k2]->g();
-        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-          _vdsum[k1][ir1] += C*_Y[10000*0 + 100*k2 + 1*k2][ir1];
-        }
 
-        for (int k = 2; k <= 2*l2; k += 2) {
-          ldouble B = 0.0;
-          for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
-            int ml1 = ml1_idx/2 - l1;
-            if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
-            ldouble A = 0.0;
-            if (k == 2 && l2 == 1 && l1 == 1) {
-              for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
-                int ml2 = ml2_idx/2 - l2;
-                if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
-                if (_o[k1]->term()[ml1_idx] != _o[k2]->term()[ml2_idx]) continue;
-                if (ml1 == -1 && ml2 == -1) A += 1.0/25.0;
-                if (ml1 == -1 && ml2 == 0) A += -2.0/25.0;
-                if (ml1 == -1 && ml2 == 1) A += 1.0/25.0;
-                if (ml1 == 0 && ml2 == -1) A += -2.0/25.0;
-                if (ml1 == 0 && ml2 == 0) A += 4.0/25.0;
-                if (ml1 == 0 && ml2 == 1) A += -2.0/25.0;
-                if (ml1 == 1 && ml2 == -1) A += 1.0/25.0;
-                if (ml1 == 1 && ml2 == 0) A += -2.0/25.0;
-                if (ml1 == 1 && ml2 == 1) A += 1.0/25.0;
+      if (_averageCoefficients) {
+        if (filled[k2]) {
+          // This is the central part
+          C = _o[k2]->g();
+          if (k2 == k1) C -= 1;
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            _vdsum[k1][ir1] += C*_Y[10000*0 + 100*k2 + 1*k2][ir1];
+          }
+          if (k1 == k2) {
+            for (int k = 2; k <= 2*l2; k += 2) {
+              ldouble A = 0.0;
+              if (k == 2 && l2 == 1) A += 6.0/5.0;
+              A /= (ldouble) (2*l2 + 1);
+              if (A == 0) continue;
+              // This is the extra k parts
+              for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+                _vdsum[k1][ir1] -= A * _Y[10000*k + 100*k2 + 1*k2][ir1];
               }
             }
-            B += A;
           }
-          // average over multiplicity of the k1, since the sum here is over the "other" orbitals
-          // we should not sum the contribution of "this" (k1) orbital more than once
-          B /= (ldouble) _o[k1]->g();
-
-          if (B == 0) continue;
-          // This is the extra k parts
+        } else { // not filled
+          C = _o[k2]->g();
+          if (k2 == k1) C -= 1;
           for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            _vdsum[k1][ir1] += B * _Y[10000*k + 100*k2 + 1*k2][ir1];
+            _vdsum[k1][ir1] += C*_Y[10000*0 + 100*k2 + 1*k2][ir1];
+          }
+          if (k1 == k2) {
+            for (int k = 2; k <= 2*l2; k += 2) {
+              ldouble A = 0.0;
+              if (k == 2 && l2 == 1) A += 6.0/5.0;
+              A /= (ldouble) (2*l2 + 1);
+              A *= _o[k2]->g()/((ldouble) 2*(2*l2 + 1));
+              if (A == 0) continue;
+              // This is the extra k parts
+              for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+                _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
+              }
+            }
+          }
+        } // is filled?
+      } else { // not average coefficients
+        if (filled[k2]) {
+          // This is the central part
+          C = _o[k2]->g();
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            _vdsum[k1][ir1] += C*_Y[10000*0 + 100*k2 + 1*k2][ir1];
+          }
+        } else { // not filled
+          C = _o[k2]->g();
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            _vdsum[k1][ir1] += C*_Y[10000*0 + 100*k2 + 1*k2][ir1];
+          }
+
+          for (int k = 2; k <= 2*l2; k += 2) {
+            ldouble B = 0.0;
+            for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
+              int ml1 = ml1_idx/2 - l1;
+              if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
+              ldouble A = 0.0;
+              if (k == 2 && l2 == 1 && l1 == 1) {
+                for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
+                  int ml2 = ml2_idx/2 - l2;
+                  if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
+                  if (_o[k1]->term()[ml1_idx] != _o[k2]->term()[ml2_idx]) continue;
+                  if (ml1 == -1 && ml2 == -1) A += 1.0/25.0;
+                  if (ml1 == -1 && ml2 == 0) A += -2.0/25.0;
+                  if (ml1 == -1 && ml2 == 1) A += 1.0/25.0;
+                  if (ml1 == 0 && ml2 == -1) A += -2.0/25.0;
+                  if (ml1 == 0 && ml2 == 0) A += 4.0/25.0;
+                  if (ml1 == 0 && ml2 == 1) A += -2.0/25.0;
+                  if (ml1 == 1 && ml2 == -1) A += 1.0/25.0;
+                  if (ml1 == 1 && ml2 == 0) A += -2.0/25.0;
+                  if (ml1 == 1 && ml2 == 1) A += 1.0/25.0;
+                }
+              }
+              B += A;
+            }
+            // average over multiplicity of the k1, since the sum here is over the "other" orbitals
+            // we should not sum the contribution of "this" (k1) orbital more than once
+            B /= (ldouble) _o[k1]->g();
+
+            if (B == 0) continue;
+            // This is the extra k parts
+            for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+              _vdsum[k1][ir1] += B * _Y[10000*k + 100*k2 + 1*k2][ir1];
+            }
           }
         }
-      }
+      } // if average coefficients
 
     }
 
