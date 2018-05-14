@@ -111,6 +111,18 @@ void HF::save(const std::string fout) {
     }
     f << std::endl;
   }
+  for (auto &i : _lambdaMap) {
+    int k1 = i.first % 100;
+    int k2 = i.first / 100;
+    f << std::setw(10) << "lambdaMap" << " " << std::setw(10) << k1 << " " << std::setw(10) << k2;
+    f << " " << std::setw(5) << "value" << std::setw(10) << i.second;
+    f << std::endl;
+  }
+  for (int k = 0; k < _lambda.size(); ++k) {
+    f << std::setw(10) << "lambda" << " " << std::setw(10) << k;
+    f << " " << std::setw(5) << "value" << std::setw(10) << _lambda[k];
+    f << std::endl;
+  }
 }
 
 void HF::load(const std::string fin) {
@@ -144,6 +156,8 @@ void HF::load(const std::string fin) {
   for (auto &k : sr._vex) {
     _vex[k.first] = k.second;
   }
+  _lambdaMap = sr._lambdaMap;
+  _lambda = sr._lambda;
   std::cout << "Vex load" << std::endl;
   _pot.resize(_g->N());
   for (int k = 0; k < _g->N(); ++k) {
@@ -193,6 +207,10 @@ ldouble HF::getE0() {
       ldouble fn = 0;
       fnp1 += A*_vex[std::pair<int,int>(k1, k2)][ir+1]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
       fn += A*_vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
+      if (_lambdaMap.find(100*k1 + k2) != _lambdaMap.end()) {
+        fnp1 += _lambda[_lambdaMap[100*k1 + k2]]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
+        fn += _lambda[_lambdaMap[100*k1 + k2]]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
+      }
       K += 0.5*(fn+fnp1)*dr;
     }
   }

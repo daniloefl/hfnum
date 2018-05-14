@@ -68,12 +68,16 @@ class StateReader {
     std::map<int, std::vector<ldouble> > _vd;
     std::map<std::pair<int,int>, std::vector<ldouble> > _vex;
 
+    std::map<int, int> _lambdaMap;
+    std::vector<ldouble> _lambda;
+
   protected:
 
     /// Saved loaded parameters
     std::map<std::string, std::vector<ldouble> > _v;
     std::map<std::string, ldouble> _d;
     std::map<std::string, int> _i;
+
 };
 
 #endif

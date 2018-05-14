@@ -112,6 +112,25 @@ void StateReader::load(const std::string &fin) {
         ss >> read_value;
         _vex[std::pair<int, int>(io1, io2)][k] = read_value;
       }
+    } else if (mode == "lambdaMap") {
+      int io1, io2;
+      ss >> io1 >> io2;
+
+      std::string trash;
+      int ki;
+      ss >> trash >> ki;
+
+      _lambdaMap[io2*100 + io1] = ki;
+    } else if (mode == "lambda") {
+      int io1;
+      ss >> io1;
+
+      std::string trash;
+      ldouble ki;
+      ss >> trash >> ki;
+
+      if (io1+1 > _lambda.size()) _lambda.resize(io1+1, 0);
+      _lambda[io1] = ki;
     }
   }
 }

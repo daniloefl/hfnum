@@ -39,7 +39,7 @@ class IterativeStandardSolver {
     /// \param vex Exchange potential for each orbital.
     /// \param matched To be returned by reference.
     /// \return Minimisation function based on matching at classical crossing for the trial energy.
-    VectorXld solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::map<int, Vradial> &matched);
+    VectorXld solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::vector<ldouble> &lambda, std::map<int, int> &lambdaMap, std::map<int, Vradial> &matched);
 
     /// \brief Solve equation for a specific energy.
     /// \param E Trial energy.
@@ -48,7 +48,7 @@ class IterativeStandardSolver {
     /// \param vdw Potential only on down electrons.
     /// \param matched To be returned by reference.
     /// \return Minimisation function based on matching at classical crossing for the trial energy.
-    VectorXld solve(std::vector<ldouble> &E, Vradial &pot, Vradial &vup, Vradial &vdw, std::map<int, Vradial> &matched);
+    VectorXld solve(std::vector<ldouble> &E, Vradial &pot, Vradial &vup, Vradial &vdw, std::vector<ldouble> &lambda, std::map<int, int> &lambdaMap, std::map<int, Vradial> &matched);
 
     /// \brief Solve assuming initial conditions at the 2 last grid points.
     /// \param E Trial energy.

@@ -115,6 +115,18 @@ void DFT::save(const std::string fout) {
     f << " " << std::setw(64) << std::setprecision(60) << _n_dw[ir];
   }
   f << std::endl;
+  for (auto &i : _lambdaMap) {
+    int k1 = i.first % 100;
+    int k2 = i.first / 100;
+    f << std::setw(10) << "lambdaMap" << " " << std::setw(10) << k1 << " " << std::setw(10) << k2;
+    f << " " << std::setw(5) << "value" << std::setw(10) << i.second;
+    f << std::endl;
+  }
+  for (int k = 0; k < _lambda.size(); ++k) {
+    f << std::setw(10) << "lambda" << " " << std::setw(10) << k;
+    f << " " << std::setw(5) << "value" << std::setw(10) << _lambda[k];
+    f << std::endl;
+  }
 }
 
 void DFT::load(const std::string fin) {
@@ -207,6 +219,25 @@ void DFT::load(const std::string fin) {
         ss >> read_value;
         _n_dw[k] = read_value;
       }
+    } else if (mode == "lambdaMap") {
+      int io1, io2;
+      ss >> io1 >> io2;
+
+      std::string trash;
+      int ki;
+      ss >> trash >> ki;
+
+      _lambdaMap[io2*100 + io1] = ki;
+    } else if (mode == "lambda") {
+      int io1;
+      ss >> io1;
+
+      std::string trash;
+      ldouble ki;
+      ss >> trash >> ki;
+
+      if (io1+1 > _lambda.size()) _lambda.resize(io1+1, 0);
+      _lambda[io1] = ki;
     }
   }
   std::cout << "Load resetting grid with isLog = " << g_isLog << ", dx = " << g_dx << ", g_N = " << g_N << ", g_rmin = " << g_rmin << std::endl;

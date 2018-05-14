@@ -156,7 +156,7 @@ class SCF {
     /// \brief Use a standard iterative Numerov method.
     /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
     /// \return Minimisation function value at the end of the step.
-    ldouble stepStandard(ldouble gamma);
+    ldouble stepStandard(ldouble gamma, bool findLambda);
 
     /// \brief Build NxN matrix to solve all equations of the Numerov method for each point simultaneously. Includes an extra equation to control the orbital normalisations, which is non-linear.
     /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
@@ -185,6 +185,7 @@ class SCF {
 
     /// variation in energy for the next step
     std::vector<ldouble> _dE;
+    std::vector<ldouble> _dlambda;
     
     /// Speed at which the new Vd and Vex are integrated into the next self-consistent step
     ldouble _gamma_scf;
@@ -253,6 +254,11 @@ class SCF {
     /// Past energy values when solving one SCF iteration
     std::vector<VectorXld> _historyE;
     std::vector<VectorXld> _historyF;
+    std::vector<VectorXld> _historyL;
+
+    /// Lagrange multiplier indices in E for orthogonality condition
+    std::map<int, int> _lambdaMap;
+    std::vector<ldouble> _lambda;
 };
 
 #endif
