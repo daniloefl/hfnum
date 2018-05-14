@@ -13,8 +13,8 @@ Z = 6
 
 # log grid
 dx = 0.25e-1
-N = 500
-rmin = 1e-4
+N = 680
+rmin = 1e-6
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
@@ -27,9 +27,9 @@ h.addOrbital(orb0)
 h.addOrbital(orb1)
 h.addOrbital(orb2)
 
-NiterSCF = 20
+NiterSCF = 30
 Niter = 1000
-F0stop = 1e-8
+F0stop = 1e-12
 r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0:5]

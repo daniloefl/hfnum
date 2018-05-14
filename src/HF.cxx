@@ -30,13 +30,13 @@ using namespace boost;
 
 HF::HF()
   : SCF() {
-  _averageCoefficients = true;
+  _averageCoefficients = false;
 }
 
 HF::HF(const std::string fname)
   : SCF() {
   load(fname);
-  _averageCoefficients = true;
+  _averageCoefficients = false;
 }
 
 HF::~HF() {

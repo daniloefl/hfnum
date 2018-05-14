@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 Z = 9
 
 # log grid
-dx = 0.25e-1/2.0
-N = 500*2
+dx = 0.25e-1
+N = 560
 rmin = 1e-4
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
