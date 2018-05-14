@@ -115,12 +115,12 @@ void HF::save(const std::string fout) {
     int k1 = i.first % 100;
     int k2 = i.first / 100;
     f << std::setw(10) << "lambdaMap" << " " << std::setw(10) << k1 << " " << std::setw(10) << k2;
-    f << " " << std::setw(5) << "value" << std::setw(10) << i.second;
+    f << " " << std::setw(5) << "value" << " " << std::setw(10) << i.second;
     f << std::endl;
   }
   for (int k = 0; k < _lambda.size(); ++k) {
     f << std::setw(10) << "lambda" << " " << std::setw(10) << k;
-    f << " " << std::setw(5) << "value" << std::setw(10) << _lambda[k];
+    f << " " << std::setw(5) << "value" << " "<< std::setw(10) << _lambda[k];
     f << std::endl;
   }
 }
@@ -207,14 +207,36 @@ ldouble HF::getE0() {
       ldouble fn = 0;
       fnp1 += A*_vex[std::pair<int,int>(k1, k2)][ir+1]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
       fn += A*_vex[std::pair<int,int>(k1, k2)][ir]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
-      if (_lambdaMap.find(100*k1 + k2) != _lambdaMap.end()) {
-        fnp1 += _lambda[_lambdaMap[100*k1 + k2]]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
-        fn += _lambda[_lambdaMap[100*k1 + k2]]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
-      }
       K += 0.5*(fn+fnp1)*dr;
     }
   }
   E0 += -0.5*(J - K);
+  for (int k = 0; k < _lambda.size(); ++k) {
+    int k1 = 0;
+    int k2 = 0;
+    for (auto &j : _lambdaMap) {
+      if (j.second == k) {
+        k1 = j.first % 100;
+        k2 = j.first / 100;
+        break;
+      }
+    }
+    std::cout << "lambda "<< k1 << " " << k2 << " " << _lambda[k] << std::endl;
+    ldouble T = 0;
+    for (int ir = 0; ir < _g->N()-1; ++ir) {
+      ldouble r = (*_g)(ir);
+      ldouble rp1 = (*_g)(ir+1);
+      ldouble dr = 0;
+      if (ir < _g->N()-1)
+        dr = (*_g)(ir+1) - (*_g)(ir);
+      ldouble fnp1 = 0;
+      ldouble fn = 0;
+      fnp1 += _lambda[_lambdaMap[100*k1 + k2]]*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
+      fn += _lambda[_lambdaMap[100*k1 + k2]]*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
+      T += 0.5*(fn+fnp1)*dr;
+    }
+    E0 += T;
+  }
   return E0;
 }
 
