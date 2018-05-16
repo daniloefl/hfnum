@@ -692,7 +692,7 @@ void HF::calculateVd(ldouble gamma) {
 }
 
 
-void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E) {
+void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E, std::vector<ldouble> &lambda) {
   std::vector<MatrixXld> Lambda(_g->N());
   int N = _om.N();
   F.resize(_g->N());
@@ -735,6 +735,14 @@ void HF::calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, 
 
           F[i](idx1,idx2) += a*std::pow(_g->dx(), 2)/12.0;
           Lambda[i](idx1,idx2) += 1 + a*std::pow(_g->dx(), 2)/12.0;
+
+          if (_lambdaMap.find(100*idx1 + idx2) != _lambdaMap.end()) {
+            int lidx = _lambdaMap[100*idx1 + idx2];
+            if (_g->isLog()) a = 2.0L*std::pow(r, 2)*lambda[lidx];
+            else a = 2.0L*lambda[lidx];
+            F[i](idx1,idx2) += a*std::pow(_g->dx(), 2)/12.0;
+            Lambda[i](idx1,idx2) += 1 + a*std::pow(_g->dx(), 2)/12.0;
+          }
         }
       }
     }

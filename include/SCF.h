@@ -170,7 +170,8 @@ class SCF {
     /// \param F To be returned by reference. Matrix F for each Grid point.
     /// \param K To be returned by reference. Inverse of F.
     /// \param E Values of energy in each orbital.
-    virtual void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E) = 0;
+    /// \param E Extra Lagrange multipliers.
+    virtual void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E, std::vector<ldouble> &lambda) = 0;
 
     /// Numerical Grid
     Grid *_g;

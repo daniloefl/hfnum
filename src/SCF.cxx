@@ -202,7 +202,7 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   // and resize it to be sure it has the proper size
   _lambdaMap.clear();
   int lcount = 0;
-  if (!_isSpinDependent || _method != 3) {
+  if (!_isSpinDependent && (_method == 3 || _method == 2)) {
     for (int i = 0; i < _o.size(); ++i) {
       for (int j = i+1; j < _o.size(); ++j) {
         if (_o[i]->l() != _o[j]->l()) continue;
@@ -293,7 +293,7 @@ ldouble SCF::stepGordon(ldouble gamma) {
   std::vector<MatrixXld> Fmn;
   std::vector<MatrixXld> Kmn;
   std::vector<VectorXld> matched;
-  calculateFMatrix(Fmn, Kmn, E);
+  calculateFMatrix(Fmn, Kmn, E, _lambda);
 
   ldouble Fn = _igs.solve(E, l, Fmn, Kmn, matched);
 
@@ -319,7 +319,7 @@ ldouble SCF::stepGordon(ldouble gamma) {
 
     std::vector<MatrixXld> Fmd;
     std::vector<MatrixXld> Kmd;
-    calculateFMatrix(Fmd, Kmd, EdE);
+    calculateFMatrix(Fmd, Kmd, EdE, _lambda);
 
     ldouble Fd = _igs.solve(EdE, l, Fmd, Kmd, matched);
     J(k2) = (Fd - Fn)/dE[k2];
@@ -376,10 +376,31 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
   std::vector<MatrixXld> Kmn;
   std::vector<VectorXld> matched;
   std::vector<int> Rnodes;
-  calculateFMatrix(Fmn, Kmn, E);
+  calculateFMatrix(Fmn, Kmn, E, _lambda);
 
   VectorXld Fn = _irs.solve(E, l, Fmn, Kmn, matched, Rnodes);
   std::cout << "INFO: Total nodes: " << Rnodes[0] << std::endl;
+
+  VectorXld Sn(_lambda.size());
+  Sn.setZero();
+
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      if (k1 <= k2) continue;
+      if (_o[k1]->l() != _o[k2]->l()) continue;
+      int lidx = _lambdaMap[k1*100+k2];
+      for (int ir = 0; ir < _g->N()-1; ++ir) {
+        ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+        if (_g->isLog())
+          Sn(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2-1)*dr;
+        else
+          Sn(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2)*dr;
+      }
+    }
+  }
+
+  VectorXld dPar(_o.size()+_lambda.size());
+  dPar.setZero();
 
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
@@ -406,19 +427,49 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
         dE[k] = _o[k]->E()*1e-2/((ldouble) _o[k]->n());
     }
   }
-  VectorXld dEv(_o.size());
-  for (int k = 0; k < _o.size(); ++k) {
+  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
     std::vector<ldouble> EdE = E;
-    EdE[k] += dE[k];
+    std::vector<ldouble> lambdad = _lambda;
   
+    if (k < _o.size()) {
+      EdE[k] += dE[k];
+    } else {
+      lambdad[k-_o.size()] += 1e-2;
+    }
+
     std::vector<MatrixXld> Fmd;
     std::vector<MatrixXld> Kmd;
     std::vector<int> Rnodesd;
-    calculateFMatrix(Fmd, Kmd, EdE);
+    calculateFMatrix(Fmd, Kmd, EdE, lambdad);
+
+    VectorXld Sd(_lambda.size());
+    Sd.setZero();
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      for (int k2 = 0; k2 < _o.size(); ++k2) {
+        if (k1 <= k2) continue;
+        if (_o[k1]->l() != _o[k2]->l()) continue;
+        int lidx = _lambdaMap[k1*100+k2];
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+          if (_g->isLog())
+            Sd(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2-1)*dr;
+          else
+            Sd(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2)*dr;
+        }
+      }
+    }
 
     // recalculate the function being minimized, because we are changing energy for orbital k independently from the others
     VectorXld Fd = _irs.solve(EdE, l, Fmd, Kmd, matched, Rnodesd);
-    dEv(k) = Fn(k)*dE[k]/(Fd(k) - Fn(k));
+    if (k < _o.size()) {
+      dPar(k) = 0;
+      if (Fd(k) - Fn(k) != 0)
+        dPar(k) = Fn(k)*dE[k]/(Fd(k) - Fn(k));
+    } else {
+      dPar(k) = 0;
+      if (Sd(k-_o.size()) - Sn(k-_o.size()) != 0)
+        dPar(k) = Sd(k-_o.size())*1e-2/(Sd(k-_o.size()) - Sn(k-_o.size()));
+    }
   }
 
   // check node count
@@ -436,15 +487,19 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
       std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
     } else {
   
-      _dE[k] = -gamma*dEv(k);
+      _dE[k] = -gamma*dPar(k);
 
-      std::cout << "Orbital " << k << " (with secant method), dE = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
+      std::cout << "INFO: Orbital " << k << " (with secant method), dE = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
       if (_dE[k] > 0) {
         _Emin[k] = _o[k]->E();
       } else if (_dE[k] < 0) {
         _Emax[k] = _o[k]->E();
       }
     }
+  }
+  for (int k = 0; k < _lambda.size(); ++k) {
+    _dlambda[k] = -gamma*dPar(_o.size()+k);
+    std::cout << "INFO: Lagrange multiplier " << k << " (with secant method), dlambda = " << _dlambda[k] << " (probe dlambda = " << 1e-2 << ")" << std::endl;
   }
 
   VectorXld tmp;
@@ -454,8 +509,14 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
   }
   _historyE.push_back(tmp);
   _historyF.push_back(Fn);
+  VectorXld tmpl;
+  tmpl.resize(_lambda.size());
+  for (int k = 0; k < _lambda.size(); ++k) {
+    tmpl(k) = _lambda[k];
+  }
+  _historyL.push_back(tmpl);
 
-  return Fn.norm();
+  return Fn.norm() + Sn.norm();
 }
 
 // solve for a fixed energy and calculate _dE for the next step

@@ -87,7 +87,7 @@ class HF : public SCF {
     /// \param F To be returned by reference. Matrix F for each Grid point.
     /// \param K To be returned by reference. Inverse of F.
     /// \param E Values of energy in each orbital.
-    void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E);
+    void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E, std::vector<ldouble> &lambda);
 
   private:
 
