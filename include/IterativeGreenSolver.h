@@ -1,13 +1,13 @@
 /*
- * \class IterativeStandardSolver
+ * \class IterativeGreenSolver
  *
  * \ingroup hfnum
  *
- * \brief Solves the 2nd degree differential equation using Numerov method assuming a non-homogeneous term. Resolves it many times with the same energy and direct and exchange terms to include all potential terms consistently.
+ * \brief Solves the 2nd degree differential equation using Numerov method with the Green's function approach. Resolves it many times with the same energy and direct and exchange terms to include all potential terms consistently.
  */
 
-#ifndef ITERATIVESTANDARDSOLVER_H
-#define ITERATIVESTANDARDSOLVER_H
+#ifndef ITERATIVEGREENSOLVER_H
+#define ITERATIVEGREENSOLVER_H
 
 #include <Eigen/Core>
 #include <vector>
@@ -18,7 +18,7 @@
 #include <vector>
 #include "OrbitalMapper.h"
 
-class IterativeStandardSolver {
+class IterativeGreenSolver {
   public:
 
     /// \brief Constructor
@@ -27,10 +27,10 @@ class IterativeStandardSolver {
     /// \param i Grid positions where to make the matching.
     /// \param om Class to provide orbital number to matrix index mapping.
     /// \param Z Atomic number used for initial condition at infinity.
-    IterativeStandardSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om, ldouble Z = 1.0);
+    IterativeGreenSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om, ldouble Z = 1.0);
 
     /// \brief Destructor.
-    virtual ~IterativeStandardSolver();
+    virtual ~IterativeGreenSolver();
 
     /// \brief Solve equation for a specific energy.
     /// \param E Trial energy.
@@ -56,29 +56,31 @@ class IterativeStandardSolver {
 
     /// \brief Solve assuming initial conditions at the 2 last grid points.
     /// \param E Trial energy.
-    /// \param matched Previous orbitals to be used for non-homogenous term.
     /// \param idx Index of orbital to solve.
     /// \param solution To be returned by reference.
-    void solveInward(std::vector<ldouble> &E, std::map<int, Vradial> &matched, int idx, Vradial &solution);
+    void solveInward(std::vector<ldouble> &E, int idx, Vradial &solution);
 
     /// \brief Solve assuming initial conditions at the 2 first grid points.
     /// \param E Trial energy.
-    /// \param matched To be returned by reference. Orbitals found.
     /// \param idx Index of orbital to solve.
     /// \param solution To be returned by reference.
-    void solveOutward(std::vector<ldouble> &E, std::map<int, Vradial> &matched, int idx, Vradial &solution);
+    void solveOutward(std::vector<ldouble> &E, int idx, Vradial &solution);
 
-    /// \brief Force continuity by taking ratio of inward and outward solutions at the matching point and scaling the solutions appropriately.
+    /// \brief Force continuity by taking ratio of inward and outward solutions at the matching point.
     /// \param k Index of the orbital.
     /// \param o Matched orbitals.
     /// \param inward Inward solution.
     /// \param outward Outward solution.
     void match(int k, Vradial &o, Vradial &inward, Vradial &outward);
 
+    /// \brief Set normalisation to 1.
+    /// \param k Index of the orbital.
+    /// \param o Matched orbitals.
+    void normalise(int k, Vradial &o);
+
     /// \brief Set Z value.
     /// \param Z New atomic number.
     void setZ(ldouble Z);
-
 
     std::vector<ldouble> _i0;
     std::vector<ldouble> _i1;
@@ -99,10 +101,11 @@ class IterativeStandardSolver {
 
     /// auxiliary variables
     std::map<int, Vradial> f;
-    std::map<int, Vradial> s;
 
     std::map<int, Vradial> inward;
     std::map<int, Vradial> outward;
+    std::map<int, Vradial> homogeneousSolution;
+    std::map<int, Vradial> S;
 
     ldouble _Z;
 };

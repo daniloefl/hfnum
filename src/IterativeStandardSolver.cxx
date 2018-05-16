@@ -53,7 +53,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   VectorXld F(M);
   F.setZero();
 
-  for (int nIter = 0; nIter < 2; ++nIter) {
+  for (int nIter = 0; nIter < 3; ++nIter) {
 
   // solve in direct order
   for (int idx = 0; idx < M; ++idx) {
@@ -127,6 +127,15 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
                     - s[idx][icl[idx]+1]
          );
   }
+
+  // alternative to the criteria above:
+  //VectorXld W(M);
+  //W.setZero();
+
+  //for (int idx = 0; idx < M; ++idx) {
+  //  W(idx) = (inward[idx][icl[idx]+1] - inward[idx][icl[idx]-1])*outward[idx][icl[idx]]/(2*_g.dx());
+  //  W(idx) -= (outward[idx][icl[idx]+1] - outward[idx][icl[idx]-1])*inward[idx][icl[idx]]/(2*_g.dx());
+  //}
 
   return F;
 }
@@ -219,6 +228,8 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
   //  solution[0] *= -1;
   //  solution[1] *= -1;
   //}
+  //solution[0] = std::pow(_g(0), _o[idx]->l() + 0.5);
+  //solution[1] = std::pow(_g(1), _o[idx]->l() + 0.5);
   if (_o[idx]->n() == 1) {
     solution[0] = std::pow(_g(0), 0.5)*std::exp(-_g(0)/a0);
     solution[1] = std::pow(_g(1), 0.5)*std::exp(-_g(1)/a0);
@@ -229,12 +240,9 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
     solution[0] = std::pow(_g(0), 1.5)/a0*std::exp(-_g(0)/(2.0*a0));
     solution[1] = std::pow(_g(1), 1.5)/a0*std::exp(-_g(1)/(2.0*a0));
   }
-  solution[0] = std::pow(_g(0), _o[idx]->l() + 0.5);
-  solution[1] = std::pow(_g(1), _o[idx]->l() + 0.5);
   if (_i0.size() > idx && _i1.size() > idx) {
     solution[0] = std::pow(_g(0), 0.5)*_i0[idx];
     solution[1] = std::pow(_g(1), 0.5)*_i1[idx];
-    //std::cout << "AAAA " << solution[0] << " " << std::pow(_g(0), _o[idx]->l() + 0.5) << " " << solution[1] << " " << std::pow(_g(1), _o[idx]->l() + 0.5) << std::endl;
   }
   for (int k = 1; k < N-2; ++k) {
     solution[k+1] = ((12.0 - f[idx][k]*10.0)*solution[k] - f[idx][k-1]*solution[k-1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k+1];
