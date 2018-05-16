@@ -60,7 +60,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     solveOutward(E, matched, idx, outward[idx]);
     solveInward(E, matched, idx, inward[idx]);
     match(idx, matched[idx], inward[idx], outward[idx]);
-  
+
     // recalculate non-homogeneus term
     for (int idx1 = 0; idx1 < M; ++idx1) {
       std::fill(s[idx1].begin(), s[idx1].end(), 0);
@@ -89,7 +89,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
       solveOutward(E, matched, idxI, outward[idxI]);
       solveInward(E, matched, idxI, inward[idxI]);
       match(idxI, matched[idxI], inward[idxI], outward[idxI]);
-  
+
       // recalculate non-homogeneus term
       for (int idx1 = 0; idx1 < M; ++idx1) {
         std::fill(s[idx1].begin(), s[idx1].end(), 0);
@@ -115,6 +115,13 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   
     } // solving in inverse order
   } // solving it in the direct order
+  
+  _i0.resize(M);
+  _i1.resize(M);
+  for (int idxI = 0; idxI < M; ++idxI) {
+    _i0[idxI] = matched[idxI][0]*std::pow(_g(0), -0.5);
+    _i1[idxI] = matched[idxI][1]*std::pow(_g(1), -0.5);
+  }
 
   }
 
@@ -208,8 +215,6 @@ void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, std::map<int,
   //solution[N-2] = std::pow(_g(N-2), _Z/std::sqrt(2*std::fabs(E[idx]))+0.5)*std::exp(-std::sqrt(2*std::fabs(E[idx]))*_g(N-2));
   solution[N-1] = std::pow(_g(N-1), 0.5)*std::exp(-_g(N-1)*a0);
   solution[N-2] = std::pow(_g(N-2), 0.5)*std::exp(-_g(N-2)*a0);
-  solution[N-1] = 0;
-  solution[N-2] = 0.5*_g.dx()*_g.dx();
   for (int k = N-2; k >= 1; --k) {
     solution[k-1] = ((12 - f[idx][k]*10)*solution[k] - f[idx][k+1]*solution[k+1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k-1];
   }
@@ -225,8 +230,8 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
   //  solution[0] *= -1;
   //  solution[1] *= -1;
   //}
-  //solution[0] = std::pow(_g(0), _o[idx]->l() + 0.5);
-  //solution[1] = std::pow(_g(1), _o[idx]->l() + 0.5);
+  solution[0] = std::pow(_g(0), _o[idx]->l() + 0.5);
+  solution[1] = std::pow(_g(1), _o[idx]->l() + 0.5);
   if (_o[idx]->n() == 1) {
     solution[0] = std::pow(_g(0), 0.5)*std::exp(-_g(0)/a0);
     solution[1] = std::pow(_g(1), 0.5)*std::exp(-_g(1)/a0);
@@ -241,8 +246,6 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
     solution[0] = std::pow(_g(0), 0.5)*_i0[idx];
     solution[1] = std::pow(_g(1), 0.5)*_i1[idx];
   }
-  solution[0] = 0;
-  solution[1] = 0.5*_g.dx()*_g.dx();
   for (int k = 1; k < N-2; ++k) {
     solution[k+1] = ((12.0 - f[idx][k]*10.0)*solution[k] - f[idx][k-1]*solution[k-1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k+1];
   }

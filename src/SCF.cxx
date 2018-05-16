@@ -217,6 +217,9 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
 
   ldouble Lstop = 1e-3;
 
+  _iss._i0.clear();
+  _iss._i1.clear();
+
   ldouble F = 0;
   int nStep = 0;
   while (nStep < Niter) {
