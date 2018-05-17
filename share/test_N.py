@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 Z = 7
 
 # log grid
-dx = 0.25e-1
-N = 560
-rmin = 1e-5
+dx = 0.2e-1/2.0
+N = 515*2
+rmin = 1e-3
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
