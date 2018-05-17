@@ -402,6 +402,15 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
   VectorXld dPar(_o.size()+_lambda.size());
   dPar.setZero();
 
+  VectorXld ParN(_o.size()+_lambda.size());
+  ParN.setZero();
+  for (int k = 0; k < _o.size(); ++k) {
+    ParN(k) = Fn(k);
+  }
+  for (int k = 0; k < _lambda.size(); ++k) {
+    ParN(_o.size()+k) = Sn(k);
+  }
+
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
     int l = _o[k]->l();
@@ -427,6 +436,9 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
         dE[k] = _o[k]->E()*1e-2/((ldouble) _o[k]->n());
     }
   }
+
+  MatrixXld J(_o.size()+_lambda.size(), _o.size()+_lambda.size());
+  J.setZero();
   for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
     std::vector<ldouble> EdE = E;
     std::vector<ldouble> lambdad = _lambda;
@@ -461,16 +473,34 @@ ldouble SCF::stepRenormalised(ldouble gamma) {
 
     // recalculate the function being minimized, because we are changing energy for orbital k independently from the others
     VectorXld Fd = _irs.solve(EdE, l, Fmd, Kmd, matched, Rnodesd);
+
     if (k < _o.size()) {
-      dPar(k) = 0;
-      if (Fd(k) - Fn(k) != 0)
-        dPar(k) = Fn(k)*dE[k]/(Fd(k) - Fn(k));
+      for (int j = 0; j < _o.size() + _lambda.size(); ++j) {
+        if (j < _o.size())
+          J(j, k) = (Fd(j) - Fn(j))/dE[k];
+        else
+          J(j, k) = (Sd(j - _o.size()) - Sn(j - _o.size()))/dE[k];
+      }
     } else {
-      dPar(k) = 0;
-      if (Sd(k-_o.size()) - Sn(k-_o.size()) != 0)
-        dPar(k) = Sd(k-_o.size())*1e-2/(Sd(k-_o.size()) - Sn(k-_o.size()));
+      for (int j = 0; j < _o.size() + _lambda.size(); ++j) {
+        if (j < _o.size())
+          J(j, k) = (Fd(j) - Fn(j))/1e-2;
+        else
+          J(j, k) = (Sd(j - _o.size()) - Sn(j - _o.size()))/1e-2;
+      }
     }
+    //if (k < _o.size()) {
+    //  dPar(k) = 0;
+    //  if (Fd(k) - Fn(k) != 0)
+    //    dPar(k) = Fn(k)*dE[k]/(Fd(k) - Fn(k));
+    //} else {
+    //  dPar(k) = 0;
+    //  if (Sd(k-_o.size()) - Sn(k-_o.size()) != 0)
+    //    dPar(k) = Sd(k-_o.size())*1e-2/(Sd(k-_o.size()) - Sn(k-_o.size()));
+    //}
   }
+
+  dPar = J.inverse()*ParN;
 
   // check node count
   for (int k = 0; k < _o.size(); ++k) {

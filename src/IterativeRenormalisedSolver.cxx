@@ -38,9 +38,10 @@ VectorXld IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vecto
   //det(A - B^-1) = 0 => det(BA - I) = 0
   VectorXld F(_o.size());
   for (int idx = 0; idx < M; ++idx) {
-    MatrixXld A = Ro[icl[idx]];
-    MatrixXld B = Ri[icl[idx]+1];
-    F(idx) = ((B*A - MatrixXld::Identity(M,M)).determinant());
+    //MatrixXld A = Ro[icl[idx]];
+    //MatrixXld B = Ri[icl[idx]+1];
+    //F(idx) = ((B*A - MatrixXld::Identity(M,M)).determinant());
+    F(idx) = ((Ro[icl[idx]] - Ri[icl[idx]+1].inverse()).determinant());
   }
 
   MatrixXld Mm = Ro[icl[kl]] - Ri[icl[kl]+1].inverse();
@@ -115,10 +116,10 @@ void IterativeRenormalisedSolver::solveOutward(std::vector<ldouble> &E, std::vec
     R[i].resize(M, M);
   }
   R[0].setZero();
-  MatrixXld psi0(M,M);
-  MatrixXld psi1(M,M);
-  psi0.setZero();
-  psi1.setZero();
+  //MatrixXld psi0(M,M);
+  //MatrixXld psi1(M,M);
+  //psi0.setZero();
+  //psi1.setZero();
   for (int idx = 0; idx < M; ++idx) {
     int k = _om.orbital(idx);
     int l = _om.l(idx);
