@@ -443,30 +443,6 @@ void HF::calculateVex(ldouble gamma) {
 void HF::calculateY() {
   std::cout << "Calculating Y" << std::endl;
 
-  MatrixXld S(_o.size(), _o.size());
-  S.setZero();
-
-  for (int k1 = 0; k1 < _o.size(); ++k1) {
-    lm tlm_d1(_o[k1]->l(), _o[k1]->m());
-    for (int k2 = 0; k2 < _o.size(); ++k2) {
-      lm tlm_d2(_o[k2]->l(), _o[k2]->m());
-      std::cout << "Calculating matrix element <" << k1 << "|S|" << k2 << ">" << std::endl;
-      if (tlm_d1 == tlm_d2 && _o[k1]->spin()*_o[k2]->spin() >= 0) {
-        for (int ir = 0; ir < _g->N()-1; ++ir) {
-          ldouble r = (*_g)(ir);
-          ldouble rp1 = (*_g)(ir+1);
-          ldouble dr = 0;
-          if (ir < _g->N()-1) dr = (*_g)(ir+1) - (*_g)(ir);
-          ldouble fn = _o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g)*std::pow(r, 2);
-          ldouble fnp1 = _o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g)*std::pow(rp1, 2);
-          S(k1, k2) += 0.5*(fn+fnp1)*dr;
-        }
-      }
-    }
-  }
-
-  MatrixXld Si = S.inverse();
-
   // Calculating Y_k(orb1, orb2)[r]
   // index in Y is 10000*k + 100*orb1 + orb2
   for (int k = 0; k <= 2; ++k) {
@@ -511,12 +487,8 @@ void HF::calculateY() {
           ldouble dx = std::log((*_g)(ir+1)) - std::log((*_g)(ir));
           ldouble fn = 0;
           ldouble fnp1 = 0;
-          for (int z = 0; z < _o.size(); ++z) {
-            for (int y = 0; y < _o.size(); ++y) {
-              fn += std::pow(r, 3)*Si(k1,z)*_o[z]->getNorm(ir, *_g)*Si(k2,y)*_o[y]->getNorm(ir, *_g);
-              fnp1 += std::pow(rp1, 3)*Si(k1,z)*_o[z]->getNorm(ir+1, *_g)*Si(k2,y)*_o[y]->getNorm(ir+1, *_g);
-            }
-          }
+          fn += std::pow(r, 3)*_o[k1]->getNorm(ir, *_g)*_o[k2]->getNorm(ir, *_g);
+          fnp1 += std::pow(rp1, 3)*_o[k1]->getNorm(ir+1, *_g)*_o[k2]->getNorm(ir+1, *_g);
           _Zt[10000*k + 100*k1 + 1*k2][ir+1] = std::exp(-dx*k)*_Zt[10000*k + 100*k1 + 1*k2][ir] + 0.5*(fnp1+fn)*std::exp(dx*k)*dx;
         }
         _Y[10000*k + 100*k1 + 1*k2][_g->N()-1] = _Zt[10000*k + 100*k1 + 1*k2][_g->N()-1];
