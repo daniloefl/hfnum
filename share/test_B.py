@@ -13,12 +13,12 @@ Z = 5
 
 # log grid
 dx = 0.2e-1
-N = 900
-rmin = 1e-7
+N = 515
+rmin = 1e-3
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
-h.method(2)
+h.method(3)
 
 orb0 = hfnum.Orbital( 1, 0, "+-")
 orb1 = hfnum.Orbital( 2, 0, "+-")
