@@ -50,6 +50,22 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     }
   }
 
+  _i0.resize(M);
+  _i1.resize(M);
+  ldouble a0 = 1.0;
+  for (int k = 0; k < M; ++k) {
+    ldouble n = _o[k]->n();
+    int l = _o[k]->l();
+    ldouble Zeff0 = _Z - _g(0)*(vd[0][0] - vex[std::pair<int,int>(k,k)][0]);
+    ldouble Zeff1 = _Z - _g(1)*(vd[0][1] - vex[std::pair<int,int>(k,k)][1]);
+    _i0[k] = 2*std::pow(Zeff0/(n*a0), 1.5)*std::pow(_g(0), l)*std::exp(-Zeff0*_g(0)/(n*a0));
+    _i1[k] = 2*std::pow(Zeff1/(n*a0), 1.5)*std::pow(_g(1), l)*std::exp(-Zeff1*_g(1)/(n*a0));
+    if (l%2 == 1) {
+      _i0[k] *= -1;
+      _i1[k] *= -1;
+    }
+  }
+
   VectorXld F(M);
   F.setZero();
 

@@ -38,10 +38,10 @@ VectorXld IterativeRenormalisedSolver::solve(std::vector<ldouble> &E, std::vecto
   //det(A - B^-1) = 0 => det(BA - I) = 0
   VectorXld F(_o.size());
   for (int idx = 0; idx < M; ++idx) {
-    //MatrixXld A = Ro[icl[idx]];
-    //MatrixXld B = Ri[icl[idx]+1];
-    //F(idx) = ((B*A - MatrixXld::Identity(M,M)).determinant());
-    F(idx) = ((Ro[icl[idx]] - Ri[icl[idx]+1].inverse()).determinant());
+    MatrixXld A = Ro[icl[idx]];
+    MatrixXld B = Ri[icl[idx]+1];
+    F(idx) = ((B*A - MatrixXld::Identity(M,M)).determinant());
+    //F(idx) = ((Ro[icl[idx]] - Ri[icl[idx]+1].inverse()).determinant());
   }
 
   MatrixXld Mm = Ro[icl[kl]] - Ri[icl[kl]+1].inverse();
