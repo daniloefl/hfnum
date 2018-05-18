@@ -50,22 +50,6 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     }
   }
 
-  _i0.resize(M);
-  _i1.resize(M);
-  ldouble a0 = 1.0;
-  for (int k = 0; k < M; ++k) {
-    ldouble n = _o[k]->n();
-    int l = _o[k]->l();
-    ldouble Zeff0 = _Z - _g(0)*(vd[k][0] - vex[std::pair<int,int>(k,k)][0]);
-    ldouble Zeff1 = _Z - _g(1)*(vd[k][1] - vex[std::pair<int,int>(k,k)][1]);
-    _i0[k] = 2*std::pow(Zeff0/(n*a0), 1.5)*std::pow(_g(0)/(n*a0), l)*std::exp(-Zeff0*_g(0)/(n*a0));
-    _i1[k] = 2*std::pow(Zeff1/(n*a0), 1.5)*std::pow(_g(1)/(n*a0), l)*std::exp(-Zeff1*_g(1)/(n*a0));
-    if ((_o[k]->n() - l - 1) % 2 == 1) {
-      _i0[k] *= -1;
-      _i1[k] *= -1;
-    }
-  }
-
   VectorXld F(M);
   F.setZero();
 
@@ -135,6 +119,12 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   }
 
   for (int idx = 0; idx < M; ++idx) {
+    solveOutward(E, matched, idx, outward[idx]);
+    solveInward(E, matched, idx, inward[idx]);
+    match(idx, matched[idx], inward[idx], outward[idx]);
+  }
+
+  for (int idx = 0; idx < M; ++idx) {
     F(idx) = ( (12.0L - 10.0L*f[idx][icl[idx]])*matched[idx][icl[idx]] 
                     - f[idx][icl[idx]-1]*matched[idx][icl[idx]-1]
                     - f[idx][icl[idx]+1]*matched[idx][icl[idx]+1]
@@ -149,8 +139,8 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   //W.setZero();
 
   //for (int idx = 0; idx < M; ++idx) {
-  //  W(idx) = (inward[idx][icl[idx]+1] - inward[idx][icl[idx]-1])*outward[idx][icl[idx]]/(2*_g.dx());
-  //  W(idx) -= (outward[idx][icl[idx]+1] - outward[idx][icl[idx]-1])*inward[idx][icl[idx]]/(2*_g.dx());
+  //  W(idx) = (inward[idx][icl[idx]+1] - inward[idx][icl[idx]-1])*outward[idx][icl[idx]]; // /(2*_g.dx()); // no nead to divide by this common factor
+  //  W(idx) -= (outward[idx][icl[idx]+1] - outward[idx][icl[idx]-1])*inward[idx][icl[idx]]; // /(2*_g.dx());
   //}
 
   return F;
@@ -230,30 +220,28 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
   int N = _g.N();
   solution.resize(N);
   ldouble a0 = std::sqrt(2*std::fabs(E[idx]))/_Z;
-  solution[0] = std::exp(-_g(0)/_o[idx]->n())*std::pow(_g(0), _o[idx]->l() + 0.5);
-  solution[1] = std::exp(-_g(1)/_o[idx]->n())*std::pow(_g(1), _o[idx]->l() + 0.5);
-  //if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
-  //  solution[0] *= -1;
-  //  solution[1] *= -1;
-  //}
   solution[0] = std::pow(_g(0), _o[idx]->l() + 0.5);
   solution[1] = std::pow(_g(1), _o[idx]->l() + 0.5);
-  if (_o[idx]->n() == 1) {
-    solution[0] = std::pow(_g(0), 0.5)*std::exp(-_g(0)/a0);
-    solution[1] = std::pow(_g(1), 0.5)*std::exp(-_g(1)/a0);
-  } else if (_o[idx]->n() == 2 && _o[idx]->l() == 0) {
-    solution[0] = std::pow(_g(0), 0.5)*(2 - _g(0)/a0)*std::exp(-_g(0)/(2.0*a0));
-    solution[1] = std::pow(_g(1), 0.5)*(2 - _g(1)/a0)*std::exp(-_g(1)/(2.0*a0));
-  } else if (_o[idx]->n() == 2 && _o[idx]->l() == 1) {
-    solution[0] = std::pow(_g(0), 1.5)/a0*std::exp(-_g(0)/(2.0*a0));
-    solution[1] = std::pow(_g(1), 1.5)/a0*std::exp(-_g(1)/(2.0*a0));
+  solution[0] = 2*std::pow(_Z/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(0)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-_Z*_g(0)/((ldouble) _o[idx]->n()));
+  solution[1] = 2*std::pow(_Z/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(1)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-_Z*_g(1)/((ldouble) _o[idx]->n()));
+  if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
+    solution[0] *= -1;
+    solution[1] *= -1;
   }
+  //if (_o[idx]->n() == 1) {
+  //  solution[0] = std::pow(_g(0), 0.5)*std::exp(-_g(0)/a0);
+  //  solution[1] = std::pow(_g(1), 0.5)*std::exp(-_g(1)/a0);
+  //} else if (_o[idx]->n() == 2 && _o[idx]->l() == 0) {
+  //  solution[0] = std::pow(_g(0), 0.5)*(2 - _g(0)/a0)*std::exp(-_g(0)/(2.0*a0));
+  //  solution[1] = std::pow(_g(1), 0.5)*(2 - _g(1)/a0)*std::exp(-_g(1)/(2.0*a0));
+  //} else if (_o[idx]->n() == 2 && _o[idx]->l() == 1) {
+  //  solution[0] = std::pow(_g(0), 1.5)/a0*std::exp(-_g(0)/(2.0*a0));
+  //  solution[1] = std::pow(_g(1), 1.5)/a0*std::exp(-_g(1)/(2.0*a0));
+  //}
   if (_i0.size() > idx && _i1.size() > idx) {
     solution[0] = std::pow(_g(0), 0.5)*_i0[idx];
     solution[1] = std::pow(_g(1), 0.5)*_i1[idx];
   }
-  //solution[0] = std::pow(_g(0), 0.5)*std::pow(_g(0), _o[idx]->l() + 1)*(1 - _Z*_g(0)/(_o[idx]->l() + 1));
-  //solution[1] = std::pow(_g(1), 0.5)*std::pow(_g(1), _o[idx]->l() + 1)*(1 - _Z*_g(1)/(_o[idx]->l() + 1));
   for (int k = 1; k < N-2; ++k) {
     solution[k+1] = ((12.0L - f[idx][k]*10.0L)*solution[k] - f[idx][k-1]*solution[k-1] - s[idx][k-1] - s[idx][k] - s[idx][k+1])/f[idx][k+1];
   }
