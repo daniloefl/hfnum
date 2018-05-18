@@ -224,10 +224,10 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, std::map<int
   solution[1] = std::pow(_g(1), _o[idx]->l() + 0.5);
   solution[0] = 2*std::pow(_Z/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(0)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-_Z*_g(0)/((ldouble) _o[idx]->n()));
   solution[1] = 2*std::pow(_Z/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(1)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-_Z*_g(1)/((ldouble) _o[idx]->n()));
-  if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
-    solution[0] *= -1;
-    solution[1] *= -1;
-  }
+  //if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
+  //  solution[0] *= -1;
+  //  solution[1] *= -1;
+  //}
   //if (_o[idx]->n() == 1) {
   //  solution[0] = std::pow(_g(0), 0.5)*std::exp(-_g(0)/a0);
   //  solution[1] = std::pow(_g(1), 0.5)*std::exp(-_g(1)/a0);
