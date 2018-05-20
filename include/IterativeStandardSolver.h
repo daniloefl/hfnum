@@ -56,17 +56,17 @@ class IterativeStandardSolver {
 
     /// \brief Solve assuming initial conditions at the 2 last grid points.
     /// \param E Trial energy.
-    /// \param matched Previous orbitals to be used for non-homogenous term.
     /// \param idx Index of orbital to solve.
     /// \param solution To be returned by reference.
-    void solveInward(std::vector<ldouble> &E, std::map<int, Vradial> &matched, int idx, Vradial &solution);
+    /// \param homo Whether to only solve it for the homogeneous case.
+    void solveInward(std::vector<ldouble> &E, int idx, Vradial &solution, bool homo = false);
 
     /// \brief Solve assuming initial conditions at the 2 first grid points.
     /// \param E Trial energy.
-    /// \param matched To be returned by reference. Orbitals found.
     /// \param idx Index of orbital to solve.
     /// \param solution To be returned by reference.
-    void solveOutward(std::vector<ldouble> &E, std::map<int, Vradial> &matched, int idx, Vradial &solution);
+    /// \param homo Whether to only solve it for the homogeneous case.
+    void solveOutward(std::vector<ldouble> &E, int idx, Vradial &solution, bool homo = false);
 
     /// \brief Force continuity by taking ratio of inward and outward solutions at the matching point and scaling the solutions appropriately.
     /// \param k Index of the orbital.
@@ -74,6 +74,14 @@ class IterativeStandardSolver {
     /// \param inward Inward solution.
     /// \param outward Outward solution.
     void match(int k, Vradial &o, Vradial &inward, Vradial &outward);
+
+    /// \brief Find initial condition at i = 1 by using the matching on the homogeneous and non-homogeneous solutions.
+    /// \param idx Index of orbital to solve.
+    /// \param hin Homogeneous inward solution.
+    /// \param hout Homogeneous outward solution.
+    /// \param in Inward solution.
+    /// \param out Outward solution.
+    void fixIC(int idx, Vradial &in, Vradial &out, Vradial &hin, Vradial &hout);
 
     /// \brief Set Z value.
     /// \param Z New atomic number.
@@ -103,6 +111,9 @@ class IterativeStandardSolver {
 
     std::map<int, Vradial> inward;
     std::map<int, Vradial> outward;
+
+    std::map<int, Vradial> homoInward;
+    std::map<int, Vradial> homoOutward;
 
     ldouble _Z;
 };
