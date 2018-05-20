@@ -44,7 +44,7 @@ print("Total ground energy: %10.6f Hartree = %15.8f eV" % (E0, E0*eV))
 o = []
 v = h.getNucleusPotential()
 
-m = next(i for i,v in enumerate(r) if v >= 10)
+m = -1 #next(i for i,v in enumerate(r) if v >= 10)
 
 style = ['r-', 'b-', 'm-', 'c-', 'k-', 'g-']
 
