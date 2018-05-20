@@ -625,7 +625,6 @@ void HF::calculateVd(ldouble gamma) {
                 for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
                   int ml2 = ml2_idx/2 - l2;
                   if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
-                  //if (_o[k1]->term()[ml1_idx] != _o[k2]->term()[ml2_idx]) continue;
                   if (ml1 == -1 && ml2 == -1) A += 1.0/25.0;
                   if (ml1 == -1 && ml2 == 0) A += -2.0/25.0;
                   if (ml1 == -1 && ml2 == 1) A += 1.0/25.0;
