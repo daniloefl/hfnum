@@ -222,8 +222,6 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
 void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, int idx, Vradial &solution, bool homo) {
   int N = _g.N();
   solution.resize(N);
-  solution[N-1] = std::pow(_g(N-1), 0.5)*std::exp(-_g(N-1)*std::sqrt(2*std::fabs(E[idx]))/_Z);
-  solution[N-2] = std::pow(_g(N-2), 0.5)*std::exp(-_g(N-2)*std::sqrt(2*std::fabs(E[idx]))/_Z);
   ldouble Zeff = _o[idx]->n()*std::sqrt(std::fabs(2*E[idx]));
   solution[N-1] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(N-1)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(N-1)/((ldouble) _o[idx]->n()));
   solution[N-2] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(N-2)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(N-2)/((ldouble) _o[idx]->n()));
@@ -242,30 +240,9 @@ void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, int idx, Vrad
 void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, int idx, Vradial &solution, bool homo) {
   int N = _g.N();
   solution.resize(N);
-  ldouble a0 = std::sqrt(2*std::fabs(E[idx]))/_Z;
-  solution[0] = std::pow(_g(0), _o[idx]->l() + 0.5);
-  solution[1] = std::pow(_g(1), _o[idx]->l() + 0.5);
   ldouble Zeff = _o[idx]->n()*std::sqrt(std::fabs(2*E[idx]));
   solution[0] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(0)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(0)/((ldouble) _o[idx]->n()));
   solution[1] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(1)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(1)/((ldouble) _o[idx]->n()));
-  //if ((_o[idx]->n() - _o[idx]->l() - 1) % 2 == 1) {
-  //  solution[0] *= -1;
-  //  solution[1] *= -1;
-  //}
-  //if (_o[idx]->n() == 1) {
-  //  solution[0] = std::pow(_g(0), 0.5)*std::exp(-_g(0)/a0);
-  //  solution[1] = std::pow(_g(1), 0.5)*std::exp(-_g(1)/a0);
-  //} else if (_o[idx]->n() == 2 && _o[idx]->l() == 0) {
-  //  solution[0] = std::pow(_g(0), 0.5)*(2 - _g(0)/a0)*std::exp(-_g(0)/(2.0*a0));
-  //  solution[1] = std::pow(_g(1), 0.5)*(2 - _g(1)/a0)*std::exp(-_g(1)/(2.0*a0));
-  //} else if (_o[idx]->n() == 2 && _o[idx]->l() == 1) {
-  //  solution[0] = std::pow(_g(0), 1.5)/a0*std::exp(-_g(0)/(2.0*a0));
-  //  solution[1] = std::pow(_g(1), 1.5)/a0*std::exp(-_g(1)/(2.0*a0));
-  //}
-  //if (_i0.size() > idx && _i1.size() > idx) {
-  //  solution[0] = std::pow(_g(0), 0.5)*_i0[idx];
-  //  solution[1] = std::pow(_g(1), 0.5)*_i1[idx];
-  //}
   if (homo) {
     for (int k = 1; k < N-2; ++k) {
       solution[k+1] = ((12.0L - f[idx][k]*10.0L)*solution[k] - f[idx][k-1]*solution[k-1])/f[idx][k+1];
@@ -306,8 +283,10 @@ void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial 
 }
 
 void IterativeStandardSolver::fixIC(int idx, Vradial &in, Vradial &out, Vradial &hin, Vradial &hout) {
+  if (hout[icl[idx]] - hin[icl[idx]] == 0) return;
   ldouble alpha = -(out[icl[idx]] - in[icl[idx]])/(hout[icl[idx]] - hin[icl[idx]]);
   if (alpha == -1) return;
+  //std::cout << "alpha = " << alpha << " " << out[icl[idx]] << " " << in[icl[idx]] << " " << hout[icl[idx]] << " " << hin[icl[idx]] << std::endl;
   for (int i = 0; i < _g.N(); ++i) {
     in[i] = in[i] + alpha*hin[i];
     out[i] = out[i] + alpha*hout[i];

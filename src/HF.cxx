@@ -373,52 +373,42 @@ void HF::calculateVex(ldouble gamma) {
           // Re-estimated in calculations/Angular coefficients Hartree-Fock numerical.ipynb
           // Values agree, except for a factor of 1/2 -- from factor of 1/2 in Vex after double counting electrons in summation?
           // https://journals.aps.org/pr/pdf/10.1103/PhysRev.34.1293
-          if (!filled[k2]) {
-            for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
-              int ml1 = ml1_idx/2 - l1;
-              if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
-              ldouble A = 0;
-              for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
-                int ml2 = ml2_idx/2 - l2;
-                if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
-                if (_o[k1]->term()[ml1_idx] != _o[k2]->term()[ml2_idx]) continue;
+          for (int ml1_idx = 0; ml1_idx < _o[k1]->term().size(); ++ml1_idx) {
+            int ml1 = ml1_idx/2 - l1;
+            if (_o[k1]->term()[ml1_idx] != '+' && _o[k1]->term()[ml1_idx] != '-') continue;
+            ldouble A = 0;
+            for (int ml2_idx = 0; ml2_idx < _o[k2]->term().size(); ++ml2_idx) {
+              int ml2 = ml2_idx/2 - l2;
+              if (_o[k2]->term()[ml2_idx] != '+' && _o[k2]->term()[ml2_idx] != '-') continue;
+              if (_o[k1]->term()[ml1_idx] != _o[k2]->term()[ml2_idx]) continue;
 
-                if (l1 == 0 && l2 == 0 && k == 0) A += 1.0;
-                if (l1 == 0 && l2 == 1 && k == 1) A += 1.0/3.0; // CHECK
-                if (l1 == 1 && l2 == 0 && k == 1) A += 1.0/3.0; // CHECK
-                if (l2 == 1 && l1 == 1) {
-                  if (k == 0 && ml1 == ml2) A += 1.0;
+              if (l1 == 0 && l2 == 0 && k == 0) A += 1.0;
+              if (l1 == 0 && l2 == 1 && k == 1) A += 1.0/3.0; // CHECK
+              if (l1 == 1 && l2 == 0 && k == 1) A += 1.0/3.0; // CHECK
+              if (l2 == 1 && l1 == 1) {
+                if (k == 0 && ml1 == ml2) A += 1.0;
  
-                  if (k == 2 && ml1 == -1 && ml2 == -1) A += 1.0/25.0;
-                  if (k == 2 && ml1 == 1 && ml2 == 1) A += 1.0/25.0;
+                if (k == 2 && ml1 == -1 && ml2 == -1) A += 1.0/25.0;
+                if (k == 2 && ml1 == 1 && ml2 == 1) A += 1.0/25.0;
 
-                  if (k == 2 && ml1 == 1 && ml2 == 0) A += 3.0/25.0;  // CHECK
-                  if (k == 2 && ml1 == -1 && ml2 == 0) A += 3.0/25.0;  // CHECK
-                  if (k == 2 && ml1 == 0 && ml2 == 1) A += 3.0/25.0;  // CHECK
-                  if (k == 2 && ml1 == 0 && ml2 == -1) A += 3.0/25.0;  // CHECK
+                if (k == 2 && ml1 == 1 && ml2 == 0) A += 3.0/25.0;  // CHECK
+                if (k == 2 && ml1 == -1 && ml2 == 0) A += 3.0/25.0;  // CHECK
+                if (k == 2 && ml1 == 0 && ml2 == 1) A += 3.0/25.0;  // CHECK
+                if (k == 2 && ml1 == 0 && ml2 == -1) A += 3.0/25.0;  // CHECK
 
-                  if (k == 2 && ml1 == 0 && ml2 == 0) A += 4.0/25.0;
+                if (k == 2 && ml1 == 0 && ml2 == 0) A += 4.0/25.0;
 
-                  if (k == 2 && ml1 == 1 && ml2 == -1) A += 6.0/25.0; // CHECK
-                  if (k == 2 && ml1 == -1 && ml2 == 1) A += 6.0/25.0; // CHECK
-                }
+                if (k == 2 && ml1 == 1 && ml2 == -1) A += 6.0/25.0; // CHECK
+                if (k == 2 && ml1 == -1 && ml2 == 1) A += 6.0/25.0; // CHECK
               }
-              B += A;
             }
-          
-            // average over multiplicity of the k1, since the sum here is over the "other" orbitals
-            // we should not sum the contribution of "this" (k1) orbital more than once
-            B /= (ldouble) _o[k1]->g();
-          } else if (filled[k2]) {
-            if (k == 0 && l1 == 0 && l2 == 0) B += 1.0*_o[k2]->g()*0.5;
-  
-            if (k == 0 && l1 == 1 && l2 == 1) B += 1.0/3.0*_o[k2]->g()*0.5;
-  
-            if (k == 1 && l1 == 0 && l2 == 1) B += 1.0/3.0*_o[k2]->g()*0.5;
-            if (k == 1 && l1 == 1 && l2 == 0) B += 1.0/3.0*_o[k2]->g()*0.5;
-
-            if (k == 2 && l1 == 1 && l2 == 1) B += 2.0/15.0*_o[k2]->g()*0.5;
+            B += A;
           }
+          
+          // average over multiplicity of the k1, since the sum here is over the "other" orbitals
+          // we should not sum the contribution of "this" (k1) orbital more than once
+          B /= (ldouble) _o[k1]->g();
+          
 
           if (B == 0) continue;
           // This is the extra k parts
