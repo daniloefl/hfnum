@@ -36,7 +36,9 @@ class LinearSystemBuilder {
     /// \param pot Coulomb potential.
     /// \param vd Direct potential.
     /// \param vex Exchange potential.
-    void prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vector<ldouble> &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex);
+    /// \param lambda Lagrange multipliers.
+    /// \param Map indicating which lagrange multipliers refer to which orbital.
+    void prepareMatrices(SMatrixXld &A, VectorXld &b0, std::vector<ldouble> &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::vector<ldouble> &lambda, std::map<int, int> &lambdaMap);
 
     /// \brief Build sparse matrices to solve system of equations.
     /// \param A Jacobian matrix.

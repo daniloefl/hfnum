@@ -202,7 +202,7 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   // and resize it to be sure it has the proper size
   _lambdaMap.clear();
   int lcount = 0;
-  if (!_isSpinDependent && (_method == 3 || _method == 2)) {
+  if (!_isSpinDependent && (_method == 0 || _method == 3 || _method == 2)) {
     for (int i = 0; i < _o.size(); ++i) {
       for (int j = i+1; j < _o.size(); ++j) {
         if (_o[i]->l() != _o[j]->l()) continue;
@@ -216,9 +216,6 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   _dlambda.resize(lcount, 0);
 
   ldouble Lstop = 1e-3;
-
-  _iss._i0.clear();
-  _iss._i1.clear();
 
   ldouble F = 0;
   int nStep = 0;
@@ -239,17 +236,25 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   
     // change orbital energies
     std::cout << "Orbital energies at step " << nStep << ", with constraint = " << std::setw(16) << F << ", method = " << strMethod << "." << std::endl;
-    std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "next energy (H)" << " " << std::setw(16) << "Min. (H)" << " " << std::setw(16) << "Max. (H)" << " " << std::setw(5) << "nodes" << std::endl;
+    std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Name" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "Step (H)" << " " << std::setw(16) << "Min. (H)" << " " << std::setw(16) << "Max. (H)" << " " << std::setw(5) << "nodes" << std::endl;
     for (int k = 0; k < _o.size(); ++k) {
       ldouble stepdE = _dE[k];
       ldouble newE = (_o[k]->E()+stepdE);
-      std::cout << std::setw(5) << k << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << newE << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
+      std::cout << std::setw(5) << k << " " << std::setw(16) << getOrbitalName(k) << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << stepdE << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
       _o[k]->E(newE);
     }
     std::cout << "Lagrange multipliers" << std::endl;
-    std::cout << std::setw(10) << "Index" << " " << std::setw(16) << "Value" << " " << std::setw(16) << "Step" << std::endl;
+    std::cout << std::setw(10) << "Variable" << " " << std::setw(16) << "Value" << " " << std::setw(16) << "Step" << std::endl;
     for (auto &k : _lambdaMap) {
-      std::cout << std::setw(10) << k.first << " " << std::setw(16) << std::setprecision(12) << _lambda[k.second] << " " << std::setw(16) << std::setprecision(12) << _dlambda[k.second] << std::endl;
+      int k2 = k.first / 100;
+      int k1 = k.first % 100;
+      if (k1 > k2) continue;
+      std::string s = "\\lambda_{";
+      s += std::to_string(k1);
+      s += ",";
+      s += std::to_string(k2);
+      s += "}";
+      std::cout << std::setw(10) << s << " " << std::setw(16) << std::setprecision(12) << _lambda[k.second] << " " << std::setw(16) << std::setprecision(12) << _dlambda[k.second] << std::endl;
     }
     for (int k = 0; k < _lambda.size(); ++k) {
       ldouble stepdE = _dlambda[k];
@@ -262,15 +267,6 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
       stop = stop && (std::fabs(*std::max_element(_dlambda.begin(), _dlambda.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < Lstop);
     }
     if (stop) break;
-  }
-
-  if (_method == 3) {
-    _iss._i0.resize(_o.size());
-    _iss._i1.resize(_o.size());
-    for (int k = 0; k < _o.size(); ++k) {
-      _iss._i0[k] = _o[k]->getNorm(0, *_g);
-      _iss._i1[k] = _o[k]->getNorm(1, *_g);
-    }
   }
 
   return F;
@@ -556,7 +552,7 @@ ldouble SCF::stepSparse(ldouble gamma) {
   if (_isSpinDependent) {
     _lsb.prepareMatrices(_A, _b0, _pot, _vsum_up, _vsum_dw);
   } else {
-    _lsb.prepareMatrices(_A, _b0, _pot, _vd, _vex);
+    _lsb.prepareMatrices(_A, _b0, _pot, _vd, _vex, _lambda, _lambdaMap);
   }
   //std::cout << _A << std::endl;
   //std::cout << _b0 << std::endl;

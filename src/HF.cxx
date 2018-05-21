@@ -320,49 +320,14 @@ void HF::calculateVex(ldouble gamma) {
       std::cout << "Calculating Vex term from k1 = " << k1 << ", k2 = " << k2 << std::endl;
 
       if (_averageCoefficients) {
-        if (filled[k2]) {
-          if (l1 == l2) {
-            if (_o[k2]->n() == _o[k1]->n()) continue;
-          }
-          for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
-            ldouble B = 0.0;
-            if (k == 0 && l1 == 0 && l2 == 0) B += 2.0;
-            if (k == 1 && l1 == 1 && l2 == 0) B += 2.0;
-            if (k == 1 && l1 == 0 && l2 == 1) B += 2.0;
-            if (k == 0 && l1 == 1 && l2 == 1) B += 6.0;
-            if (k == 2 && l1 == 1 && l2 == 1) B += 12.0/5.0;
-   
-            B /= (ldouble) (2*l1 + 1);
+        for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
+          ldouble B = _o[k2]->g()*0.5*std::pow(CG(l1, l2, 0, 0, k, 0), 2)/((ldouble) 2*k+1.0);
 
-            if (B == 0) continue;
-            // This is the extra k parts
-            for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-              ldouble r1 = (*_g)(ir1);
-              _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
-            }
-          }
-        } else { // not filled
-          if (l1 == l2) {
-            if (_o[k2]->n() == _o[k1]->n()) continue;
-          }
-          for (int k = abs(l1-l2); k <= l1+l2; k += 1) {
-            ldouble B = 0.0;
-            if (k == 0 && l1 == 0 && l2 == 0) B += 2.0;
-            if (k == 1 && l1 == 1 && l2 == 0) B += 2.0;
-            if (k == 1 && l1 == 0 && l2 == 1) B += 2.0;
-            if (k == 0 && l1 == 1 && l2 == 1) B += 6.0;
-            if (k == 2 && l1 == 1 && l2 == 1) B += 12.0/5.0;
-   
-            B /= (ldouble) (2*l1 + 1);
-
-            B *= _o[k2]->g()/((ldouble) 2*(2*l2 + 1));
-
-            if (B == 0) continue;
-            // This is the extra k parts
-            for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-              ldouble r1 = (*_g)(ir1);
-              _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
-            }
+          if (B == 0) continue;
+          // This is the extra k parts
+          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+            ldouble r1 = (*_g)(ir1);
+            _vexsum[std::pair<int,int>(k1, k2)][ir1] += B * _Y[10000*k + 100*k1 + 1*k2][ir1];
           }
         }
       } else {
@@ -553,45 +518,11 @@ void HF::calculateVd(ldouble gamma) {
       ldouble C = 1.0;
 
       if (_averageCoefficients) {
-        if (filled[k2]) {
-          // This is the central part
-          C = _o[k2]->g();
-          if (k2 == k1) C -= 1;
-          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            _vdsum[k1][ir1] += C*_Y[10000*0 + 100*k2 + 1*k2][ir1];
-          }
-          if (k1 == k2) {
-            for (int k = 2; k <= 2*l2; k += 2) {
-              ldouble A = 0.0;
-              if (k == 2 && l2 == 1) A += 6.0/5.0;
-              A /= (ldouble) (2*l2 + 1);
-              if (A == 0) continue;
-              // This is the extra k parts
-              for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-                _vdsum[k1][ir1] -= A * _Y[10000*k + 100*k2 + 1*k2][ir1];
-              }
-            }
-          }
-        } else { // not filled
-          C = _o[k2]->g();
-          if (k2 == k1) C -= 1;
-          for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-            _vdsum[k1][ir1] += C*_Y[10000*0 + 100*k2 + 1*k2][ir1];
-          }
-          if (k1 == k2) {
-            for (int k = 2; k <= 2*l2; k += 2) {
-              ldouble A = 0.0;
-              if (k == 2 && l2 == 1) A += 6.0/5.0;
-              A /= (ldouble) (2*l2 + 1);
-              A *= _o[k2]->g()/((ldouble) 2*(2*l2 + 1));
-              if (A == 0) continue;
-              // This is the extra k parts
-              for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
-                _vdsum[k1][ir1] += A * _Y[10000*k + 100*k2 + 1*k2][ir1];
-              }
-            }
-          }
-        } // is filled?
+        // This is the central part
+        C = _o[k2]->g();
+        for (int ir1 = 0; ir1 < _g->N(); ++ir1) {
+          _vdsum[k1][ir1] += C*_Y[10000*0 + 100*k2 + 1*k2][ir1];
+        }
       } else { // not average coefficients
         if (filled[k2]) {
           // This is the central part

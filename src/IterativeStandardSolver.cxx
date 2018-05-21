@@ -10,6 +10,8 @@
 IterativeStandardSolver::IterativeStandardSolver(const Grid &g, std::vector<Orbital *> &o, std::vector<int> &i, OrbitalMapper &om, ldouble Z)
   : _g(g), _o(o), icl(i), _om(om), _Z(Z) {
 
+  _i0.clear();
+  _i1.clear();
 }
 
 IterativeStandardSolver::~IterativeStandardSolver() {
@@ -54,6 +56,16 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     }
   }
 
+  if (_i0.size() != _o.size()) {
+    _i0.resize(_o.size(), 0);
+    _i1.resize(_o.size(), 0);
+    for (int idx = 0; idx < M; ++idx) {
+      ldouble Zeff = _o[idx]->n()*std::sqrt(std::fabs(2*E[idx]));
+      _i0[idx] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(0)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(0)/((ldouble) _o[idx]->n()));
+      _i1[idx] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(1)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(1)/((ldouble) _o[idx]->n()));
+    }
+  }
+
   VectorXld F(M);
   F.setZero();
 
@@ -63,9 +75,6 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     for (int idx = 0; idx < M; ++idx) {
       solveOutward(E, idx, outward[idx]);
       solveInward(E, idx, inward[idx]);
-      solveOutward(E, idx, homoOutward[idx]);
-      solveInward(E, idx, homoInward[idx]);
-      fixIC(idx, inward[idx], outward[idx], homoInward[idx], homoOutward[idx]);
       match(idx, matched[idx], inward[idx], outward[idx]);
 
       // recalculate non-homogeneus term
@@ -95,9 +104,6 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
       for (int idxI = idx-1; idxI >= 0; --idxI) {
         solveOutward(E, idxI, outward[idxI]);
         solveInward(E, idxI, inward[idxI]);
-        solveOutward(E, idx, homoOutward[idx]);
-        solveInward(E, idx, homoInward[idx]);
-        fixIC(idx, inward[idx], outward[idx], homoInward[idx], homoOutward[idx]);
         match(idxI, matched[idxI], inward[idxI], outward[idxI]);
 
         // recalculate non-homogeneus term
@@ -125,17 +131,51 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     
       } // solving in inverse order
     } // solving it in the direct order
-    
+
+    for (int idx = 0; idx < M; ++idx) {
+      solveOutward(E, idx, homoOutward[idx], true);
+      solveInward(E, idx, homoInward[idx], true);
+      ldouble rhicl = homoOutward[idx][icl[idx]]/homoInward[idx][icl[idx]];
+      for (int i = 0; i < _g.N(); ++i) {
+        homoInward[idx][i] *= rhicl;
+      }
+    }
+    for (int idx = 0; idx < M; ++idx) {
+      solveOutward(E, idx, outward[idx]);
+      solveInward(E, idx, inward[idx]);
+    }
+
+    for (int idx = 0; idx < M; ++idx) {
+      fixIC(idx, inward[idx], outward[idx], homoInward[idx], homoOutward[idx]);
+      solveInward(E, idx, inward[idx]);
+      solveOutward(E, idx, outward[idx]);
+      match(idx, matched[idx], inward[idx], outward[idx]);
+    }
+
+    // recalculate non-homogeneus term
+    for (int idx1 = 0; idx1 < M; ++idx1) {
+      std::fill(s[idx1].begin(), s[idx1].end(), 0);
+      for (int idx2 = 0; idx2 < M; ++idx2) {
+        if (idx1 == idx2) continue;
+        for (int k = 0; k < _g.N(); ++k) {
+          if (_g.isLog()) {
+            s[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
+            if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
+              int lidx = lambdaMap[100*idx1 + idx2];
+              s[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda[lidx]*matched[idx2][k];
+            }
+          } else {
+            s[idx1][k] += std::pow(_g.dx(), 2)/12.0*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
+            if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
+              int lidx = lambdaMap[100*idx1 + idx2];
+              s[idx1][k] += std::pow(_g.dx(), 2)/12.0L*lambda[lidx]*matched[idx2][k];
+            }
+          }
+        }
+      }
+    } // recalculate non-homogeneous term
   }
 
-  for (int idx = 0; idx < M; ++idx) {
-    solveOutward(E, idx, outward[idx]);
-    solveInward(E, idx, inward[idx]);
-    solveOutward(E, idx, homoOutward[idx]);
-    solveInward(E, idx, homoInward[idx]);
-    fixIC(idx, inward[idx], outward[idx], homoInward[idx], homoOutward[idx]);
-    match(idx, matched[idx], inward[idx], outward[idx]);
-  }
 
   for (int idx = 0; idx < M; ++idx) {
     F(idx) = ( (12.0L - 10.0L*f[idx][icl[idx]])*matched[idx][icl[idx]] 
@@ -243,6 +283,10 @@ void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, int idx, Vra
   ldouble Zeff = _o[idx]->n()*std::sqrt(std::fabs(2*E[idx]));
   solution[0] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(0)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(0)/((ldouble) _o[idx]->n()));
   solution[1] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(1)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(1)/((ldouble) _o[idx]->n()));
+  if (idx < _i0.size()) {
+    solution[0] = _i0[idx];
+    solution[1] = _i1[idx];
+  }
   if (homo) {
     for (int k = 1; k < N-2; ++k) {
       solution[k+1] = ((12.0L - f[idx][k]*10.0L)*solution[k] - f[idx][k-1]*solution[k-1])/f[idx][k+1];
@@ -284,11 +328,24 @@ void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial 
 
 void IterativeStandardSolver::fixIC(int idx, Vradial &in, Vradial &out, Vradial &hin, Vradial &hout) {
   if (hout[icl[idx]] - hin[icl[idx]] == 0) return;
-  ldouble alpha = -(out[icl[idx]] - in[icl[idx]])/(hout[icl[idx]] - hin[icl[idx]]);
-  if (alpha == -1) return;
-  //std::cout << "alpha = " << alpha << " " << out[icl[idx]] << " " << in[icl[idx]] << " " << hout[icl[idx]] << " " << hin[icl[idx]] << std::endl;
+  ldouble ricl = out[icl[idx]]/in[icl[idx]];
+  for (int i = 0; i < _g.N(); ++i) {
+    in[i] *= ricl;
+  }
+
+  ldouble alpha = -(out[icl[idx]+1] - in[icl[idx]+1])/(hout[icl[idx]+1] - hin[icl[idx]+1]);
+  if (alpha == -1) {
+    _i0[idx] = out[0];
+    _i1[idx] = out[1];
+    return;
+  }
   for (int i = 0; i < _g.N(); ++i) {
     in[i] = in[i] + alpha*hin[i];
     out[i] = out[i] + alpha*hout[i];
   }
+  Vradial m(in.size());
+  match(idx, m, in, out);
+  _i0[idx] = m[0];
+  _i1[idx] = m[1];
+  //std::cout << "alpha = " << alpha << " " << idx << " " << out[icl[idx]+1] << " " << in[icl[idx]+1] << " " << hout[icl[idx]+1] << " " << hin[icl[idx]+1] << " " << _i0[idx] << " " << _i1[idx] << std::endl;
 }
