@@ -202,7 +202,7 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   // and resize it to be sure it has the proper size
   _lambdaMap.clear();
   int lcount = 0;
-  if (!_isSpinDependent && (_method == 0 || _method == 3 || _method == 2)) {
+  if (!_isSpinDependent) {
     for (int i = 0; i < _o.size(); ++i) {
       for (int j = i+1; j < _o.size(); ++j) {
         if (_o[i]->l() != _o[j]->l()) continue;
@@ -306,19 +306,67 @@ ldouble SCF::stepGordon(ldouble gamma) {
     }
   }
 
+  VectorXld Sn(_lambda.size());
+  Sn.setZero();
+
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      if (k1 <= k2) continue;
+      if (_o[k1]->l() != _o[k2]->l()) continue;
+      int lidx = _lambdaMap[k1*100+k2];
+      for (int ir = 0; ir < _g->N()-1; ++ir) {
+        ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+        if (_g->isLog())
+          Sn(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2-1)*dr;
+        else
+          Sn(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2)*dr;
+      }
+    }
+  }
+
+  VectorXld dPar(_o.size()+_lambda.size());
+  dPar.setZero();
+
   VectorXld J(_o.size());
   J.setZero();
   std::cout << "Calculating energy change Jacobian." << std::endl;
-  for (int k2 = 0; k2 < _o.size(); ++k2) {
+  for (int k2 = 0; k2 < _o.size()+_lambda.size(); ++k2) {
     std::vector<ldouble> EdE = E;
-    EdE[k2] += dE[k2];
+    std::vector<ldouble> lambdad = _lambda;
+  
+    if (k2 < _o.size()) {
+      EdE[k2] += dE[k2];
+    } else {
+      lambdad[k2-_o.size()] += 1e-2;
+    }
 
     std::vector<MatrixXld> Fmd;
     std::vector<MatrixXld> Kmd;
-    calculateFMatrix(Fmd, Kmd, EdE, _lambda);
+    calculateFMatrix(Fmd, Kmd, EdE, lambdad);
+
+    VectorXld Sd(_lambda.size());
+    Sd.setZero();
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      for (int k2 = 0; k2 < _o.size(); ++k2) {
+        if (k1 <= k2) continue;
+        if (_o[k1]->l() != _o[k2]->l()) continue;
+        int lidx = _lambdaMap[k1*100+k2];
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+          if (_g->isLog())
+            Sd(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2-1)*dr;
+          else
+            Sd(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2)*dr;
+        }
+      }
+    }
 
     ldouble Fd = _igs.solve(EdE, l, Fmd, Kmd, matched);
-    J(k2) = (Fd - Fn)/dE[k2];
+    if (k2 < _o.size()) {
+      J(k2) = (Fd - Fn)/dE[k2];
+    } else {
+      J(k2) = (Sd(_o.size()+k2) - Sn(_o.size()+k2))/1e-2;
+    }
 
   }
 
@@ -351,6 +399,11 @@ ldouble SCF::stepGordon(ldouble gamma) {
         _Emax[k] = _o[k]->E();
       }
     }
+  }
+
+  for (int k = 0; k < _lambda.size(); ++k) {
+    _dlambda[k] = -gamma*Sn(k)/J(_o.size()+k);
+    std::cout << "INFO: Lagrange multiplier " << k << " (with secant method), dlambda = " << _dlambda[k] << " (probe dlambda = " << 1e-2 << ")" << std::endl;
   }
 
   return F;
