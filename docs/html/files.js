@@ -33,6 +33,10 @@ var files =
     [ "IterativeRenormalisedSolver.h", "IterativeRenormalisedSolver_8h.html", [
       [ "IterativeRenormalisedSolver", "classIterativeRenormalisedSolver.html", "classIterativeRenormalisedSolver" ]
     ] ],
+    [ "IterativeStandardMatrixSolver.cxx", "IterativeStandardMatrixSolver_8cxx.html", null ],
+    [ "IterativeStandardMatrixSolver.h", "IterativeStandardMatrixSolver_8h.html", [
+      [ "IterativeStandardMatrixSolver", "classIterativeStandardMatrixSolver.html", "classIterativeStandardMatrixSolver" ]
+    ] ],
     [ "IterativeStandardSolver.cxx", "IterativeStandardSolver_8cxx.html", null ],
     [ "IterativeStandardSolver.h", "IterativeStandardSolver_8h.html", [
       [ "IterativeStandardSolver", "classIterativeStandardSolver.html", "classIterativeStandardSolver" ]

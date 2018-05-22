@@ -9,6 +9,7 @@ var annotated_dup =
     [ "HFS", "classHFS.html", "classHFS" ],
     [ "IterativeGordonSolver", "classIterativeGordonSolver.html", "classIterativeGordonSolver" ],
     [ "IterativeRenormalisedSolver", "classIterativeRenormalisedSolver.html", "classIterativeRenormalisedSolver" ],
+    [ "IterativeStandardMatrixSolver", "classIterativeStandardMatrixSolver.html", "classIterativeStandardMatrixSolver" ],
     [ "IterativeStandardSolver", "classIterativeStandardSolver.html", "classIterativeStandardSolver" ],
     [ "LinearSystemBuilder", "classLinearSystemBuilder.html", "classLinearSystemBuilder" ],
     [ "lm", "classlm.html", "classlm" ],

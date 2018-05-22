@@ -1,10 +1,11 @@
 <map id="SCF.h" name="SCF.h">
-<area shape="rect" id="node2" href="$Grid_8h.html" title="Grid.h" alt="" coords="686,229,744,256"/>
-<area shape="rect" id="node7" href="$Orbital_8h.html" title="Orbital.h" alt="" coords="921,229,992,256"/>
-<area shape="rect" id="node10" href="$utils_8h.html" title="utils.h" alt="" coords="233,304,290,331"/>
-<area shape="rect" id="node16" href="$LinearSystemBuilder_8h.html" title="LinearSystemBuilder.h" alt="" coords="726,80,880,107"/>
-<area shape="rect" id="node17" href="$OrbitalMapper_8h.html" title="OrbitalMapper.h" alt="" coords="642,155,756,181"/>
-<area shape="rect" id="node18" href="$IterativeRenormalisedSolver_8h.html" title="IterativeRenormalisedSolver.h" alt="" coords="124,80,322,107"/>
-<area shape="rect" id="node19" href="$IterativeStandardSolver_8h.html" title="IterativeStandardSolver.h" alt="" coords="346,80,516,107"/>
-<area shape="rect" id="node20" href="$IterativeGordonSolver_8h.html" title="IterativeGordonSolver.h" alt="" coords="952,80,1110,107"/>
+<area shape="rect" id="node2" href="$Grid_8h.html" title="Grid.h" alt="" coords="983,229,1041,256"/>
+<area shape="rect" id="node7" href="$Orbital_8h.html" title="Orbital.h" alt="" coords="793,229,863,256"/>
+<area shape="rect" id="node10" href="$utils_8h.html" title="utils.h" alt="" coords="347,304,405,331"/>
+<area shape="rect" id="node16" href="$LinearSystemBuilder_8h.html" title="LinearSystemBuilder.h" alt="" coords="483,80,637,107"/>
+<area shape="rect" id="node17" href="$OrbitalMapper_8h.html" title="OrbitalMapper.h" alt="" coords="955,155,1069,181"/>
+<area shape="rect" id="node18" href="$IterativeRenormalisedSolver_8h.html" title="IterativeRenormalisedSolver.h" alt="" coords="261,80,459,107"/>
+<area shape="rect" id="node19" href="$IterativeGordonSolver_8h.html" title="IterativeGordonSolver.h" alt="" coords="1339,80,1498,107"/>
+<area shape="rect" id="node20" href="$IterativeStandardMatrixSolver_8h.html" title="IterativeStandardMatrixSolver.h" alt="" coords="1004,80,1209,107"/>
+<area shape="rect" id="node21" href="$IterativeStandardSolver_8h.html" title="IterativeStandardSolver.h" alt="" coords="661,80,830,107"/>
 </map>

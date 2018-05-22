@@ -12,6 +12,8 @@ var classStateReader =
     [ "load", "classStateReader.html#ac55ce95726aef9e873bd01c46c967c55", null ],
     [ "_d", "classStateReader.html#aa968d039462aeef08afb611255b88fef", null ],
     [ "_i", "classStateReader.html#a0e8e4f8507fe474f82003807fb4f0d1b", null ],
+    [ "_lambda", "classStateReader.html#a12345c89222d1d22422001069a7959a4", null ],
+    [ "_lambdaMap", "classStateReader.html#a2715dcef0c44620eab6fa7631c7041f3", null ],
     [ "_o", "classStateReader.html#a22a188d50ee06a1adc51ce51c6ccfb30", null ],
     [ "_v", "classStateReader.html#a4fc69321bd1069e592d8bb09377165e4", null ],
     [ "_vd", "classStateReader.html#af69d1b51528698aa84da77ddf0e6c52f", null ],

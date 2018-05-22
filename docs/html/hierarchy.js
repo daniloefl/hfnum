@@ -8,6 +8,7 @@ var hierarchy =
     [ "GTOUnit", "structGTOUnit.html", null ],
     [ "IterativeGordonSolver", "classIterativeGordonSolver.html", null ],
     [ "IterativeRenormalisedSolver", "classIterativeRenormalisedSolver.html", null ],
+    [ "IterativeStandardMatrixSolver", "classIterativeStandardMatrixSolver.html", null ],
     [ "IterativeStandardSolver", "classIterativeStandardSolver.html", null ],
     [ "LinearSystemBuilder", "classLinearSystemBuilder.html", null ],
     [ "lm", "classlm.html", null ],
