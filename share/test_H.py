@@ -12,14 +12,8 @@ import matplotlib.pyplot as plt
 Z = 1
 
 # log grid
-dx = 0.2e-1
-N = 515
-rmin = 1e-3
-dx = 0.5e-1
-N = 320
-rmin = 1e-6
-dx = 1.0/16.0
-N = 120.0
+dx = 1.0/16.0*0.5
+N = 120.0*2
 rmin = np.exp(-4)/Z
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
