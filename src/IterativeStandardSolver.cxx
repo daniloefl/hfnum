@@ -91,13 +91,13 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
               snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
               if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                 int lidx = lambdaMap[100*idx1 + idx2];
-                snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda[lidx]*matched[idx2][k];
+                snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda[lidx]*matched[idx2][k];
               }
             } else {
               snew[idx1][k] += std::pow(_g.dx(), 2)/12.0*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
               if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                 int lidx = lambdaMap[100*idx1 + idx2];
-                snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*lambda[lidx]*matched[idx2][k];
+                snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda[lidx]*matched[idx2][k];
               }
             }
           }
@@ -126,13 +126,13 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
                 snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
                 if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                   int lidx = lambdaMap[100*idx1 + idx2];
-                  snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda[lidx]*matched[idx2][k];
+                  snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda[lidx]*matched[idx2][k];
                 }
               } else {
                 snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
                 if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                   int lidx = lambdaMap[100*idx1 + idx2];
-                  snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*lambda[lidx]*matched[idx2][k];
+                  snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda[lidx]*matched[idx2][k];
                 }
               }
             }
@@ -177,13 +177,13 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
             snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
             if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
               int lidx = lambdaMap[100*idx1 + idx2];
-              snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda[lidx]*matched[idx2][k];
+              snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda[lidx]*matched[idx2][k];
             }
           } else {
             snew[idx1][k] += std::pow(_g.dx(), 2)/12.0*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
             if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
               int lidx = lambdaMap[100*idx1 + idx2];
-              snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*lambda[lidx]*matched[idx2][k];
+              snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda[lidx]*matched[idx2][k];
             }
           }
         }

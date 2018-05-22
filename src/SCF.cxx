@@ -232,7 +232,7 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     } else if (_method == 2) {
       F = stepRenormalised(gamma);
     } else if (_method == 3) {
-      gamma = 0.5*(1 - std::exp(-(nStep+1)/5.0));
+      gamma = 0.9*(1 - std::exp(-(nStep+1)/5.0));
       F = stepStandard(gamma);
     } else if (_method == 4) {
       gamma = 0.5*(1 - std::exp(-(nStep+1)/5.0));
