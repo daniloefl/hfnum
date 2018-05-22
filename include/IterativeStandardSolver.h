@@ -108,6 +108,7 @@ class IterativeStandardSolver {
     /// auxiliary variables
     std::map<int, Vradial> f;
     std::map<int, Vradial> s;
+    std::map<int, Vradial> snew;
 
     std::map<int, Vradial> inward;
     std::map<int, Vradial> outward;

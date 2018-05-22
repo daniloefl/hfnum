@@ -86,7 +86,7 @@ ldouble IterativeGordonSolver::solve(std::vector<ldouble> &E, std::vector<int> &
   }
   match(matched, fix_inward, fix_outward);
 
-  return std::fabs(F);
+  return F;
 }
 
 

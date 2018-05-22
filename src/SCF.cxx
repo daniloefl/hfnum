@@ -318,6 +318,7 @@ ldouble SCF::stepGordon(ldouble gamma) {
     for (int k2 = 0; k2 < _o.size(); ++k2) {
       if (k1 <= k2) continue;
       if (_o[k1]->l() != _o[k2]->l()) continue;
+      if (_lambdaMap.find(k1*100+k2) == _lambdaMap.end()) continue;
       int lidx = _lambdaMap[k1*100+k2];
       for (int ir = 0; ir < _g->N()-1; ++ir) {
         ldouble dr = (*_g)(ir+1) - (*_g)(ir);
@@ -332,7 +333,7 @@ ldouble SCF::stepGordon(ldouble gamma) {
   VectorXld dPar(_o.size()+_lambda.size());
   dPar.setZero();
 
-  VectorXld J(_o.size());
+  VectorXld J(_o.size()+_lambda.size());
   J.setZero();
   std::cout << "Calculating energy change Jacobian." << std::endl;
   for (int k2 = 0; k2 < _o.size()+_lambda.size(); ++k2) {
@@ -355,6 +356,7 @@ ldouble SCF::stepGordon(ldouble gamma) {
       for (int k2 = 0; k2 < _o.size(); ++k2) {
         if (k1 <= k2) continue;
         if (_o[k1]->l() != _o[k2]->l()) continue;
+        if (_lambdaMap.find(k1*100+k2) == _lambdaMap.end()) continue;
         int lidx = _lambdaMap[k1*100+k2];
         for (int ir = 0; ir < _g->N()-1; ++ir) {
           ldouble dr = (*_g)(ir+1) - (*_g)(ir);
@@ -370,7 +372,7 @@ ldouble SCF::stepGordon(ldouble gamma) {
     if (k2 < _o.size()) {
       J(k2) = (Fd - Fn)/dE[k2];
     } else {
-      J(k2) = (Sd(_o.size()+k2) - Sn(_o.size()+k2))/1e-2;
+      J(k2) = (Sd(k2-_o.size()) - Sn(k2-_o.size()))/1e-2;
     }
 
   }
