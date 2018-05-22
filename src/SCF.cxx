@@ -28,7 +28,7 @@ using namespace boost;
 #include <cstdlib>
 
 SCF::SCF()
-  : _g(new Grid(expGrid, 1e-1, 10, 1e-3)), _Z(1), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _irs(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om), _igs(*_g, _o, icl, _om) {
+  : _g(new Grid(expGrid, 1e-1, 10, 1e-3)), _Z(1), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _irs(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om), _isms(*_g, _o, icl, _om), _igs(*_g, _o, icl, _om) {
   _own_grid = true;
   _pot.resize(_g->N());
   for (int k = 0; k < _g->N(); ++k) {
@@ -130,7 +130,7 @@ int SCF::getOrbital_s(int no) {
 
 void SCF::method(int m) {
   if (m < 0) m = 0;
-  if (m > 3) m = 3;
+  if (m > 4) m = 4;
   _method = m;
 }
 
@@ -192,6 +192,8 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     strMethod = "Iterative Renormalised Numerov (http://aip.scitation.org/doi/pdf/10.1063/1.436421)";
   } else if (_method == 3) {
     strMethod = "Iterative Standard Numerov with non-homogeneous term";
+  } else if (_method == 4) {
+    strMethod = "Iterative Standard Numerov using matrices";
   }
 
   _historyL.clear();
@@ -232,6 +234,9 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     } else if (_method == 3) {
       gamma = 0.5*(1 - std::exp(-(nStep+1)/5.0));
       F = stepStandard(gamma);
+    } else if (_method == 4) {
+      gamma = 0.5*(1 - std::exp(-(nStep+1)/5.0));
+      F = stepStandardMatrix(gamma);
     }
   
     // change orbital energies
@@ -861,3 +866,185 @@ ldouble SCF::stepStandard(ldouble gamma) {
   return Fn.squaredNorm()+Sn.squaredNorm();
 }
 
+
+ldouble SCF::stepStandardMatrix(ldouble gamma) {
+  int N = _om.N();
+
+  std::vector<ldouble> E(_o.size(), 0);
+  std::vector<int> l(_o.size(), 0);
+
+  for (int k = 0; k < _o.size(); ++k) {
+    E[k] = _o[k]->E();
+    l[k] = _o[k]->l();
+  }
+
+  std::vector<MatrixXld> Fmn;
+  std::vector<MatrixXld> Kmn;
+  std::vector<VectorXld> matched;
+  calculateFMatrix(Fmn, Kmn, E, _lambda);
+
+  VectorXld Fn = _isms.solve(E, l, Fmn, Kmn, matched);
+
+  VectorXld Sn(_lambda.size());
+  Sn.setZero();
+
+  for (int k1 = 0; k1 < _o.size(); ++k1) {
+    for (int k2 = 0; k2 < _o.size(); ++k2) {
+      if (k1 <= k2) continue;
+      if (_o[k1]->l() != _o[k2]->l()) continue;
+      if (_lambdaMap.find(k1*100+k2) == _lambdaMap.end()) continue;
+      int lidx = _lambdaMap[k1*100+k2];
+      for (int ir = 0; ir < _g->N()-1; ++ir) {
+        ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+        if (_g->isLog())
+          Sn(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2-1)*dr;
+        else
+          Sn(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2)*dr;
+      }
+    }
+  }
+
+  VectorXld dPar(_o.size()+_lambda.size());
+  dPar.setZero();
+
+  VectorXld ParN(_o.size()+_lambda.size());
+  ParN.setZero();
+  for (int k = 0; k < _o.size(); ++k) {
+    ParN(k) = Fn(k);
+  }
+  for (int k = 0; k < _lambda.size(); ++k) {
+    ParN(_o.size()+k) = Sn(k);
+  }
+
+  for (int k = 0; k < _o.size(); ++k) {
+    _nodes[k] = 0;
+    int l = _o[k]->l();
+    int m = _o[k]->m();
+    int idx = _om.index(k);
+    for (int i = 0; i < _g->N(); ++i) {
+      (*_o[k])(i) = matched[i](idx);
+      if (i >= 10 && i < _g->N() - 4 && matched[i](idx)*matched[i-1](idx) <= 0) {
+        _nodes[k] += 1;
+        std::cout << "Orbital " << k << ": Found node at i=" << i << ", r = " << (*_g)(i) << std::endl;
+      }
+    }
+  }
+
+  int iterE = _historyE.size()-1;
+  std::vector<ldouble> dE(_o.size(), 0);
+  for (int k = 0; k < _o.size(); ++k) {
+    _dE[k] = 0;
+    dE[k] = _o[k]->E()*1e-2/((ldouble) _o[k]->n());
+    if (iterE >= 1) { // take a test E variation from the previous tested points
+      dE[k] = _historyE[iterE-1][k] - _historyE[iterE][k];
+      if (dE[k] == 0)
+        dE[k] = _o[k]->E()*1e-2/((ldouble) _o[k]->n());
+    }
+  }
+
+  MatrixXld J(_o.size()+_lambda.size(), _o.size()+_lambda.size());
+  J.setZero();
+  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
+    std::vector<ldouble> EdE = E;
+    std::vector<ldouble> lambdad = _lambda;
+  
+    if (k < _o.size()) {
+      EdE[k] += dE[k];
+    } else {
+      lambdad[k-_o.size()] += 1e-2;
+    }
+
+    std::vector<MatrixXld> Fmd;
+    std::vector<MatrixXld> Kmd;
+    calculateFMatrix(Fmd, Kmd, EdE, lambdad);
+
+    // recalculate the function being minimized, because we are changing energy for orbital k independently from the others
+    VectorXld Fd = _isms.solve(EdE, l, Fmd, Kmd, matched);
+
+    VectorXld Sd(_lambda.size());
+    Sd.setZero();
+    for (int k1 = 0; k1 < _o.size(); ++k1) {
+      for (int k2 = 0; k2 < _o.size(); ++k2) {
+        if (k1 <= k2) continue;
+        if (_o[k1]->l() != _o[k2]->l()) continue;
+        if (_lambdaMap.find(k1*100+k2) == _lambdaMap.end()) continue;
+        int lidx = _lambdaMap[k1*100+k2];
+        for (int ir = 0; ir < _g->N()-1; ++ir) {
+          ldouble dr = (*_g)(ir+1) - (*_g)(ir);
+          if (_g->isLog())
+            Sd(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2-1)*dr;
+          else
+            Sd(lidx) += matched[ir](k1)*matched[ir](k2)*std::pow((*_g)(ir), 2)*dr;
+        }
+      }
+    }
+
+
+    if (k < _o.size()) {
+      for (int j = 0; j < _o.size() + _lambda.size(); ++j) {
+        if (j < _o.size())
+          J(j, k) = (Fd(j) - Fn(j))/dE[k];
+        else
+          J(j, k) = (Sd(j - _o.size()) - Sn(j - _o.size()))/dE[k];
+      }
+    } else {
+      for (int j = 0; j < _o.size() + _lambda.size(); ++j) {
+        if (j < _o.size())
+          J(j, k) = (Fd(j) - Fn(j))/1e-2;
+        else
+          J(j, k) = (Sd(j - _o.size()) - Sn(j - _o.size()))/1e-2;
+      }
+    }
+  }
+
+  if (J.determinant() != 0) {
+    JacobiSVD<MatrixXld> dec(J, ComputeThinU | ComputeThinV);
+    dPar = dec.solve(ParN);
+  }
+
+  // check node count
+  for (int k = 0; k < _o.size(); ++k) {
+    int idx = _om.index(k);
+    if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emin[k] = _o[k]->E()+1e-15;
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
+      std::cout << "Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      _Emax[k] = _o[k]->E()-1e-15;
+      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      std::cout << "Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+    } else {
+  
+      _dE[k] = -gamma*dPar(k);
+
+      std::cout << "INFO: Orbital " << k << " (with secant method), dE = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
+      if (_dE[k] > 0) {
+        _Emin[k] = _o[k]->E();
+      } else if (_dE[k] < 0) {
+        _Emax[k] = _o[k]->E();
+      }
+    }
+  }
+  for (int k = 0; k < _lambda.size(); ++k) {
+    _dlambda[k] = -gamma*dPar(_o.size()+k);
+    std::cout << "INFO: Lagrange multiplier " << k << " (with secant method), dlambda = " << _dlambda[k] << " (probe dlambda = " << 1e-2 << ")" << std::endl;
+  }
+
+  VectorXld tmp;
+  tmp.resize(_o.size());
+  for (int k = 0; k < _o.size(); ++k) {
+    tmp(k) = _o[k]->E();
+  }
+  _historyE.push_back(tmp);
+  _historyF.push_back(Fn);
+  VectorXld tmpl;
+  tmpl.resize(_lambda.size());
+  for (int k = 0; k < _lambda.size(); ++k) {
+    tmpl(k) = _lambda[k];
+  }
+  _historyL.push_back(tmpl);
+
+  return Fn.norm() + Sn.norm();
+}
