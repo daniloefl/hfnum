@@ -79,7 +79,7 @@ h.resetGrid(1, dx, int(N), rmin)
 # set atomic number
 h.setZ(Z)
 
-# use this (default) method for speed, but change it to 2 for more stability
+# use this (default) method
 h.method(3)
 
 # create an Orbital as many times as needed
