@@ -18,6 +18,9 @@ rmin = 1e-3
 #dx = 1.0/16.0
 #N = 120.0
 #rmin = np.exp(-4)/Z
+dx = 1.0/16.0
+N = 120.0
+rmin = np.exp(-4)/Z
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)

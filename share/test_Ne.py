@@ -13,11 +13,14 @@ Z = 10
 
 # log grid
 dx = 0.25e-1/2.0
-N = 680*2
+N = 650*2
 rmin = 1e-6
-dx = 0.2e-1/2.0
-N = 515*2
-rmin = 1e-3
+#dx = 0.2e-1/2.0
+#N = 515*2
+#rmin = 1e-3
+dx = 1.0/16.0
+N = 120.0
+rmin = np.exp(-4)/Z
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
