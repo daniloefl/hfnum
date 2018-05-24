@@ -21,8 +21,8 @@ Z = float(Z)
 
 # log grid
 dx = 1.0/16.0*0.25
-N = 130.0*4
-rmin = np.exp(-4)/Z
+N = 170.0*4
+rmin = np.exp(-6)/Z
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)
 h.setZ(Z)
