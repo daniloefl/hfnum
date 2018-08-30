@@ -257,6 +257,14 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
       int lmain = _o[k]->l();
       int mmain = _o[k]->m();
       // calculate crossing of potential at zero for lmain,mmain
+      ldouble a_max = 0;
+      for (int i = _g->N()-1; i >= 0; --i) {
+        ldouble r = (*_g)(i);
+        ldouble a = 0;
+        if (_g->isLog()) a = 2*std::pow(r, 2)*(_o[k]->E() - _pot[i] - _vd[k][i] + _vex[std::pair<int,int>(k,k)][i]) - std::pow(lmain_eq + 0.5, 2);
+        else a = 2*(_o[k]->E() - _pot[i] - _vd[k][i] + _vex[std::pair<int,int>(k,k)][i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
+        if (std::fabs(a) > a_max) a_max = std::fabs(a);
+      }
       ldouble a_m1 = 0;
       //for (int i = 3; i < _g->N()-3; ++i) {
       for (int i = _g->N()-3; i >= 3; --i) {
@@ -266,11 +274,13 @@ void HF::solve(int NiterSCF, int Niter, ldouble F0stop) {
         else a = 2*(_o[k]->E() - _pot[i] - _vd[k][i] + _vex[std::pair<int,int>(k,k)][i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
         //if (_g->isLog()) a = 2*std::pow(r, 2)*(_o[k]->E() - _pot[i]) - std::pow(lmain_eq + 0.5, 2);
         //else a = 2*(_o[k]->E() - _pot[i]) - lmain_eq*(lmain_eq+1)/std::pow(r, 2);
-        if (icl[k] < 0 && a*a_m1 < 0) {
-          icl[k] = i;
-          break;
+        if (std::fabs(a) > 0.05*a_max) {
+          if (icl[k] < 0 && a*a_m1 < 0) {
+            icl[k] = i;
+            break;
+          }
+          a_m1 = a;
         }
-        a_m1 = a;
       }
       if (icl[k] < 0) icl[k] = 10;
       std::cout << "Found classical crossing for orbital " << k << " at " << icl[k] << std::endl;
