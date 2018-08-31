@@ -79,7 +79,7 @@ if fname.strip() == '':
 
 NiterSCF = 40
 Niter = 100
-F0stop = 1e-6
+F0stop = 1e-12
 r = np.asarray(h.getR())
 print "Last r:", r[-1]
 print "First r:", r[0]
