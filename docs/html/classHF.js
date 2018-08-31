@@ -4,7 +4,6 @@ var classHF =
     [ "HF", "classHF.html#aaca6ad8d1c129148a9f48f34b8ec632a", null ],
     [ "~HF", "classHF.html#a26c4333faa005ed8ca2863afd72760b4", null ],
     [ "addOrbital", "classHF.html#aaed6429a4123a38bf75636686bca402f", null ],
-    [ "calculateFMatrix", "classHF.html#afb10fab504ef69d67310c69ccc8302f5", null ],
     [ "calculateVd", "classHF.html#abe4a51b742c05d7a787eb4e5e9102ced", null ],
     [ "calculateVex", "classHF.html#aacc5500ebeafe7002580bf1af2ec9e2d", null ],
     [ "calculateY", "classHF.html#a80048b277c28af6772a2965e56e404c2", null ],

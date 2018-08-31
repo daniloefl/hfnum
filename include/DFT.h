@@ -17,8 +17,6 @@
 #include "SCF.h"
 #include "utils.h"
 #include "LinearSystemBuilder.h"
-#include "IterativeRenormalisedSolver.h"
-#include "IterativeGordonSolver.h"
 #include "OrbitalMapper.h"
 
 #include <Python.h>
@@ -28,7 +26,7 @@ class DFT : public SCF {
   public:
 
     /// \brief Constructor for an atom.
-    DFT();
+    DFT(ldouble Z = 1);
 
     /// \brief Constructor for an atom.
     /// \param fname Input result form previous calculation for plotting
@@ -86,14 +84,6 @@ class DFT : public SCF {
     /// \brief Get electron density for spin down orbitals.
     /// \return Vector of electron density values for each Grid point.
     boost::python::list getDensityDownPython();
-
-  protected:
-    /// \brief Calculate F matrix, which represents the Hamiltonian using the Numerov method. K is the inverse of F. This is used for the Gordon and renormalised methods, since these matrices are calculated per Grid point. The sparse method uses a large matrix solving all points simultaneously.
-    /// \param F To be returned by reference. Matrix F for each Grid point.
-    /// \param K To be returned by reference. Inverse of F.
-    /// \param E Values of energy in each orbital.
-    void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E, std::vector<ldouble> &lambda);
-
 
   private:
     /// \brief Calculate direct SCF potentials.

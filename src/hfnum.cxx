@@ -8,13 +8,16 @@
 #include "NonCentralCorrection.h"
 #include "SpinOrbitCorrection.h"
 #include "RHF.h"
+#include "utils.h"
 
 using namespace boost::python;
 
 BOOST_PYTHON_MODULE(hfnum)
 {
+  def("getSymbol", getSymbol);
   class_<HFS>("HFS", init<>())
     .def(init<>())
+    .def(init<ldouble>())
     .def(init<const std::string>())
     .def("solve", &HFS::solve)
     .def("addOrbital", &HFS::addOrbitalPython)
@@ -71,6 +74,7 @@ BOOST_PYTHON_MODULE(hfnum)
   ;
   class_<HF>("HF", init<>())
     .def(init<>())
+    .def(init<ldouble>())
     .def(init<const std::string>())
     .def("solve", &HF::solve)
     .def("addOrbital", &HF::addOrbitalPython)
@@ -135,6 +139,7 @@ BOOST_PYTHON_MODULE(hfnum)
   ;
   class_<DFT>("DFT", init<>())
     .def(init<>())
+    .def(init<ldouble>())
     .def(init<const std::string>())
     .def("solve", &DFT::solve)
     .def("addOrbital", &DFT::addOrbitalPython)

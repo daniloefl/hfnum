@@ -24,7 +24,7 @@ orb1 = hfnum.Orbital( 2, 0, "+N")
 h.addOrbital(orb0)
 h.addOrbital(orb1)
 
-h.method(3)
+h.method(1)
 
 NiterSCF = 40
 Niter = 200

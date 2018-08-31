@@ -13,7 +13,7 @@ Z = 9
 
 # log grid
 dx = 1.0/16.0*0.5
-N = 120.0*2
+N = 140.0*2
 rmin = np.exp(-4)/Z
 h = hfnum.HF()
 h.resetGrid(1, dx, int(N), rmin)

@@ -16,12 +16,8 @@
 
 #include "utils.h"
 #include "LinearSystemBuilder.h"
-#include "IterativeRenormalisedSolver.h"
-#include "IterativeGordonSolver.h"
-#include "IterativeStandardMatrixSolver.h"
-#include "OrbitalMapper.h"
-
 #include "IterativeStandardSolver.h"
+#include "OrbitalMapper.h"
 
 #include <Python.h>
 using namespace boost;
@@ -30,7 +26,7 @@ class SCF {
   public:
 
     /// \brief Constructor for an atom.
-    SCF();
+    SCF(ldouble Z = 1);
 
     /// \brief Destructor.
     virtual ~SCF();
@@ -75,7 +71,7 @@ class SCF {
     void gammaSCF(ldouble g);
 
     /// \brief Select method to be used.
-    /// \param m Can be 0 for the sparse method, 1 for the Gordon method, 2 for the renormalised method.
+    /// \param m Can be 0 for the sparse method, 1 for the iterative Numerov solution
     void method(int m);
 
     /// \brief Get value of orbital component for orbital no, in spherical harmonic given by lo and mo.
@@ -145,25 +141,10 @@ class SCF {
     /// \return Value of a constraint being minimised (depends on the method).
     ldouble solveForFixedPotentials(int Niter, ldouble F0stop);
 
-    /// \brief Use Gordon's method, which tries a set of orthogonal initial conditions to find the energy.
-    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
-    /// \return Minimisation function value at the end of the step.
-    ldouble stepGordon(ldouble gamma);
-
-    /// \brief Use renormalised wave function method, which looks for solution in ratio of Numerov parameters to avoid overflow.
-    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
-    /// \return Minimisation function value at the end of the step.
-    ldouble stepRenormalised(ldouble gamma);
-
     /// \brief Use a standard iterative Numerov method.
     /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
     /// \return Minimisation function value at the end of the step.
     ldouble stepStandard(ldouble gamma);
-
-    /// \brief Use a standard matrix Numerov method.
-    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
-    /// \return Minimisation function value at the end of the step.
-    ldouble stepStandardMatrix(ldouble gamma);
 
     /// \brief Build NxN matrix to solve all equations of the Numerov method for each point simultaneously. Includes an extra equation to control the orbital normalisations, which is non-linear.
     /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
@@ -171,13 +152,6 @@ class SCF {
     ldouble stepSparse(ldouble gamma);
 
   protected:
-
-    /// \brief Calculate F matrix, which represents the Hamiltonian using the Numerov method. K is the inverse of F. This is used for the Gordon and renormalised methods, since these matrices are calculated per Grid point. The sparse method uses a large matrix solving all points simultaneously.
-    /// \param F To be returned by reference. Matrix F for each Grid point.
-    /// \param K To be returned by reference. Inverse of F.
-    /// \param E Values of energy in each orbital.
-    /// \param E Extra Lagrange multipliers.
-    virtual void calculateFMatrix(std::vector<MatrixXld> &F, std::vector<MatrixXld> &K, std::vector<ldouble> &E, std::vector<ldouble> &lambda) = 0;
 
     /// Numerical Grid
     Grid *_g;
@@ -224,17 +198,8 @@ class SCF {
     /// Solver using sparse matrices
     LinearSystemBuilder _lsb;
 
-    /// Solver for the renormalised method
-    IterativeRenormalisedSolver _irs;
-
     /// Solver for the standard method
     IterativeStandardSolver _iss;
-
-    /// Solver for the standard matrixmethod
-    IterativeStandardMatrixSolver _isms;
-
-    /// Solver for Gordon's method
-    IterativeGordonSolver _igs;
 
     /// Class that maps orbitals to indices
     OrbitalMapper _om;

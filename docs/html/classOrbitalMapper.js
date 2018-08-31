@@ -1,6 +1,6 @@
 var classOrbitalMapper =
 [
-    [ "OrbitalMapper", "classOrbitalMapper.html#a9aa41584138c9979d344b747b0257ffd", null ],
+    [ "OrbitalMapper", "classOrbitalMapper.html#af4cded800eb25795fa95a8f586a52cf5", null ],
     [ "~OrbitalMapper", "classOrbitalMapper.html#a5583c183e67329e0907f1a21a56d7d80", null ],
     [ "index", "classOrbitalMapper.html#a055d7f80183802d2413f6952fad40dba", null ],
     [ "l", "classOrbitalMapper.html#a09b3fdb7dc6956359676035da641601d", null ],

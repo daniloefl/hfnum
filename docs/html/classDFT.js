@@ -4,7 +4,6 @@ var classDFT =
     [ "DFT", "classDFT.html#a2a0d841b77f733462886f0963838b94e", null ],
     [ "~DFT", "classDFT.html#a6ffdbff309d9fe1745b53057b17656a7", null ],
     [ "addOrbital", "classDFT.html#aaa740e274c0e9fd8c0ebe515d797ce31", null ],
-    [ "calculateFMatrix", "classDFT.html#a769a20038c97f3f8111e7ad182cdf918", null ],
     [ "calculateN", "classDFT.html#a9db19bc75a64bdd1af5a96df44221181", null ],
     [ "calculateV", "classDFT.html#a6198e94d9ebeac59f79b0a831c459eca", null ],
     [ "getDensityDown", "classDFT.html#a16100777fd75aaed73490dcb43da3ada", null ],

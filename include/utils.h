@@ -60,6 +60,7 @@ double CG(int j1, int j2, int m1, int m2, int j, int m);
 /// t^(-1/2) int_0^sqrt(t) exp(-y^2) dy
 ldouble F0(ldouble);
 
+const std::string getSymbol(int Z);
 
 #endif
 
