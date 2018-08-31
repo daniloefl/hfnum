@@ -28,7 +28,7 @@ using namespace boost;
 #include <cstdlib>
 
 SCF::SCF(ldouble Z)
-  : _g(new Grid(expGrid, 1.0/16.0*0.5, (int) ((std::log(12.0) + 6 + std::log(Z))/(1.0/16.0*0.5)), std::exp(-6)/Z)),
+  : _g(new Grid(expGrid, 1.0/16.0, (int) ((std::log(12.0) + 4 + std::log(Z))/(1.0/16.0)), std::exp(-4)/Z)),
   _Z(Z), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om) {
   _own_grid = true;
   _pot.resize(_g->N());
