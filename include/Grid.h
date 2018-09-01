@@ -31,7 +31,7 @@ class Grid {
     /// \param dx Step size.
     /// \param N Number of Grid points.
     /// \param rmin Minimum Grid point.
-    Grid(gridType t = expGrid, double dx = 1e-1, int N = 150, double rmin = 1e-4, double alpha = 0);
+    Grid(gridType t = expGrid, double dx = 1e-1, int N = 150, double rmin = 1e-4, double beta = 0, double Z = 1);
 
     /// \brief Copy constructor.
     /// \param g Other Grid object.
@@ -57,6 +57,9 @@ class Grid {
     /// \brief Getter for isLog flag.
     bool isLog() const;
 
+    /// \brief Getter for isLinExp flag.
+    bool isLinExp() const;
+
     /// \brief Getter for type.
     gridType type() const;
 
@@ -68,8 +71,9 @@ class Grid {
     /// \param dx Step size.
     /// \param N Number of Grid points.
     /// \param rmin Minimum Grid point.
-    /// \param alpha Parameter for the lin+exp grid.
-    void reset(gridType t = expGrid, double dx = 1e-1, int N = 150, double rmin = 1e-4, double alpha = 0.0);
+    /// \param beta Parameter for the lin+exp grid.
+    /// \param Z Atomic number
+    void reset(gridType t = expGrid, double dx = 1e-1, int N = 150, double rmin = 1e-4, double beta = 0.0, double Z = 1.0);
 
 
   private:
@@ -89,8 +93,11 @@ class Grid {
     /// Whether the grid is logarithmic
     gridType _t;
 
-    /// alpha
+    /// alpha, beta, Z
     double _alpha;
+    double _beta;
+    double _Z;
+    double _x0;
 };
 
 #endif

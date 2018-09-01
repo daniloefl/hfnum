@@ -304,8 +304,20 @@ ldouble SCF::stepSparse(ldouble gamma) {
     _nodes[k] = 0;
     int l = _o[k]->l();
     int m = _o[k]->m();
+
+    ldouble a_max = 0;
     for (int i = 0; i < _g->N(); ++i) {
-      if (i >= 10  && i < _g->N() - 4 && (*_o[k])(i)*(*_o[k])(i-1) <= 0) {
+      if (std::fabs((*_o[k])(i)) > a_max) {
+        a_max = std::fabs((*_o[k])(i));
+      }
+    }
+    std::vector<ldouble> alist;
+    for (int i = 0; i < _g->N(); ++i) {
+      if (std::fabs((*_o[k])(i)) < 0.05*a_max) continue;
+      alist.push_back((*_o[k])(i));
+    }
+    for (int i = 0; i < alist.size(); ++i) {
+      if (i >= 1 && alist[i]*alist[i-1] < 0) {
         _nodes[k] += 1;
       }
     }
@@ -382,11 +394,25 @@ ldouble SCF::stepStandard(ldouble gamma) {
     int l = _o[k]->l();
     int m = _o[k]->m();
     int idx = _om.index(k);
+
+    ldouble a_max = 0;
     for (int i = 0; i < _g->N(); ++i) {
       (*_o[k])(i) = matchedSt[idx][i];
-      if (i >= 10 && i < _g->N() - 4 && (*_o[k])(i)*(*_o[k])(i-1) < 0) {
+      if (std::fabs((*_o[k])(i)) > a_max) {
+        a_max = std::fabs((*_o[k])(i));
+      }
+    }
+    std::vector<ldouble> alist;
+    std::vector<ldouble> alist_i;
+    for (int i = 0; i < _g->N(); ++i) {
+      if (std::fabs((*_o[k])(i)) < 0.05*a_max) continue;
+      alist.push_back((*_o[k])(i));
+      alist_i.push_back(i);
+    }
+    for (int i = 0; i < alist.size(); ++i) {
+      if (i >= 1 && alist[i]*alist[i-1] < 0) {
         _nodes[k] += 1;
-        std::cout << "Orbital " << k << ": Found node at i=" << i << ", r = " << (*_g)(i) << std::endl;
+        std::cout << "Orbital " << k << ": Found node at i=" << alist_i[i] << ", r = " << (*_g)(alist_i[i]) << std::endl;
       }
     }
   }
