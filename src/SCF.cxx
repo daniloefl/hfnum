@@ -18,6 +18,8 @@
 #include <boost/python/exec.hpp>
 #include <boost/python/extract.hpp>
 
+#include <boost/python.hpp>
+
 #include <Python.h>
 using namespace boost;
 
@@ -261,6 +263,9 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     }
     if (stop) break;
   }
+
+  // check for interrupt signal
+  PyErr_CheckSignals();
 
   return F;
 }
