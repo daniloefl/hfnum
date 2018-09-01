@@ -10,11 +10,17 @@
 #include "RHF.h"
 #include "utils.h"
 
+#include "HFException.h"
+
 using namespace boost::python;
 
 BOOST_PYTHON_MODULE(hfnum)
 {
   def("getSymbol", getSymbol);
+  class_<HFException>("HFException", init<>())
+    .def(init<const std::string>())
+    .def("what", &HFException::what)
+  ;
   class_<HFS>("HFS", init<>())
     .def(init<>())
     .def(init<ldouble>())

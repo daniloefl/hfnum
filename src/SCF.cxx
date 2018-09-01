@@ -29,8 +29,10 @@ using namespace boost;
 #include <fstream>
 #include <cstdlib>
 
+#include "HFException.h"
+
 SCF::SCF(ldouble Z)
-  : _g(new Grid(expGrid, 1.0/32.0, (int) ((std::log(16.0) + 4 + std::log(Z))/(1.0/32.0)), std::exp(-4)/Z)),
+  : _g(new Grid(expGrid, 1.0/32.0, (int) ((std::log(16.0) + 6 + std::log(Z))/(1.0/32.0)), std::exp(-6)/Z)),
   _Z(Z), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om) {
   _own_grid = true;
   _pot.resize(_g->N());
@@ -262,10 +264,13 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
       stop = stop && (std::fabs(*std::max_element(_dlambda.begin(), _dlambda.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < Lstop);
     }
     if (stop) break;
-  }
 
-  // check for interrupt signal
-  PyErr_CheckSignals();
+    // check for interrupt signal
+    PyErr_CheckSignals();
+    if (PyErr_Occurred())
+      throw HFException("Received signal. Interrupting.");
+
+  }
 
   return F;
 }
