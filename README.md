@@ -26,7 +26,7 @@ class constructor from hfnum.HF to hfnum.HFS or hfnum.DFT, as appropriate.
 # Installing packages necessary for compilation
 
 ```
-sudo apt install libboost-dev* libboost-python*
+sudo apt install libboost-dev* libboost-python* libgsl-dev
 ```
 
 # Compilation
