@@ -466,7 +466,7 @@ ldouble SCF::stepStandard(ldouble gamma) {
       dE[k] = 0;
       if (iterE >= 1) {
         if (_historyE[iterE-1](k) != 0 && _historyE[iterE](k) != 0)
-          dE[k] = _historyE[iterE-1](k) - _historyE[iterE](k);
+          dE[k] = (_historyE[iterE-1](k) - _historyE[iterE](k))*0.1;
       }
       if (dE[k] == 0)
         dE[k] = E[k]*1e-2/((ldouble) _o[k]->n());
