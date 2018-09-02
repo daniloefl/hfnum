@@ -58,7 +58,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     }
   }
 
-  ldouble ic = 0.7;
+  ldouble ic = 0.5;
 
   if (_i0.size() != _o.size()) {
     _i0.resize(_o.size(), 0);
@@ -92,7 +92,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   //     -> Use as the new non-homogeneus terms: s <- ic * snew + (1 - ic) * s [where ic is a constant, set at 0.3]
   //   -> Go back to the beginning to repeat this.
 
-  for (int nIter = 0; nIter < 10; ++nIter) {
+  for (int nIter = 0; nIter < 20; ++nIter) {
 
     // solve in direct order
     for (int idx = 0; idx < M; ++idx) {
