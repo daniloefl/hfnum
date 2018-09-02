@@ -73,6 +73,25 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   VectorXld F(M);
   F.setZero();
 
+  // Procedure:
+  // Start with non-homogeneous terms s for each equation at zero (they come from the exchange potential multiplying solutions for other orbitals)
+  // Do the following 10 times
+  //   -> For current eq. k from 0 to M:
+  //     -> Solve eq. k using last non-homogeneus term s(k) for that eq.
+  //     -> Recalculate all the non-homogeneous terms snew(*) with the last solution
+  //     -> Use as the new non-homogeneus terms: s <- ic * snew + (1 - ic) * s [where ic is a constant, set at 0.3]
+  //     -> For each eq. j from M-1 to 0:
+  //       -> Solve the eq. j using the new non-homogeneus term s(j)
+  //       -> Recalculate all the non-homogeneous terms snew(*) with the last solution
+  //       -> Use as the new non-homogeneus terms: s <- ic * snew + (1 - ic) * s [where ic is a constant, set at 0.3]
+  //   -> For current eq. k from 0 to M:
+  //     -> Solve eq. k using a *zero* non-homogeneous term.
+  //     -> Fix the initial conditions i0 and i1 for the equations based on the ratio of the homogeneous and non-homogeneous solutions
+  //         --> See fixIC
+  //     -> Recalculate all the non-homogeneous terms snew(*) with the last solution
+  //     -> Use as the new non-homogeneus terms: s <- ic * snew + (1 - ic) * s [where ic is a constant, set at 0.3]
+  //   -> Go back to the beginning to repeat this.
+
   for (int nIter = 0; nIter < 10; ++nIter) {
 
     // solve in direct order
@@ -332,13 +351,11 @@ void IterativeStandardSolver::match(int k, Vradial &o, Vradial &inward, Vradial 
   ldouble norm = 0;
   for (int i = 0; i < _g.N(); ++i) {
     ldouble r = _g(i);
-    ldouble dr = _g.dx();
-    if (_g.isLog()) dr *= r;
-    //if (i < _g.N()-1) dr = std::fabs(_g(i+1) - _g(i));
     ldouble ov = o[i];
-    if (_g.isLog()) ov *= std::pow(r, -0.5);
-    //o_untransformed[i] = ov;
-    norm += std::pow(ov*r, 2)*dr;
+    // in log scale: y = psi sqrt(r) and dr = r dx, so psi1 psi2 r^2 dr = y1 y2 / r r^2 r dx = y1 y2 r^2 dx
+    // in lin scale y = psi, dr = dx, so psi1 psi2 r^2 dr = y1 y2 r^2 dx
+    if (_g.isLog()) norm += ov*ov*r*r*_g.dx();
+    else if (_g.isLin()) norm += ov*ov*r*r*_g.dx();
   }
   for (int i = 0; i < _g.N(); ++i) {
     o[i] /= std::sqrt(norm);
@@ -369,3 +386,4 @@ void IterativeStandardSolver::fixIC(int idx, Vradial &in, Vradial &out, Vradial 
   _i1[idx] = m[1];
   //std::cout << "alpha = " << alpha << " " << idx << " " << out[icl[idx]+1] << " " << in[icl[idx]+1] << " " << hout[icl[idx]+1] << " " << hin[icl[idx]+1] << " " << _i0[idx] << " " << _i1[idx] << std::endl;
 }
+

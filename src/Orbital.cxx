@@ -151,13 +151,18 @@ const ldouble Orbital::getNorm(int i_in, const Grid &g) {
     ldouble integ = 0;
     for (int k = 0; k < _N; ++k) {
       ldouble r = g(k);
-      ldouble dr = 0;
-      if (k < _N-1) dr = std::fabs(g(k+1) - g(k));
       ldouble ov = _wf[k];
-      if (g.isLog()) ov *= std::pow(r, -0.5);
-      _wf_norm[k] = ov;
-      norm += std::pow(ov*r, 2)*dr;
-      integ += ov*r*dr;
+      if (g.isLog()) {
+        // y = psi sqrt(r), dr = r dx, so psi1 psi2 r^2 dr = y1 y2 / r r^2 r dx = y1 y2 r^2 dx
+        _wf_norm[k] = ov*std::pow(r, -0.5);
+        norm += std::pow(ov*r, 2)*g.dx();
+        integ += ov*std::pow(r, -0.5+2)*g.dx(); // psi r dr = y /sqrt(r) r r dx = y r^(2-0.5) dx
+      } else if (g.isLin()) {
+        // y = psi , dr = dx, so psi1 psi2 r^2 dr = y1 y2 r^2 dx
+        _wf_norm[k] = ov;
+        norm += std::pow(ov*r, 2)*g.dx();
+        integ += ov*r*g.dx();
+      }
     }
     norm = 1.0/std::sqrt(norm);
     //if (integ < 0) norm *= -1;

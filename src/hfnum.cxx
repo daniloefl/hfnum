@@ -9,6 +9,7 @@
 #include "SpinOrbitCorrection.h"
 #include "RHF.h"
 #include "utils.h"
+#include "units.h"
 
 #include "HFException.h"
 
@@ -16,6 +17,17 @@ using namespace boost::python;
 
 BOOST_PYTHON_MODULE(hfnum)
 {
+
+  scope().attr("eV") = electronVolt; 
+  scope().attr("electronVolt") = electronVolt; 
+
+  scope().attr("H") = Hartree;
+  scope().attr("Hartree") = Hartree;
+
+  scope().attr("Rd") = Rydberg;
+  scope().attr("Rydberg") = Rydberg;
+
+
   def("getSymbol", getSymbol);
   class_<HFException>("HFException", init<>())
     .def(init<const std::string>())

@@ -119,6 +119,10 @@ Grid &Grid::operator =(const Grid &g) {
   return *this;
 }
 
+bool Grid::isLin() const {
+  return _t == linGrid;
+}
+
 bool Grid::isLog() const {
   return _t == expGrid;
 }

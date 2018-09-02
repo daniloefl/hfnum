@@ -54,6 +54,9 @@ class Grid {
     /// \param i Index.
     double operator()(int i) const;
 
+    /// \brief Getter for isLin flag.
+    bool isLin() const;
+
     /// \brief Getter for isLog flag.
     bool isLog() const;
 

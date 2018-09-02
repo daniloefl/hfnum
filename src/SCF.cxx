@@ -32,7 +32,7 @@ using namespace boost;
 #include "HFException.h"
 
 SCF::SCF(ldouble Z)
-  : _g(new Grid(expGrid, 1.0/16.0, (int) ((std::log(16.0) + 8 + std::log(Z))/(1.0/16.0)), std::exp(-8)/Z)),
+  : _g(new Grid(expGrid, 1.0/32.0, (int) ((std::log(15.0) + 5 + std::log(Z))/(1.0/32.0))+1, std::exp(-5)/Z)),
   _Z(Z), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om) {
   _own_grid = true;
   _pot.resize(_g->N());
@@ -233,15 +233,29 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   
     // change orbital energies
     std::cout << "Orbital energies at step " << nStep << ", with constraint = " << std::setw(16) << F << ", method = " << strMethod << "." << std::endl;
-    std::cout << std::setw(5) << "Index" << " " << std::setw(16) << "Name" << " " << std::setw(16) << "Energy (H)" << " " << std::setw(16) << "Step (H)" << " " << std::setw(16) << "Min. (H)" << " " << std::setw(16) << "Max. (H)" << " " << std::setw(5) << "nodes" << std::endl;
+    std::cout << std::setw(5) << std::right << "Index" << " "
+              << std::setw(16) << std::right << "Name" << " "
+              << std::setw(16) << std::right << "Energy (H)" << " "
+              << std::setw(16) << std::right << "Step (H)" << " "
+              << std::setw(16) << std::right << "Min. (H)" << " "
+              << std::setw(16) << std::right << "Max. (H)" << " "
+              << std::setw(5) << std::right << "nodes" << std::endl;
     for (int k = 0; k < _o.size(); ++k) {
       ldouble stepdE = _dE[k];
       ldouble newE = (_o[k]->E()+stepdE);
-      std::cout << std::setw(5) << k << " " << std::setw(16) << getOrbitalName(k) << " " << std::setw(16) << std::setprecision(12) << _o[k]->E() << " " << std::setw(16) << std::setprecision(12) << stepdE << " " << std::setw(16) << std::setprecision(12) << _Emin[k] << " " << std::setw(16) << std::setprecision(12) << _Emax[k] << " " << std::setw(5) << _nodes[k] << std::endl;
+      std::cout << std::setw(5) << std::right << k << " "
+                << std::setw(16) << std::right << getOrbitalName(k) << " "
+                << std::setw(16) << std::right << std::setprecision(10) << _o[k]->E() << " "
+                << std::setw(16) << std::right << std::setprecision(10) << stepdE << " "
+                << std::setw(16) << std::right << std::setprecision(10) << _Emin[k] << " "
+                << std::setw(16) << std::right << std::setprecision(10) << _Emax[k] << " "
+                << std::setw(5) << std::right << _nodes[k] << std::endl;
       _o[k]->E(newE);
     }
     std::cout << "Lagrange multipliers" << std::endl;
-    std::cout << std::setw(10) << "Variable" << " " << std::setw(16) << "Value" << " " << std::setw(16) << "Step" << std::endl;
+    std::cout << std::setw(10) << std::right << "Variable" << " "
+              << std::setw(16) << std::right << "Value" << " "
+              << std::setw(16) << std::right << "Step" << std::endl;
     for (auto &k : _lambdaMap) {
       int k2 = k.first / 100;
       int k1 = k.first % 100;
@@ -251,8 +265,11 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
       s += ",";
       s += std::to_string(k2);
       s += "}";
-      std::cout << std::setw(10) << s << " " << std::setw(16) << std::setprecision(12) << _lambda[k.second] << " " << std::setw(16) << std::setprecision(12) << _dlambda[k.second] << std::endl;
+      std::cout << std::setw(10) << s << " "
+                << std::setw(16) << std::setprecision(10) << std::right << _lambda[k.second] << " "
+                << std::setw(16) << std::setprecision(10) << std::right << _dlambda[k.second] << std::endl;
     }
+    std::cout.unsetf(std::cout.showpos);
     for (int k = 0; k < _lambda.size(); ++k) {
       ldouble stepdE = _dlambda[k];
       ldouble newE = (_lambda[k]+stepdE);
@@ -386,11 +403,10 @@ ldouble SCF::stepStandard(ldouble gamma) {
       if (_o[k1]->l() != _o[k2]->l()) continue;
       int lidx = _lambdaMap[k1*100+k2];
       for (int ir = 0; ir < _g->N()-1; ++ir) {
-        ldouble dr = (*_g)(ir+1) - (*_g)(ir);
-        if (_g->isLog())
-          Sn(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2-1)*dr;
-        else
-          Sn(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*dr;
+        if (_g->isLog()) // y = psi * sqrt(r) and dr = r dx, so psi1 * psi2 * r^2 * dr = y1 * y2 / r * r^2 * r * dx = y1 y2 r^2 dx
+          Sn(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
+        else if (_g->isLin()) // y = psi and dr = dx, so psi1 psi2 r^2 dr = y1 y2 r^2 dx
+          Sn(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
       }
     }
   }
@@ -447,12 +463,13 @@ ldouble SCF::stepStandard(ldouble gamma) {
     std::vector<ldouble> lambdad = _lambda;
   
     if (k < _o.size()) {
-      dE[k] = E[k]*1e-2/((ldouble) _o[k]->n());
+      dE[k] = 0;
       if (iterE >= 1) {
-        dE[k] = _historyE[iterE-1][k] - _historyE[iterE][k];
+        if (_historyE[iterE-1](k) != 0 && _historyE[iterE](k) != 0)
+          dE[k] = _historyE[iterE-1](k) - _historyE[iterE](k);
       }
       if (dE[k] == 0)
-        dE[k] = E[k]*1e-2/_o[k]->n();
+        dE[k] = E[k]*1e-2/((ldouble) _o[k]->n());
 
       EdE[k] += dE[k];
     } else {
@@ -474,11 +491,10 @@ ldouble SCF::stepStandard(ldouble gamma) {
         if (_o[k1]->l() != _o[k2]->l()) continue;
         int lidx = _lambdaMap[k1*100+k2];
         for (int ir = 0; ir < _g->N()-1; ++ir) {
-          ldouble dr = (*_g)(ir+1) - (*_g)(ir);
-          if (_g->isLog())
-            Sd(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2-1)*dr;
-          else
-            Sd(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*dr;
+          if (_g->isLog()) // y = psi * sqrt(r) and dr = r dx, so psi1 * psi2 * r^2 * dr = y1 * y2 / r * r^2 * r * dx = y1 y2 r^2 dx
+            Sd(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
+          else if (_g->isLin()) // y = psi and dr = dx, so psi1 psi2 r^2 dr = y1 y2 r^2 dx
+            Sd(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
         }
       }
     }
@@ -504,7 +520,15 @@ ldouble SCF::stepStandard(ldouble gamma) {
   //std::cout << J << std::endl;
   //std::cout << "Nominal minimisation function value" << std::endl;
   //std::cout << ParN << std::endl;
-  dPar = J.inverse()*ParN;
+  //std::cout << "Jacobian inverse" << std::endl;
+  //std::cout << J.inverse() << std::endl;
+  //std::cout << "Jacobian singular values" << std::endl;
+  //std::cout << J.jacobiSvd(ComputeThinU | ComputeThinV).singularValues() << std::endl;
+  //std::cout << "Jacobian U and V" << std::endl;
+  //std::cout << J.jacobiSvd(ComputeThinU | ComputeThinV).matrixU() << std::endl << J.jacobiSvd(ComputeThinU | ComputeThinV).matrixV() << std::endl;
+  //dPar = J.inverse()*ParN;
+  dPar = J.jacobiSvd(ComputeThinU | ComputeThinV).solve(ParN);
+  //dPar = J.fullPivLu().solve(ParN);
   //std::cout << "Calculated step" << std::endl;
   //std::cout << dPar << std::endl;
 
@@ -518,6 +542,11 @@ ldouble SCF::stepStandard(ldouble gamma) {
     std::cout << "INFO: Orbital " << k << " (with the Newton-Raphson method), dE = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
   }
 
+  VectorXld tmp;
+  tmp.resize(_o.size());
+  VectorXld tmpl;
+  tmpl.resize(_lambda.size());
+
   for (int k = 0; k < _o.size(); ++k) {
     int idx = _om.index(k);
     if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
@@ -526,6 +555,7 @@ ldouble SCF::stepStandard(ldouble gamma) {
       _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
       //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/((ldouble) 20.0*_o[k]->n());
       std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      tmp(k) = 0;
       _historyL.clear();
       _historyE.clear();
       _historyF.clear();
@@ -535,6 +565,7 @@ ldouble SCF::stepStandard(ldouble gamma) {
       _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
       //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/( (ldouble) 20.0*_o[k]->n());
       std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      tmp(k) = 0;
       _historyL.clear();
       _historyE.clear();
       _historyF.clear();
@@ -545,21 +576,15 @@ ldouble SCF::stepStandard(ldouble gamma) {
         _Emax[k] = _o[k]->E();
       }
   
-      VectorXld tmp;
-      tmp.resize(_o.size());
-      for (int k = 0; k < _o.size(); ++k) {
-        tmp(k) = _o[k]->E();
-      }
-      VectorXld tmpl;
-      tmpl.resize(_lambda.size());
-      for (int k = 0; k < _lambda.size(); ++k) {
-        tmpl(k) = _lambda[k];
-      }
-      _historyE.push_back(tmp);
-      _historyF.push_back(Fn);
-      _historyL.push_back(tmpl);
+      tmp(k) = _o[k]->E();
     }
   }
+  for (int k = 0; k < _lambda.size(); ++k) {
+    tmpl(k) = _lambda[k];
+  }
+  _historyE.push_back(tmp);
+  _historyF.push_back(Fn);
+  _historyL.push_back(tmpl);
   
   return Fn.squaredNorm()+Sn.squaredNorm();
 }

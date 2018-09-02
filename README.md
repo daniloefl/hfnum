@@ -1,9 +1,10 @@
 # Quick start
 
-Install GSL and Boost with Python support. In Ubuntu:
+Install Python, Eigen, GSL, Boost with Python support. One also needs Numpy, Matplotlib and Seaborn in Python. In Ubuntu:
 
 ```
-sudo apt install libboost-dev* libboost-python* libgsl-dev
+sudo apt install libboost-dev libboost-python-dev libgsl-dev python python-pip libeigen3-dev
+pip install --user numpy matplotlib seaborn
 cmake .
 make
 ```
