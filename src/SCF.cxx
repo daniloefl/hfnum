@@ -527,8 +527,8 @@ ldouble SCF::stepStandard(ldouble gamma) {
   //std::cout << "Jacobian U and V" << std::endl;
   //std::cout << J.jacobiSvd(ComputeThinU | ComputeThinV).matrixU() << std::endl << J.jacobiSvd(ComputeThinU | ComputeThinV).matrixV() << std::endl;
   //dPar = J.inverse()*ParN;
-  dPar = J.jacobiSvd(ComputeThinU | ComputeThinV).solve(ParN);
-  //dPar = J.fullPivLu().solve(ParN);
+  //dPar = J.jacobiSvd(ComputeThinU | ComputeThinV).solve(ParN);
+  dPar = J.fullPivLu().solve(ParN);
   //std::cout << "Calculated step" << std::endl;
   //std::cout << dPar << std::endl;
 
