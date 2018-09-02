@@ -15,7 +15,7 @@ Z = 1
 
 print("Please enter the atomic number.")
 
-Z = raw_input('[default: %d] ' % 1)
+Z = raw_input('[default: %d] ' % Z)
 if Z.strip() == '':
   Z = 1
 Z = float(Z) ## allow for effective atomic numbers
@@ -100,12 +100,15 @@ if fname.strip() == '':
 
 NiterSCF = 40
 Niter = 100
-F0stop = 1e-6
+F0stop = 1e-8
 r = np.asarray(h.getR())
 print("Last r:", r[-1])
 print("First r:", r[0])
 print("Number of grid points: ", len(r))
-h.gammaSCF(0.4)
+
+# this is the default, but can be adjusted to improve convergence
+#h.gammaSCF(0.5)
+
 h.solve(NiterSCF, Niter, F0stop)
 
 for n in range(0, h.getNOrbitals()):

@@ -58,7 +58,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     }
   }
 
-  ldouble ic = 0.3;
+  ldouble ic = 0.7;
 
   if (_i0.size() != _o.size()) {
     _i0.resize(_o.size(), 0);
