@@ -534,6 +534,7 @@ ldouble SCF::stepStandard(ldouble gamma) {
 
   for (int k = 0; k < _lambda.size(); ++k) {
     _dlambda[k] = -gamma*dPar(_o.size()+k);
+    if (std::fabs(_dlambda[k]) > 0.5) _dlambda[k] = 0.5*_dlambda[k]/std::fabs(_dlambda[k]);
     std::cout << "INFO: Lagrange multiplier " << k << " (with the Newton-Raphson method), dlambda = " << _dlambda[k] << " (probe dlambda = " << 1e-2 << ")" << std::endl;
   }
   for (int k = 0; k < _o.size(); ++k) {
