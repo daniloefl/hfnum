@@ -571,6 +571,11 @@ ldouble SCF::stepStandard(ldouble gamma) {
       _historyE.clear();
       _historyF.clear();
     } else {
+      //if (_o[k]->E() + _dE[k] > _Emax[k]) {
+      //  _dE[k] = _Emax[k] - _o[k]->E();
+      //} else if (_o[k]->E() + dE[k] < _Emin[k]) {
+      //  _dE[k] = _Emin[k] - _o[k]->E();
+      //}
       if (_dE[k] > 0) {
         _Emin[k] = _o[k]->E();
       } else if (_dE[k] < 0) {
