@@ -78,12 +78,13 @@ if fname.strip() == '':
     fname = fname_default
 
 NiterSCF = 40
-Niter = 100
+Niter = 200
 F0stop = 1e-12
 r = np.asarray(h.getR())
-print "Last r:", r[-1]
-print "First r:", r[0]
-h.gammaSCF(0.1)
+print("Last r:", r[-1])
+print("First r:", r[0])
+print("Number of grid points: ", len(r))
+h.gammaSCF(0.3)
 h.solve(NiterSCF, Niter, F0stop)
 
 for n in range(0, h.getNOrbitals()):

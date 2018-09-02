@@ -1,4 +1,30 @@
-# hfnum
+# Quick start
+
+Install GSL and Boost with Python support. In Ubuntu:
+
+```
+sudo apt install libboost-dev* libboost-python* libgsl-dev
+cmake .
+make
+```
+
+Calculate energy levels in atoms with:
+
+```
+python share/calculate_HF.py
+```
+
+Type the atomic number (ie: 6 for Carbon) when requested.
+Type the electron configuration (ie: 1s2 2s2 2p2 for ground state Carbon) when requested.
+And type the output file name where to save the resulting wave functions.
+
+The wave functions can be plotted after the running ends using the following:
+
+```
+python share/load_result.py
+```
+
+# Introduction
 
 Hartree-Fock calculation in C++ using a numerical Grid. Based on hfpython repository.
 It currently can use linear or logarithmic Grids, but only logarithmic Grids have been observed to work with acceptable precision.

@@ -32,7 +32,7 @@ using namespace boost;
 #include "HFException.h"
 
 SCF::SCF(ldouble Z)
-  : _g(new Grid(expGrid, 1.0/8.0, (int) ((std::log(16.0) + 4 + std::log(Z))/(1.0/8.0)), std::exp(-4)/Z)),
+  : _g(new Grid(expGrid, 1.0/16.0, (int) ((std::log(16.0) + 8 + std::log(Z))/(1.0/16.0)), std::exp(-8)/Z)),
   _Z(Z), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om) {
   _own_grid = true;
   _pot.resize(_g->N());
