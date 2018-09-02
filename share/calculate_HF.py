@@ -25,7 +25,7 @@ h = hfnum.HF(Z)
 config = ""
 while config.strip() == "":
   print("Please enter the electron configuration in the format: 1s2 2s2 2p3")
-  config = raw_input(" ")
+  config = raw_input("")
   if config.strip() == "":
     print("Configuration %s does not match the allowed electron configuration format." % i)
     print("Please enter a valid electron configuration.")
@@ -98,18 +98,19 @@ fname = raw_input('[default: %s] ' % fname_default)
 if fname.strip() == '':
     fname = fname_default
 
-NiterSCF = 40
-Niter = 100
-F0stop = 1e-8
 r = np.asarray(h.getR())
 print("Last r:", r[-1])
 print("First r:", r[0])
 print("Number of grid points: ", len(r))
 
-# this is the default, but can be adjusted to improve convergence
-#h.gammaSCF(0.5)
+# can be adjusted to improve convergence
+h.gammaSCF(0.3)
 
-h.solve(NiterSCF, Niter, F0stop)
+F0 = 1e-6
+if h.getNOrbitals() > 3:
+  F0 = 1e-3
+
+h.solve(40, 100, F0)
 
 for n in range(0, h.getNOrbitals()):
   print("Energy for orbital %10s: %10.6f Hartree = %15.8f eV" % (h.getOrbitalName(n), h.getOrbital_E(n), h.getOrbital_E(n)*hfnum.eV))

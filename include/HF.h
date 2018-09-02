@@ -69,7 +69,7 @@ class HF : public SCF {
     /// \param NiterSCF Number of self-consistent iterations.
     /// \param Niter Number of iterations when looking for correct energy eigenvalue.
     /// \param F0step Stop looking for correct energies, when all eigenvalues change by lass than this amount.
-    void solve(int NiterSCF, int Niter, ldouble F0stop);
+    void solve(int NiterSCF = 40, int Niter = 100, ldouble F0stop = 1e-5);
 
     /// \brief Calculate total energy
     /// \return Ground energy

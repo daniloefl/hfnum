@@ -177,9 +177,11 @@ class SCF {
 
     /// record maximum energy if needed
     std::vector<ldouble> _Emax;
+    std::vector<ldouble> _Emax_n;
 
     /// record minimum energy if needed
     std::vector<ldouble> _Emin;
+    std::vector<ldouble> _Emin_n;
 
     /// record number of zero crossings of the main orbital function if needed
     std::vector<int> _nodes;

@@ -210,6 +210,8 @@ void HFS::solve(int NiterSCF, int Niter, ldouble F0stop) {
   _nodes.resize(_o.size());
   _Emax.resize(_o.size());
   _Emin.resize(_o.size());
+  _Emax_n.resize(_o.size());
+  _Emin_n.resize(_o.size());
   icl.resize(_o.size());
 
 
@@ -249,6 +251,8 @@ void HFS::solve(int NiterSCF, int Niter, ldouble F0stop) {
       _nodes[k] = 0;
       _Emin[k] = -_Z*_Z;
       _Emax[k] = 0;
+      _Emin_n[k] = _Emin[k];
+      _Emax_n[k] = _Emax[k];
     }
 
     std::cout << "SCF step " << nStepSCF << std::endl;

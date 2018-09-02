@@ -21,7 +21,6 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
-using namespace boost;
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -31,8 +30,10 @@ using namespace boost;
 
 #include "HFException.h"
 
+using namespace boost;
+
 SCF::SCF(ldouble Z)
-  : _g(new Grid(expGrid, 1.0/32.0, (int) ((std::log(30.0) + 6 + std::log(Z))/(1.0/32.0))+1, std::exp(-6)/Z)),
+  : _g(new Grid(expGrid, 1.0/32.0, (int) ((std::log(12.0) + 5 + std::log(Z))/(1.0/32.0))+1, std::exp(-5)/Z)),
   _Z(Z), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om) {
   _own_grid = true;
   _pot.resize(_g->N());
@@ -276,7 +277,11 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
       _lambda[k] = newE;
     }
   
-    bool stop = std::fabs(*std::max_element(_dE.begin(), _dE.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop;
+    std::vector<ldouble> dErel;
+    for (int k = 0; k < _dE.size(); ++k) {
+      dErel.push_back(_dE[k]/_o[k]->E());
+    }
+    bool stop = std::fabs(*std::max_element(dErel.begin(), dErel.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < F0stop;
     if (_dlambda.size() > 0) {
       stop = stop && (std::fabs(*std::max_element(_dlambda.begin(), _dlambda.end(), [](ldouble a, ldouble b) -> bool { return std::fabs(a) < std::fabs(b); } )) < Lstop);
     }
@@ -466,7 +471,7 @@ ldouble SCF::stepStandard(ldouble gamma) {
       dE[k] = 0;
       if (iterE >= 1) {
         if (_historyE[iterE-1](k) != 0 && _historyE[iterE](k) != 0)
-          dE[k] = (_historyE[iterE-1](k) - _historyE[iterE](k))*0.1;
+          dE[k] = (_historyE[iterE-1](k) - _historyE[iterE](k));
       }
       if (dE[k] == 0)
         dE[k] = E[k]*1e-2/((ldouble) _o[k]->n());
@@ -531,15 +536,18 @@ ldouble SCF::stepStandard(ldouble gamma) {
   dPar = J.fullPivLu().solve(ParN);
   //std::cout << "Calculated step" << std::endl;
   //std::cout << dPar << std::endl;
+  //for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
+  //  dPar(k) = ParN(k)/J(k, k);
+  //}
 
   for (int k = 0; k < _lambda.size(); ++k) {
     _dlambda[k] = -gamma*dPar(_o.size()+k);
-    if (std::fabs(_dlambda[k]) > 0.5) _dlambda[k] = 0.5*_dlambda[k]/std::fabs(_dlambda[k]);
+    //if (std::fabs(_dlambda[k]) > 0.5) _dlambda[k] = 0.5*_dlambda[k]/std::fabs(_dlambda[k]);
     std::cout << "INFO: Lagrange multiplier " << k << " (with the Newton-Raphson method), dlambda = " << _dlambda[k] << " (probe dlambda = " << 1e-2 << ")" << std::endl;
   }
   for (int k = 0; k < _o.size(); ++k) {
     _dE[k] = -gamma*dPar(k);
-    if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
+    //if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
     std::cout << "INFO: Orbital " << k << " (with the Newton-Raphson method), dE = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
   }
 
@@ -549,40 +557,92 @@ ldouble SCF::stepStandard(ldouble gamma) {
   tmpl.resize(_lambda.size());
 
   for (int k = 0; k < _o.size(); ++k) {
+    tmp(k) = 0;
+
     int idx = _om.index(k);
-    if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) {
-      std::cout << "INFO: Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
-      _Emin[k] = _o[k]->E();
-      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
-      //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/((ldouble) 20.0*_o[k]->n());
+
+    if ((int) std::fabs(_nodes[k] - _o[k]->n() + _o[k]->l() + 1) == 1) { // only one node off
+      std::cout << "INFO: One node off in orbital " << k << "." << std::endl;
+      ldouble EE = _o[k]->E() + _dE[k]; // normal shift
+      if (EE < _Emax[k] && EE > _Emin[k]) {
+        _dE[k] = EE - _o[k]->E();
+      } else {
+        // try E (n'/n)^2.5
+        EE = _o[k]->E()*std::pow( (_nodes[k] + _o[k]->l() + 1)/_o[k]->n(), 2.5);
+        if (EE < _Emax[k] && EE > _Emin[k]) {
+          _dE[k] = EE - _o[k]->E();
+        } else {
+          // try +/ delta E / 2^k for several k until one value is in range
+          for (double kk = 0; kk <= 20; kk++) {
+            EE = _o[k]->E() + _dE[k]*std::pow(2, -kk);
+            if (EE < _Emax[k] && EE > _Emin[k]) {
+              _dE[k] = EE - _o[k]->E();
+              break;
+            }
+            EE = _o[k]->E() - _dE[k]*std::pow(2, -kk);
+            if (EE < _Emax[k] && EE > _Emin[k]) {
+              _dE[k] = EE - _o[k]->E();
+              break;
+            }
+          }
+        }
+      }
       std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
-      tmp(k) = 0;
+      _historyL.clear();
+      _historyE.clear();
+      _historyF.clear();
+    } else if ((_nodes[k] - _o[k]->n() + _o[k]->l() + 1) == 0) { // correct number of nodes
+      // try +/ delta E / 2^k for several k until one value is in range
+      for (double kk = 0; kk <= 20; kk++) {
+        ldouble EE = _o[k]->E() + _dE[k]*std::pow(2, -kk);
+        if (EE < _Emax[k] && EE > _Emin[k]) {
+          _dE[k] = EE - _o[k]->E();
+          break;
+        }
+        EE = _o[k]->E() - _dE[k]*std::pow(2, -kk);
+        if (EE < _Emax[k] && EE > _Emin[k]) {
+          _dE[k] = EE - _o[k]->E();
+          break;
+        }
+      }
+      tmp(k) = _o[k]->E();
+    } else if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) { // too few nodes
+      std::cout << "INFO: Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+
+      ldouble delta = 1 - _o[k]->E()/_Emin[k];
+      _Emin[k] = _o[k]->E();
+
+      _Emin_n[k] = _o[k]->E()*std::pow( (_nodes[k] + _o[k]->l() + 1)/_o[k]->n(), 2.5);
+      if (delta < 0.05) _Emin_n[k] = _Emin[k]*std::pow( (_nodes[k] + _o[k]->l() + 1)/_o[k]->n(), 2.5);
+
+      if (_Emin_n[k] < _Emax[k] && _Emin_n[k] > _Emin[k]) {
+        _dE[k] = _Emin_n[k] - _o[k]->E();
+      } else {
+        _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      }
+
+      std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
       _historyL.clear();
       _historyE.clear();
       _historyF.clear();
     } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
       std::cout << "INFO: Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      ldouble delta = 1 - _o[k]->E()/_Emax[k];
       _Emax[k] = _o[k]->E();
-      _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
-      //_dE[k] = _o[k]->E()*(_nodes[k] - _o[k]->n() + _o[k]->l() + 1)/( (ldouble) 20.0*_o[k]->n());
+
+      _Emax_n[k] = _o[k]->E()*std::pow( (_nodes[k] + _o[k]->l() + 1)/_o[k]->n(), 2.5);
+      if (delta < 0.05) _Emax_n[k] = _Emax[k]*std::pow( (_nodes[k] + _o[k]->l() + 1)/_o[k]->n(), 2.5);
+
+      if (_Emin_n[k] < _Emax[k] && _Emin_n[k] > _Emin[k]) {
+        _dE[k] = _Emin_n[k] - _o[k]->E();
+      } else {
+        _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+      }
+
       std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
-      tmp(k) = 0;
       _historyL.clear();
       _historyE.clear();
       _historyF.clear();
-    } else {
-      //if (_o[k]->E() + _dE[k] > _Emax[k]) {
-      //  _dE[k] = _Emax[k] - _o[k]->E();
-      //} else if (_o[k]->E() + dE[k] < _Emin[k]) {
-      //  _dE[k] = _Emin[k] - _o[k]->E();
-      //}
-      if (_dE[k] > 0) {
-        _Emin[k] = _o[k]->E();
-      } else if (_dE[k] < 0) {
-        _Emax[k] = _o[k]->E();
-      }
-  
-      tmp(k) = _o[k]->E();
     }
   }
   for (int k = 0; k < _lambda.size(); ++k) {
