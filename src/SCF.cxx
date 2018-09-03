@@ -345,7 +345,7 @@ ldouble SCF::stepSparse(ldouble gamma) {
     }
     std::vector<ldouble> alist;
     for (int i = 0; i < _g->N(); ++i) {
-      if (std::fabs((*_o[k])(i)) < 0.05*a_max) continue;
+      if (std::fabs((*_o[k])(i)) < 0.01*a_max) continue;
       alist.push_back((*_o[k])(i));
     }
     for (int i = 0; i < alist.size(); ++i) {
@@ -436,7 +436,7 @@ ldouble SCF::stepStandard(ldouble gamma) {
     std::vector<ldouble> alist;
     std::vector<ldouble> alist_i;
     for (int i = 0; i < _g->N(); ++i) {
-      if (std::fabs((*_o[k])(i)) < 0.05*a_max) continue;
+      if (std::fabs((*_o[k])(i)) < 0.01*a_max) continue;
       alist.push_back((*_o[k])(i));
       alist_i.push_back(i);
     }
@@ -521,32 +521,22 @@ ldouble SCF::stepStandard(ldouble gamma) {
       }
     }
   }
-  //std::cout << "Jacobian" << std::endl;
-  //std::cout << J << std::endl;
-  //std::cout << "Nominal minimisation function value" << std::endl;
-  //std::cout << ParN << std::endl;
-  //std::cout << "Jacobian inverse" << std::endl;
-  //std::cout << J.inverse() << std::endl;
-  //std::cout << "Jacobian singular values" << std::endl;
-  //std::cout << J.jacobiSvd(ComputeThinU | ComputeThinV).singularValues() << std::endl;
-  //std::cout << "Jacobian U and V" << std::endl;
-  //std::cout << J.jacobiSvd(ComputeThinU | ComputeThinV).matrixU() << std::endl << J.jacobiSvd(ComputeThinU | ComputeThinV).matrixV() << std::endl;
+
   //dPar = J.inverse()*ParN;
   //dPar = J.jacobiSvd(ComputeThinU | ComputeThinV).solve(ParN);
   dPar = J.fullPivLu().solve(ParN);
+
   //std::cout << "Calculated step" << std::endl;
   //std::cout << dPar << std::endl;
-  //for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
-  //  dPar(k) = ParN(k)/J(k, k);
-  //}
+
+  ldouble alpha = -1;
 
   // now do line search in the direction of dPar
   // set d (sum F^2) /dalpha = 0 = sum 2 F dF/dalpha = 0
-  ldouble alpha = -1;
   //ldouble gradAlpha = 0;
   //int alphaIter = 0;
-  //while (alphaIter++ < 10) {
-  //  ldouble alphaStep = 0.01;
+  //while (alphaIter++ < 5) {
+  //  ldouble alphaStep = 0.001;
   //  gradAlpha = 0;
 
   //  std::vector<ldouble> EdE = E;
@@ -626,7 +616,6 @@ ldouble SCF::stepStandard(ldouble gamma) {
   //      sumF2 += std::pow(Sn(k - _o.size()), 2);
   //    }
   //  }
-  //  std::cout << "sumF2 = " << sumF2 << std::endl;
 
   //  // get gradient
   //  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
@@ -636,10 +625,9 @@ ldouble SCF::stepStandard(ldouble gamma) {
   //      gradAlpha += 2 * Sn(k - _o.size()) * (Sd(k - _o.size()) - Sn(k - _o.size()))/alphaStep;
   //    }
   //  }
-  //  std::cout << "gradAlpha = " << gradAlpha << std::endl;
   //  if (gradAlpha == 0 || !(gradAlpha == gradAlpha)) break;
   //  alpha = alpha - sumF2/gradAlpha;
-  //  std::cout << "New alpha = " << alpha << " (-gamma would be " << -gamma << ")" << std::endl;
+  //  std::cout << "Line search iteration " << alphaIter << ": new alpha = " << alpha << std::endl;
   //}
 
   for (int k = 0; k < _lambda.size(); ++k) {
@@ -681,11 +669,6 @@ ldouble SCF::stepStandard(ldouble gamma) {
               _dE[k] = EE - _o[k]->E();
               break;
             }
-            EE = _o[k]->E() - _dE[k]*std::pow(2, -kk);
-            if (EE < _Emax[k] && EE > _Emin[k]) {
-              _dE[k] = EE - _o[k]->E();
-              break;
-            }
           }
         }
       }
@@ -697,11 +680,6 @@ ldouble SCF::stepStandard(ldouble gamma) {
       // try +/ delta E / 2^k for several k until one value is in range
       for (double kk = 0; kk <= 20; kk++) {
         ldouble EE = _o[k]->E() + _dE[k]*std::pow(2, -kk);
-        if (EE < _Emax[k] && EE > _Emin[k]) {
-          _dE[k] = EE - _o[k]->E();
-          break;
-        }
-        EE = _o[k]->E() - _dE[k]*std::pow(2, -kk);
         if (EE < _Emax[k] && EE > _Emin[k]) {
           _dE[k] = EE - _o[k]->E();
           break;
