@@ -21,6 +21,8 @@ if Z.strip() == '':
 Z = float(Z) ## allow for effective atomic numbers
 
 h = hfnum.HF(Z)
+if Z >= 10:
+  h.resetGrid(1, 1.0/64.0, int( (np.log(12.0) + 6 + np.log(Z))/(1.0/64.0) )+1, np.exp(-6)/Z)
 
 config = ""
 while config.strip() == "":
@@ -97,6 +99,7 @@ fname = fname_default
 fname = raw_input('[default: %s] ' % fname_default)
 if fname.strip() == '':
     fname = fname_default
+
 
 r = np.asarray(h.getR())
 print("Last r:", r[-1])

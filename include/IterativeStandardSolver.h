@@ -41,7 +41,7 @@ class IterativeStandardSolver {
     /// \param lambdaMap Map establishing which lambda indices relate to a pair of orbital indices. The key is 100*k1 + k2.
     /// \param matched To be returned by reference.
     /// \return Minimisation function based on matching at classical crossing for the trial energy.
-    VectorXld solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::vector<ldouble> &lambda, std::map<int, int> &lambdaMap, std::map<int, Vradial> &matched);
+    VectorXld solve(VectorXld &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, VectorXld &lambda, std::map<int, int> &lambdaMap, std::map<int, Vradial> &matched);
 
     /// \brief Solve equation for a specific energy.
     /// \param E Trial energy.
@@ -52,21 +52,21 @@ class IterativeStandardSolver {
     /// \param lambdaMap Map establishing which lambda indices relate to a pair of orbital indices. The key is 100*k1 + k2.
     /// \param matched To be returned by reference.
     /// \return Minimisation function based on matching at classical crossing for the trial energy.
-    VectorXld solve(std::vector<ldouble> &E, Vradial &pot, Vradial &vup, Vradial &vdw, std::vector<ldouble> &lambda, std::map<int, int> &lambdaMap, std::map<int, Vradial> &matched);
+    VectorXld solve(VectorXld &E, Vradial &pot, Vradial &vup, Vradial &vdw, VectorXld &lambda, std::map<int, int> &lambdaMap, std::map<int, Vradial> &matched);
 
     /// \brief Solve assuming initial conditions at the 2 last grid points.
     /// \param E Trial energy.
     /// \param idx Index of orbital to solve.
     /// \param solution To be returned by reference.
     /// \param homo Whether to only solve it for the homogeneous case.
-    void solveInward(std::vector<ldouble> &E, int idx, Vradial &solution, bool homo = false);
+    void solveInward(VectorXld &E, int idx, Vradial &solution, bool homo = false);
 
     /// \brief Solve assuming initial conditions at the 2 first grid points.
     /// \param E Trial energy.
     /// \param idx Index of orbital to solve.
     /// \param solution To be returned by reference.
     /// \param homo Whether to only solve it for the homogeneous case.
-    void solveOutward(std::vector<ldouble> &E, int idx, Vradial &solution, bool homo = false);
+    void solveOutward(VectorXld &E, int idx, Vradial &solution, bool homo = false);
 
     /// \brief Force continuity by taking ratio of inward and outward solutions at the matching point and scaling the solutions appropriately.
     /// \param k Index of the orbital.

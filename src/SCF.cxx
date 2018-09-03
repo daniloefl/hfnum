@@ -35,6 +35,7 @@ using namespace boost;
 SCF::SCF(ldouble Z)
   : _g(new Grid(expGrid, 1.0/32.0, (int) ((std::log(12.0) + 5 + std::log(Z))/(1.0/32.0))+1, std::exp(-5)/Z)),
   _Z(Z), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om) {
+  _findRoots = true;
   _own_grid = true;
   _pot.resize(_g->N());
   for (int k = 0; k < _g->N(); ++k) {
@@ -221,6 +222,7 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
 
   ldouble F = 0;
   int nStep = 0;
+  _reestimateHessian = true;
   while (nStep < Niter) {
     // compute sum of squares of F(x_old)
     nStep += 1;
@@ -229,7 +231,11 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
       F = stepSparse(gamma);
     } else if (_method == 1) {
       gamma = 1; //0.5*(1 - std::exp(-(nStep+1)/5.0));
-      F = stepStandard(gamma);
+      if (_findRoots) {
+        F = stepStandard(gamma);
+      } else {
+        F = stepStandardMinim(gamma);
+      }
     }
   
     // change orbital energies
@@ -380,26 +386,14 @@ ldouble SCF::stepSparse(ldouble gamma) {
   return F;
 }
 
-// solve for a fixed energy and calculate _dE for the next step
-ldouble SCF::stepStandard(ldouble gamma) {
-  int N = _om.N();
-
-  std::vector<ldouble> E(_o.size(), 0);
-  std::vector<int> l(_o.size(), 0);
-
-  for (int k = 0; k < _o.size(); ++k) {
-    E[k] = _o[k]->E();
-    l[k] = _o[k]->l();
-  }
-
-  VectorXld Sn(_lambda.size());
+ldouble SCF::solveStandard(VectorXld &E, VectorXld &lambda, VectorXld &Sn, VectorXld &Fn, std::map<int, Vradial> &matchedOrb) {
+  Sn.resize(lambda.size());
   Sn.setZero();
 
-  VectorXld Fn;
   if (_isSpinDependent) {
-    Fn = _iss.solve(E, _pot, _vsum_up, _vsum_dw, _lambda, _lambdaMap, matchedSt);
+    Fn = _iss.solve(E, _pot, _vsum_up, _vsum_dw, lambda, _lambdaMap, matchedOrb);
   } else {
-    Fn = _iss.solve(E, _pot, _vd, _vex, _lambda, _lambdaMap, matchedSt);
+    Fn = _iss.solve(E, _pot, _vd, _vex, lambda, _lambdaMap, matchedOrb);
   }
 
   for (int k1 = 0; k1 < _o.size(); ++k1) {
@@ -409,16 +403,30 @@ ldouble SCF::stepStandard(ldouble gamma) {
       int lidx = _lambdaMap[k1*100+k2];
       for (int ir = 0; ir < _g->N()-1; ++ir) {
         if (_g->isLog()) // y = psi * sqrt(r) and dr = r dx, so psi1 * psi2 * r^2 * dr = y1 * y2 / r * r^2 * r * dx = y1 y2 r^2 dx
-          Sn(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
+          Sn(lidx) += matchedOrb[k1][ir]*matchedOrb[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
         else if (_g->isLin()) // y = psi and dr = dx, so psi1 psi2 r^2 dr = y1 y2 r^2 dx
-          Sn(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
+          Sn(lidx) += matchedOrb[k1][ir]*matchedOrb[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
       }
     }
   }
-  //std::cout << "First derivative constraint" << std::endl;
-  //std::cout << Fn << std::endl;
-  //std::cout << "Overlap matrix off-diagonal elements" << std::endl;
-  //std::cout << Sn << std::endl;
+  ldouble Fn2 = 0;
+  for (int k = 0; k < E.size(); ++k) Fn2 += std::pow(Fn(k), 2);
+  for (int k = 0; k < lambda.size(); ++k) Fn2 += std::pow(Sn(k), 2);
+  return Fn2;
+}
+
+// solve for a fixed energy and calculate _dE for the next step
+ldouble SCF::stepStandard(ldouble gamma) {
+  int N = _om.N();
+
+  VectorXld E(_o.size());
+  for (int k = 0; k < _o.size(); ++k) E(k) = _o[k]->E();
+  VectorXld L(_lambda.size());
+  for (int k = 0; k < _lambda.size(); ++k) L(k) = _lambda[k];
+
+  VectorXld Fn(E.size());
+  VectorXld Sn(L.size());
+  ldouble sumFn2 = solveStandard(E, L, Sn, Fn, matchedSt);
 
   for (int k = 0; k < _o.size(); ++k) {
     _nodes[k] = 0;
@@ -448,291 +456,475 @@ ldouble SCF::stepStandard(ldouble gamma) {
     }
   }
 
-  VectorXld ParN(_o.size()+_lambda.size());
-  ParN.setZero();
-  for (int k = 0; k < _o.size(); ++k) {
-    ParN(k) = Fn(k);
-  }
-  for (int k = 0; k < _lambda.size(); ++k) {
-    ParN(_o.size()+k) = Sn(k);
-  }
-  VectorXld dPar(_o.size()+_lambda.size());
+  VectorXld ParN(E.size()+L.size());
+  ParN.head(E.size()) = Fn;
+  ParN.tail(L.size()) = Sn;
+
+  VectorXld dPar(ParN.size());
   dPar.setZero();
-  MatrixXld J(_o.size()+_lambda.size(), _o.size()+_lambda.size());
+
+  MatrixXld J(ParN.size(), ParN.size());
   J.setZero();
 
+  VectorXld probe_dE(E.size());
+  probe_dE.setZero();
+  VectorXld probe_dLambda(L.size());
+  probe_dLambda.setZero();
+
   int iterE = _historyE.size()-1;
-  std::vector<ldouble> dE(_o.size(), 0);
-  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
-    std::vector<ldouble> EdE = E;
-    std::vector<ldouble> lambdad = _lambda;
+  for (int k = 0; k < ParN.size(); ++k) {
+    VectorXld EdE = E;
+    VectorXld LdL = L;
   
-    if (k < _o.size()) {
-      dE[k] = 0;
+    if (k < E.size()) {
+      probe_dE(k) = E(k)*1e-2/((ldouble) _o[k]->n());
       if (iterE >= 1) {
         if (_historyE[iterE-1](k) != 0 && _historyE[iterE](k) != 0)
-          dE[k] = 0.1*(_historyE[iterE-1](k) - _historyE[iterE](k));
+          probe_dE(k) = 0.1*(_historyE[iterE-1](k) - _historyE[iterE](k));
       }
-      if (dE[k] == 0)
-        dE[k] = E[k]*1e-2/((ldouble) _o[k]->n());
 
-      EdE[k] += dE[k];
+      EdE(k) += probe_dE(k);
     } else {
-      lambdad[k-_o.size()] += 1e-2;
+      probe_dLambda(k - E.size()) = 1e-2;
+      LdL(k - E.size()) += probe_dLambda(k - E.size());
     }
 
     VectorXld Fd;
-    if (_isSpinDependent) {
-      Fd = _iss.solve(EdE, _pot, _vsum_up, _vsum_dw, lambdad, _lambdaMap, matchedSt);
-    } else {
-      Fd = _iss.solve(EdE, _pot, _vd, _vex, lambdad, _lambdaMap, matchedSt);
-    }
+    VectorXld Sd(L.size());
+    ldouble sumFd2 = solveStandard(EdE, LdL, Sd, Fd, matchedSt);
 
-    VectorXld Sd(_lambda.size());
-    Sd.setZero();
-    for (int k1 = 0; k1 < _o.size(); ++k1) {
-      for (int k2 = 0; k2 < _o.size(); ++k2) {
-        if (k1 <= k2) continue;
-        if (_o[k1]->l() != _o[k2]->l()) continue;
-        int lidx = _lambdaMap[k1*100+k2];
-        for (int ir = 0; ir < _g->N()-1; ++ir) {
-          if (_g->isLog()) // y = psi * sqrt(r) and dr = r dx, so psi1 * psi2 * r^2 * dr = y1 * y2 / r * r^2 * r * dx = y1 y2 r^2 dx
-            Sd(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
-          else if (_g->isLin()) // y = psi and dr = dx, so psi1 psi2 r^2 dr = y1 y2 r^2 dx
-            Sd(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
-        }
-      }
-    }
     // two criteria to satisfy:
     // F = 0 and S = 0
-    if (k < _o.size()) {
-      for (int j = 0; j < _o.size() + _lambda.size(); ++j) {
-        if (j < _o.size())
-          J(j, k) = (Fd(j) - Fn(j))/dE[k];
+    if (k < E.size()) {
+      for (int j = 0; j < ParN.size(); ++j) {
+        if (j < E.size())
+          J(j, k) = (Fd(j) - Fn(j))/probe_dE(k);
         else
-          J(j, k) = (Sd(j - _o.size()) - Sn(j - _o.size()))/dE[k];
+          J(j, k) = (Sd(j - _o.size()) - Sn(j - _o.size()))/probe_dE(k);
       }
     } else {
-      for (int j = 0; j < _o.size() + _lambda.size(); ++j) {
-        if (j < _o.size())
-          J(j, k) = (Fd(j) - Fn(j))/1e-2;
+      for (int j = 0; j < ParN.size(); ++j) {
+        if (j < E.size())
+          J(j, k) = (Fd(j) - Fn(j))/probe_dLambda(k - E.size());
         else
-          J(j, k) = (Sd(j - _o.size()) - Sn(j - _o.size()))/1e-2;
+          J(j, k) = (Sd(j - E.size()) - Sn(j - E.size()))/probe_dLambda(k - E.size());
       }
     }
   }
 
-  //dPar = J.inverse()*ParN;
-  //dPar = J.jacobiSvd(ComputeThinU | ComputeThinV).solve(ParN);
   dPar = J.fullPivLu().solve(ParN);
 
-  //std::cout << "Calculated step" << std::endl;
-  //std::cout << dPar << std::endl;
-
   ldouble alpha = -1;
-
-  // now do line search in the direction of dPar
-  // set d (sum F^2) /dalpha = 0 = sum 2 F dF/dalpha = 0
-  //ldouble gradAlpha = 0;
-  //int alphaIter = 0;
-  //while (alphaIter++ < 5) {
-  //  ldouble alphaStep = 0.001;
-  //  gradAlpha = 0;
-
-  //  std::vector<ldouble> EdE = E;
-  //  std::vector<ldouble> lambdad = _lambda;
-
-  //  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
-  //    if (k < _o.size()) {
-  //      EdE[k] += alpha*dPar(k);
-  //    } else { 
-  //      lambdad[k-_o.size()] += alpha*dPar(k);
-  //    }
-  //  }
-
-  //  // solve it again
-  //  VectorXld Fn;
-  //  if (_isSpinDependent) {
-  //    Fn = _iss.solve(EdE, _pot, _vsum_up, _vsum_dw, lambdad, _lambdaMap, matchedSt);
-  //  } else {
-  //    Fn = _iss.solve(EdE, _pot, _vd, _vex, lambdad, _lambdaMap, matchedSt);
-  //  }
-
-  //  VectorXld Sn(_lambda.size());
-  //  Sn.setZero();
-  //  for (int k1 = 0; k1 < _o.size(); ++k1) {
-  //    for (int k2 = 0; k2 < _o.size(); ++k2) {
-  //      if (k1 <= k2) continue;
-  //      if (_o[k1]->l() != _o[k2]->l()) continue;
-  //      int lidx = _lambdaMap[k1*100+k2];
-  //      for (int ir = 0; ir < _g->N()-1; ++ir) {
-  //        if (_g->isLog()) // y = psi * sqrt(r) and dr = r dx, so psi1 * psi2 * r^2 * dr = y1 * y2 / r * r^2 * r * dx = y1 y2 r^2 dx
-  //          Sn(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
-  //        else if (_g->isLin()) // y = psi and dr = dx, so psi1 psi2 r^2 dr = y1 y2 r^2 dx
-  //          Sn(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
-  //      }
-  //    }
-  //  }
-
-  //  // step alpha * dPar
-  //  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
-  //    if (k < _o.size()) {
-  //      EdE[k] += alphaStep*dPar(k);
-  //    } else { 
-  //      lambdad[k-_o.size()] += alphaStep*dPar(k);
-  //    }
-  //  }
-
-  //  // solve it again
-  //  VectorXld Fd;
-  //  if (_isSpinDependent) {
-  //    Fd = _iss.solve(EdE, _pot, _vsum_up, _vsum_dw, lambdad, _lambdaMap, matchedSt);
-  //  } else {
-  //    Fd = _iss.solve(EdE, _pot, _vd, _vex, lambdad, _lambdaMap, matchedSt);
-  //  }
-
-  //  VectorXld Sd(_lambda.size());
-  //  Sd.setZero();
-  //  for (int k1 = 0; k1 < _o.size(); ++k1) {
-  //    for (int k2 = 0; k2 < _o.size(); ++k2) {
-  //      if (k1 <= k2) continue;
-  //      if (_o[k1]->l() != _o[k2]->l()) continue;
-  //      int lidx = _lambdaMap[k1*100+k2];
-  //      for (int ir = 0; ir < _g->N()-1; ++ir) {
-  //        if (_g->isLog()) // y = psi * sqrt(r) and dr = r dx, so psi1 * psi2 * r^2 * dr = y1 * y2 / r * r^2 * r * dx = y1 y2 r^2 dx
-  //          Sd(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
-  //        else if (_g->isLin()) // y = psi and dr = dx, so psi1 psi2 r^2 dr = y1 y2 r^2 dx
-  //          Sd(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
-  //      }
-  //    }
-  //  }
-
-  //  // get function
-  //  ldouble sumF2 = 0;
-  //  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
-  //    if (k < _o.size()) {
-  //      sumF2 += std::pow(Fn(k), 2);
-  //    } else {
-  //      sumF2 += std::pow(Sn(k - _o.size()), 2);
-  //    }
-  //  }
-
-  //  // get gradient
-  //  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
-  //    if (k < _o.size()) {
-  //      gradAlpha += 2 * Fn(k) * (Fd(k) - Fn(k))/alphaStep;
-  //    } else {
-  //      gradAlpha += 2 * Sn(k - _o.size()) * (Sd(k - _o.size()) - Sn(k - _o.size()))/alphaStep;
-  //    }
-  //  }
-  //  if (gradAlpha == 0 || !(gradAlpha == gradAlpha)) break;
-  //  alpha = alpha - sumF2/gradAlpha;
-  //  std::cout << "Line search iteration " << alphaIter << ": new alpha = " << alpha << std::endl;
-  //}
-
-  for (int k = 0; k < _lambda.size(); ++k) {
+  for (int k = 0; k < L.size(); ++k) {
     _dlambda[k] = alpha*gamma*dPar(_o.size()+k);
     if (std::fabs(_dlambda[k]) > 0.5) _dlambda[k] = 0.5*_dlambda[k]/std::fabs(_dlambda[k]);
-    std::cout << "INFO: Lagrange multiplier " << k << " (with the Newton-Raphson method), dlambda = " << _dlambda[k] << " (probe dlambda = " << 1e-2 << ")" << std::endl;
+    std::cout << "INFO: Lagrange multiplier " << k << " (with the Newton-Raphson method), dlambda = " << _dlambda[k] << " (probe dlambda = " << probe_dLambda(k) << ")" << std::endl;
   }
-  for (int k = 0; k < _o.size(); ++k) {
+  for (int k = 0; k < E.size(); ++k) {
     _dE[k] = alpha*gamma*dPar(k);
     if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
-    std::cout << "INFO: Orbital " << k << " (with the Newton-Raphson method), dE = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
+    std::cout << "INFO: Orbital " << k << " (with the Newton-Raphson method), dE = " << _dE[k] << " (probe dE = " << probe_dE(k) << ")" << std::endl;
   }
 
-  VectorXld tmp;
-  tmp.resize(_o.size());
-  VectorXld tmpl;
-  tmpl.resize(_lambda.size());
-
+  VectorXld tmp = E;
   for (int k = 0; k < _o.size(); ++k) {
-    tmp(k) = 0;
 
     int idx = _om.index(k);
 
-    if ((int) std::fabs(_nodes[k] - _o[k]->n() + _o[k]->l() + 1) == 1 && std::fabs(_dE[k]/_o[k]->E()) > 0.02) { // only one node off
+    int nodes_found = _nodes[k];
+    int nodes_target = _o[k]->n() - _o[k]->l() - 1;
+
+    ldouble orb_n = _o[k]->n();
+    ldouble orb_n_eff = _nodes[k] + _o[k]->l() + 1;
+    
+    ldouble &orb_dE = _dE[k];
+    ldouble orb_E = _o[k]->E();
+
+    if (std::abs(nodes_found - nodes_target) == 1 && std::fabs(orb_dE/orb_E) > 0.02) { // only one node off
       std::cout << "INFO: One node off in orbital " << k << "." << std::endl;
-      ldouble EE = _o[k]->E() + _dE[k]; // normal shift
+      ldouble EE = orb_E + orb_dE; // normal shift
       if (EE < _Emax[k] && EE > _Emin[k]) {
-        _dE[k] = EE - _o[k]->E();
+        orb_dE = EE - orb_E;
       } else {
         // try E (n'/n)^2.5
-        EE = _o[k]->E()*std::pow( (_nodes[k] + _o[k]->l() + 1)/_o[k]->n(), 2.5);
+        EE = orb_E*std::pow( (orb_n_eff/orb_n), 2.5);
         if (EE < _Emax[k] && EE > _Emin[k]) {
-          _dE[k] = EE - _o[k]->E();
+          orb_dE = EE - orb_E;
         } else {
           // try +/ delta E / 2^k for several k until one value is in range
           for (double kk = 0; kk <= 20; kk++) {
-            EE = _o[k]->E() + _dE[k]*std::pow(2, -kk);
+            EE = orb_E + orb_dE*std::pow(2, -kk);
             if (EE < _Emax[k] && EE > _Emin[k]) {
-              _dE[k] = EE - _o[k]->E();
+              orb_dE = EE - orb_E;
               break;
             }
           }
         }
       }
       std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      tmp(k) = 0;
       _historyL.clear();
       _historyE.clear();
       _historyF.clear();
-    } else if ((_nodes[k] - _o[k]->n() + _o[k]->l() + 1) == 0) { // correct number of nodes
+    } else if ((nodes_found - nodes_target) == 0) { // correct number of nodes
       // try +/ delta E / 2^k for several k until one value is in range
       for (double kk = 0; kk <= 20; kk++) {
-        ldouble EE = _o[k]->E() + _dE[k]*std::pow(2, -kk);
+        ldouble EE = orb_E + orb_dE*std::pow(2, -kk);
         if (EE < _Emax[k] && EE > _Emin[k]) {
-          _dE[k] = EE - _o[k]->E();
+          orb_dE = EE - orb_E;
           break;
         }
       }
-      tmp(k) = _o[k]->E();
-    } else if (_nodes[k] < _o[k]->n() - _o[k]->l() - 1) { // too few nodes
+    } else if (nodes_found < nodes_target) { // too few nodes
       std::cout << "INFO: Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
 
-      ldouble delta = 1 - _o[k]->E()/_Emin[k];
-      _Emin[k] = _o[k]->E();
+      ldouble delta = 1 - orb_E/_Emin[k];
+      _Emin[k] = orb_E;
 
-      _Emin_n[k] = _o[k]->E()*std::pow( (_nodes[k] + _o[k]->l() + 1)/_o[k]->n(), 2.5);
-      if (delta < 0.05) _Emin_n[k] = _Emin[k]*std::pow( (_nodes[k] + _o[k]->l() + 1)/_o[k]->n(), 2.5);
+      _Emin_n[k] = orb_E*std::pow(orb_n_eff/orb_n, 2.5);
+      if (delta < 0.05) _Emin_n[k] = _Emin[k]*std::pow(orb_n_eff/orb_n, 2.5);
 
       if (_Emin_n[k] < _Emax[k] && _Emin_n[k] > _Emin[k]) {
-        _dE[k] = _Emin_n[k] - _o[k]->E();
+        orb_dE = _Emin_n[k] - orb_E;
       } else {
-        _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+        orb_dE = -orb_E + (_Emin[k] + _Emax[k])*0.5;
       }
 
       std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      tmp(k) = 0;
       _historyL.clear();
       _historyE.clear();
       _historyF.clear();
-    } else if (_nodes[k] > _o[k]->n() - _o[k]->l() - 1) {
+    } else if (nodes_found > nodes_target) {
       std::cout << "INFO: Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
-      ldouble delta = 1 - _o[k]->E()/_Emax[k];
-      _Emax[k] = _o[k]->E();
+      ldouble delta = 1 - orb_E/_Emax[k];
+      _Emax[k] = orb_E;
 
-      _Emax_n[k] = _o[k]->E()*std::pow( (_nodes[k] + _o[k]->l() + 1)/_o[k]->n(), 2.5);
-      if (delta < 0.05) _Emax_n[k] = _Emax[k]*std::pow( (_nodes[k] + _o[k]->l() + 1)/_o[k]->n(), 2.5);
+      _Emax_n[k] = orb_E*std::pow(orb_n_eff/orb_n, 2.5);
+      if (delta < 0.05) _Emax_n[k] = _Emax[k]*std::pow(orb_n_eff/orb_n, 2.5);
 
       if (_Emin_n[k] < _Emax[k] && _Emin_n[k] > _Emin[k]) {
-        _dE[k] = _Emin_n[k] - _o[k]->E();
+        orb_dE = _Emin_n[k] - orb_E;
       } else {
-        _dE[k] = -_o[k]->E() + (_Emin[k] + _Emax[k])*0.5;
+        orb_dE = -orb_E + (_Emin[k] + _Emax[k])*0.5;
       }
 
       std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      tmp(k) = 0;
       _historyL.clear();
       _historyE.clear();
       _historyF.clear();
     }
   }
-  for (int k = 0; k < _lambda.size(); ++k) {
-    tmpl(k) = _lambda[k];
-  }
   _historyE.push_back(tmp);
   _historyF.push_back(Fn);
-  _historyL.push_back(tmpl);
+  _historyL.push_back(L);
   
   return Fn.squaredNorm()+Sn.squaredNorm();
 }
 
+// solve for a fixed energy and calculate _dE for the next step
+ldouble SCF::stepStandardMinim(ldouble gamma) {
+  int N = _om.N();
+
+  VectorXld E(_o.size());
+  for (int k = 0; k < _o.size(); ++k) E(k) = _o[k]->E();
+  VectorXld L(_lambda.size());
+  for (int k = 0; k < _lambda.size(); ++k) L(k) = _lambda[k];
+
+  VectorXld Fn(E.size());
+  VectorXld Sn(L.size());
+  ldouble sumFn = solveStandard(E, L, Sn, Fn, matchedSt);
+
+  for (int k = 0; k < _o.size(); ++k) {
+    _nodes[k] = 0;
+    int l = _o[k]->l();
+    int m = _o[k]->m();
+    int idx = _om.index(k);
+
+    ldouble a_max = 0;
+    for (int i = 0; i < _g->N(); ++i) {
+      (*_o[k])(i) = matchedSt[idx][i];
+      if (std::fabs((*_o[k])(i)) > a_max) {
+        a_max = std::fabs((*_o[k])(i));
+      }
+    }
+    std::vector<ldouble> alist;
+    std::vector<ldouble> alist_i;
+    for (int i = 0; i < _g->N(); ++i) {
+      if (std::fabs((*_o[k])(i)) < 0.01*a_max) continue;
+      alist.push_back((*_o[k])(i));
+      alist_i.push_back(i);
+    }
+    for (int i = 0; i < alist.size(); ++i) {
+      if (i >= 1 && alist[i]*alist[i-1] < 0) {
+        _nodes[k] += 1;
+        std::cout << "Orbital " << k << ": Found node at i=" << alist_i[i] << ", r = " << (*_g)(alist_i[i]) << std::endl;
+      }
+    }
+  }
+
+  VectorXld ParN(E.size()+L.size());
+  ParN.head(E.size()) = Fn;
+  ParN.tail(L.size()) = Sn;
+
+  VectorXld dPar(ParN.size());
+  dPar.setZero();
+
+  VectorXld gradP(ParN.size());
+  gradP.setZero();
+
+  MatrixXld Hn(ParN.size(), ParN.size());
+  Hn.setZero();
+
+  VectorXld probe_dE(E.size());
+  probe_dE.setZero();
+  VectorXld probe_dLambda(L.size());
+  probe_dLambda.setZero();
+
+  int iterE = _historyE.size()-1;
+  for (int k = 0; k < ParN.size(); ++k) {
+    VectorXld EdE = E;
+    VectorXld LdL = L;
+  
+    if (k < E.size()) {
+      probe_dE(k) = E(k)*1e-2/((ldouble) _o[k]->n());
+      if (iterE >= 1) {
+        if (_historyE[iterE-1](k) != 0 && _historyE[iterE](k) != 0)
+          probe_dE(k) = 0.1*(_historyE[iterE-1](k) - _historyE[iterE](k));
+      }
+    } else {
+      probe_dLambda(k - E.size()) = 1e-2;
+    }
+  }
+
+  // nominal
+  //VectorXld EdE1 = E;
+  //VectorXld LdL1 = L;
+  //VectorXld Fn1(E.size());
+  //VectorXld Sn1(L.size());
+  //ldouble sumFn1 = solveStandard(EdE1, LdL1, Sn1, Fn1, matchedSt);
+  // calculate gradient
+  for (int k = 0; k < ParN.size(); ++k) {
+    VectorXld EdE2 = E;
+    VectorXld LdL2 = L;
+    if (k < E.size()) {
+      EdE2(k) += probe_dE(k);
+    } else {
+      LdL2(k - E.size()) += probe_dLambda(k - E.size());
+    }
+
+    VectorXld Fd2;
+    VectorXld Sd2(L.size());
+    ldouble sumFn2 = solveStandard(EdE2, LdL2, Sd2, Fd2, matchedSt);
+
+    if (k < E.size()) {
+      gradP(k) = (sumFn2 - sumFn)/probe_dE(k);
+    } else {
+      gradP(k) = (sumFn2 - sumFn)/probe_dLambda(k - E.size());
+    }
+
+    //if (_reestimateHessian) {
+      VectorXld gradP2(ParN.size());
+      gradP2.setZero();
+      for (int j = 0; j < ParN.size(); ++j) {
+        VectorXld EdE1 = E;
+        VectorXld LdL1 = L;
+        if (j < E.size()) {
+          EdE1(j) += probe_dE(j);
+        } else {
+          LdL1(j - E.size()) += probe_dLambda(j - E.size());
+        }
+        VectorXld Fd1;
+        VectorXld Sd1(L.size());
+        ldouble sumFd1 = solveStandard(EdE1, LdL1, Sd1, Fd1, matchedSt);
+
+        VectorXld EdE2 = EdE1;
+        VectorXld LdL2 = LdL1;
+        if (k < E.size()) {
+          EdE2(k) += probe_dE(k);
+        } else {
+          LdL2(k - E.size()) += probe_dLambda(k - E.size());
+        }
+        VectorXld Fd2;
+        VectorXld Sd2(L.size());
+        ldouble sumFd2 = solveStandard(EdE2, LdL2, Sd2, Fd2, matchedSt);
+
+        if (k < E.size()) {
+          gradP2(k) = (sumFd2 - sumFd1)/probe_dE(k);
+        } else {
+          gradP2(k) = (sumFd2 - sumFd1)/probe_dLambda(k - E.size());
+        }
+
+        if (j < E.size()) {
+          Hn(k, j) = (gradP2(k) - gradP(k))/probe_dE(j);
+        } else {
+          Hn(k, j) = (gradP2(k) - gradP(k))/probe_dLambda(j - E.size());
+        }
+      }
+    //} else { // update Hessian
+    //  VectorXld curr_gradP = gradP;
+    //  VectorXld prev_gradP = _gradP;
+    //  VectorXld dg = curr_gradP - prev_gradP;
+    //  VectorXld dx = ParN - _ParN;
+    //  Hn = _H + dg*dg.transpose()/(dg.transpose()*dx) - _H*dx*dx.transpose()*_H.transpose()/(dx.transpose()*_H*dx);
+    //}
+  }
+
+  dPar = -Hn.fullPivLu().solve(gradP);
+  ldouble alpha = 1;
+
+  //int alphaIter = 0;
+  //while (alphaIter++ < 10) {
+  //  ldouble alphaStep = 0.01;
+  //  VectorXld EdE = E;
+  //  VectorXld LdL = L;
+  //  for (int k = 0; k < ParN.size(); ++k) {
+  //    if (k < E.size()) {
+  //      EdE(k) += alpha*dPar(k);
+  //    } else { 
+  //      LdL(k - E.size()) += alpha*dPar(k);
+  //    }
+  //  }
+  //  // solve it again
+  //  VectorXld Fna(E.size());
+  //  VectorXld Sna(L.size());
+  //  ldouble sumFna = solveStandard(EdE, LdL, Sna, Fna, matchedSt);
+  //  // step alpha * dPar
+  //  for (int k = 0; k < ParN.size(); ++k) {
+  //    if (k < E.size()) {
+  //      EdE(k) += alphaStep*dPar(k);
+  //    } else { 
+  //      LdL(k - E.size()) += alphaStep*dPar(k);
+  //    }
+  //  }
+  //  VectorXld Fnb(E.size());
+  //  VectorXld Snb(L.size());
+  //  ldouble sumFnb = solveStandard(EdE, LdL, Snb, Fnb, matchedSt);
+  //  ldouble gradAlpha = 0;
+  //  for (int k = 0; k < ParN.size(); ++k) {
+  //    if (k < E.size()) {
+  //      gradAlpha += 2 * Fna(k) * (Fnb(k) - Fna(k))/alphaStep;
+  //    } else {
+  //      gradAlpha += 2 * Sna(k - E.size()) * (Snb(k - E.size()) - Sna(k - E.size()))/alphaStep;
+  //    }
+  //  }
+  //  // get gradient
+  //  //ldouble gradAlpha = (sumFnb - sumFna)/alphaStep;
+  //  if (gradAlpha == 0 || !(gradAlpha == gradAlpha)) break;
+  //  alpha = alpha - sumFna/gradAlpha;
+  //  std::cout << "Updated alpha to " << alpha << std::endl;
+  //}
+
+  for (int k = 0; k < L.size(); ++k) {
+    _dlambda[k] = alpha*gamma*dPar(_o.size()+k);
+    if (std::fabs(_dlambda[k]) > 0.5) _dlambda[k] = 0.5*_dlambda[k]/std::fabs(_dlambda[k]);
+    std::cout << "INFO: Lagrange multiplier " << k << " (with the Newton-Raphson method), dlambda = " << _dlambda[k] << " (probe dlambda = " << probe_dLambda(k) << ")" << std::endl;
+  }
+  for (int k = 0; k < E.size(); ++k) {
+    _dE[k] = alpha*gamma*dPar(k);
+    if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
+    std::cout << "INFO: Orbital " << k << " (with the Newton-Raphson method), dE = " << _dE[k] << " (probe dE = " << probe_dE(k) << ")" << std::endl;
+  }
+  _H = Hn;
+  _gradP = gradP;
+  _ParN = ParN;
+  _reestimateHessian = false;
+
+  VectorXld tmp = E;
+  for (int k = 0; k < _o.size(); ++k) {
+
+    int idx = _om.index(k);
+
+    int nodes_found = _nodes[k];
+    int nodes_target = _o[k]->n() - _o[k]->l() - 1;
+
+    ldouble orb_n = _o[k]->n();
+    ldouble orb_n_eff = _nodes[k] + _o[k]->l() + 1;
+    
+    ldouble &orb_dE = _dE[k];
+    ldouble orb_E = _o[k]->E();
+
+    if (std::abs(nodes_found - nodes_target) == 1 && std::fabs(orb_dE/orb_E) > 0.02) { // only one node off
+      std::cout << "INFO: One node off in orbital " << k << "." << std::endl;
+      ldouble EE = orb_E + orb_dE; // normal shift
+      if (EE < _Emax[k] && EE > _Emin[k]) {
+        orb_dE = EE - orb_E;
+      } else {
+        // try E (n'/n)^2.5
+        EE = orb_E*std::pow( (orb_n_eff/orb_n), 2.5);
+        if (EE < _Emax[k] && EE > _Emin[k]) {
+          orb_dE = EE - orb_E;
+        } else {
+          // try +/ delta E / 2^k for several k until one value is in range
+          for (double kk = 0; kk <= 20; kk++) {
+            EE = orb_E + orb_dE*std::pow(2, -kk);
+            if (EE < _Emax[k] && EE > _Emin[k]) {
+              orb_dE = EE - orb_E;
+              break;
+            }
+          }
+        }
+      }
+      std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      tmp(k) = 0;
+      _historyL.clear();
+      _historyE.clear();
+      _historyF.clear();
+    } else if ((nodes_found - nodes_target) == 0) { // correct number of nodes
+      // try +/ delta E / 2^k for several k until one value is in range
+      for (double kk = 0; kk <= 20; kk++) {
+        ldouble EE = orb_E + orb_dE*std::pow(2, -kk);
+        if (EE < _Emax[k] && EE > _Emin[k]) {
+          orb_dE = EE - orb_E;
+          break;
+        }
+      }
+    } else if (nodes_found < nodes_target) { // too few nodes
+      std::cout << "INFO: Too few nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+
+      ldouble delta = 1 - orb_E/_Emin[k];
+      _Emin[k] = orb_E;
+
+      _Emin_n[k] = orb_E*std::pow(orb_n_eff/orb_n, 2.5);
+      if (delta < 0.05) _Emin_n[k] = _Emin[k]*std::pow(orb_n_eff/orb_n, 2.5);
+
+      if (_Emin_n[k] < _Emax[k] && _Emin_n[k] > _Emin[k]) {
+        orb_dE = _Emin_n[k] - orb_E;
+      } else {
+        orb_dE = -orb_E + (_Emin[k] + _Emax[k])*0.5;
+      }
+
+      std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      tmp(k) = 0;
+      _historyL.clear();
+      _historyE.clear();
+      _historyF.clear();
+    } else if (nodes_found > nodes_target) {
+      std::cout << "INFO: Too many nodes in orbital " << k << ", skipping dE by large enough amount to go to the next node position." << std::endl;
+      ldouble delta = 1 - orb_E/_Emax[k];
+      _Emax[k] = orb_E;
+
+      _Emax_n[k] = orb_E*std::pow(orb_n_eff/orb_n, 2.5);
+      if (delta < 0.05) _Emax_n[k] = _Emax[k]*std::pow(orb_n_eff/orb_n, 2.5);
+
+      if (_Emin_n[k] < _Emax[k] && _Emin_n[k] > _Emin[k]) {
+        orb_dE = _Emin_n[k] - orb_E;
+      } else {
+        orb_dE = -orb_E + (_Emin[k] + _Emax[k])*0.5;
+      }
+
+      std::cout << "INFO: Orbital " << k << ", new dE = " << _dE[k] << std::endl;
+      tmp(k) = 0;
+      _historyL.clear();
+      _historyE.clear();
+      _historyF.clear();
+    }
+  }
+  _historyE.push_back(tmp);
+  _historyF.push_back(Fn);
+  _historyL.push_back(L);
+  
+  return Fn.squaredNorm()+Sn.squaredNorm();
+}
 

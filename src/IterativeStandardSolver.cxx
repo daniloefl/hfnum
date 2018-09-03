@@ -22,7 +22,7 @@ void IterativeStandardSolver::setZ(ldouble Z) {
 }
 
 
-VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, std::vector<ldouble> &lambda, std::map<int, int> &lambdaMap, std::map<int, Vradial> &matched) {
+VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<int, Vradial> &vd, std::map<std::pair<int, int>, Vradial> &vex, VectorXld &lambda, std::map<int, int> &lambdaMap, std::map<int, Vradial> &matched) {
   int M = _om.N();
 
   for (int idx = 0; idx < M; ++idx) {
@@ -49,11 +49,11 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   for (int idx = 0; idx < M; ++idx) {
     if (_g.isLog()) {
       for (int k = 0; k < _g.N(); ++k) {
-        f[idx][k] = 1.0L + std::pow(_g.dx(), 2)/12.0L*(2*std::pow(_g(k), 2)*(E[idx] - pot[k] - vd[idx][k] + vex[std::pair<int,int>(idx,idx)][k]) - std::pow(((ldouble ) _o[idx]->l()) + 0.5, 2));
+        f[idx][k] = 1.0L + std::pow(_g.dx(), 2)/12.0L*(2*std::pow(_g(k), 2)*(E(idx) - pot[k] - vd[idx][k] + vex[std::pair<int,int>(idx,idx)][k]) - std::pow(((ldouble ) _o[idx]->l()) + 0.5, 2));
       }
     } else {
       for (int k = 0; k < _g.N(); ++k) {
-        f[idx][k] = 1.0L + std::pow(_g.dx(), 2)/12.0L*((E[idx] - pot[k] - vd[idx][k] + vex[std::pair<int,int>(idx,idx)][k]) - std::pow(_o[idx]->l() + 0.5, 2));
+        f[idx][k] = 1.0L + std::pow(_g.dx(), 2)/12.0L*((E(idx) - pot[k] - vd[idx][k] + vex[std::pair<int,int>(idx,idx)][k]) - std::pow(_o[idx]->l() + 0.5, 2));
       }
     }
   }
@@ -64,7 +64,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     _i0.resize(_o.size(), 0);
     _i1.resize(_o.size(), 0);
     for (int idx = 0; idx < M; ++idx) {
-      ldouble Zeff = _o[idx]->n()*std::sqrt(std::fabs(2*E[idx]));
+      ldouble Zeff = _o[idx]->n()*std::sqrt(std::fabs(2*E(idx)));
       _i0[idx] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(0)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(0)/((ldouble) _o[idx]->n()));
       _i1[idx] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(1)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(1)/((ldouble) _o[idx]->n()));
     }
@@ -110,13 +110,13 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
               snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
               if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                 int lidx = lambdaMap[100*idx1 + idx2];
-                snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda[lidx]*matched[idx2][k];
+                snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda(lidx)*matched[idx2][k];
               }
             } else {
               snew[idx1][k] += std::pow(_g.dx(), 2)/12.0*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
               if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                 int lidx = lambdaMap[100*idx1 + idx2];
-                snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda[lidx]*matched[idx2][k];
+                snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda(lidx)*matched[idx2][k];
               }
             }
           }
@@ -145,13 +145,13 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
                 snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
                 if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                   int lidx = lambdaMap[100*idx1 + idx2];
-                  snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda[lidx]*matched[idx2][k];
+                  snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda(lidx)*matched[idx2][k];
                 }
               } else {
                 snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
                 if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                   int lidx = lambdaMap[100*idx1 + idx2];
-                  snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda[lidx]*matched[idx2][k];
+                  snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda(lidx)*matched[idx2][k];
                 }
               }
             }
@@ -196,13 +196,13 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
             snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
             if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
               int lidx = lambdaMap[100*idx1 + idx2];
-              snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda[lidx]*matched[idx2][k];
+              snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda(lidx)*matched[idx2][k];
             }
           } else {
             snew[idx1][k] += std::pow(_g.dx(), 2)/12.0*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
             if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
               int lidx = lambdaMap[100*idx1 + idx2];
-              snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda[lidx]*matched[idx2][k];
+              snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda(lidx)*matched[idx2][k];
             }
           }
         }
@@ -238,7 +238,7 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
   return F;
 }
 
-VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, Vradial &vup, Vradial &vdw, std::vector<ldouble> &lambda, std::map<int, int> &lambdaMap, std::map<int, Vradial> &matched) {
+VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, Vradial &vup, Vradial &vdw, VectorXld &lambda, std::map<int, int> &lambdaMap, std::map<int, Vradial> &matched) {
   int M = _om.N();
 
   for (int idx = 0; idx < M; ++idx) {
@@ -260,16 +260,16 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
     if (_g.isLog()) {
       for (int k = 0; k < _g.N(); ++k) {
         if (_o[idx]->term().find('+') != std::string::npos)
-          f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*(2*std::pow(_g(k), 2)*(E[idx] - pot[k] - vup[k]) - std::pow(((ldouble ) _o[idx]->l()) + 0.5, 2));
+          f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*(2*std::pow(_g(k), 2)*(E(idx) - pot[k] - vup[k]) - std::pow(((ldouble ) _o[idx]->l()) + 0.5, 2));
         if (_o[idx]->term().find('-') != std::string::npos)
-          f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*(2*std::pow(_g(k), 2)*(E[idx] - pot[k] - vdw[k]) - std::pow(((ldouble ) _o[idx]->l()) + 0.5, 2));
+          f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*(2*std::pow(_g(k), 2)*(E(idx) - pot[k] - vdw[k]) - std::pow(((ldouble ) _o[idx]->l()) + 0.5, 2));
       }
     } else {
       for (int k = 0; k < _g.N(); ++k) {
         if (_o[idx]->term().find('+') != std::string::npos)
-          f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*((E[idx] - pot[k] - vup[k]) - std::pow(_o[idx]->l() + 0.5, 2));
+          f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*((E(idx) - pot[k] - vup[k]) - std::pow(_o[idx]->l() + 0.5, 2));
         if (_o[idx]->term().find('-') != std::string::npos)
-          f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*((E[idx] - pot[k] - vdw[k]) - std::pow(_o[idx]->l() + 0.5, 2));
+          f[idx][k] = 1 + std::pow(_g.dx(), 2)/12.0*((E(idx) - pot[k] - vdw[k]) - std::pow(_o[idx]->l() + 0.5, 2));
       }
     }
   }
@@ -298,10 +298,10 @@ VectorXld IterativeStandardSolver::solve(std::vector<ldouble> &E, Vradial &pot, 
 
 
 
-void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, int idx, Vradial &solution, bool homo) {
+void IterativeStandardSolver::solveInward(VectorXld &E, int idx, Vradial &solution, bool homo) {
   int N = _g.N();
   solution.resize(N);
-  ldouble Zeff = _o[idx]->n()*std::sqrt(std::fabs(2*E[idx]));
+  ldouble Zeff = _o[idx]->n()*std::sqrt(std::fabs(2*E(idx)));
   solution[N-1] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(N-1)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(N-1)/((ldouble) _o[idx]->n()));
   solution[N-2] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(N-2)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(N-2)/((ldouble) _o[idx]->n()));
 
@@ -316,10 +316,10 @@ void IterativeStandardSolver::solveInward(std::vector<ldouble> &E, int idx, Vrad
   }
 }
 
-void IterativeStandardSolver::solveOutward(std::vector<ldouble> &E, int idx, Vradial &solution, bool homo) {
+void IterativeStandardSolver::solveOutward(VectorXld &E, int idx, Vradial &solution, bool homo) {
   int N = _g.N();
   solution.resize(N);
-  ldouble Zeff = _o[idx]->n()*std::sqrt(std::fabs(2*E[idx]));
+  ldouble Zeff = _o[idx]->n()*std::sqrt(std::fabs(2*E(idx)));
   solution[0] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(0)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(0)/((ldouble) _o[idx]->n()));
   solution[1] = std::sqrt(Zeff)*2*std::pow(Zeff/((ldouble) _o[idx]->n()), 1.5)*std::pow(_g(1)/((ldouble) _o[idx]->n()), _o[idx]->l() + 0.5)*std::exp(-Zeff*_g(1)/((ldouble) _o[idx]->n()));
   if (idx < _i0.size()) {

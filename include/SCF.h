@@ -146,12 +146,29 @@ class SCF {
     /// \return Minimisation function value at the end of the step.
     ldouble stepStandard(ldouble gamma);
 
+    /// \brief Use a standard iterative Numerov method.
+    /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
+    /// \return Minimisation function value at the end of the step.
+    ldouble stepStandardMinim(ldouble gamma);
+
     /// \brief Build NxN matrix to solve all equations of the Numerov method for each point simultaneously. Includes an extra equation to control the orbital normalisations, which is non-linear.
     /// \param gamma Factor used to regulate speed on which we go in the direction of the minimum when looking for energy eigenvalues.
     /// \return Minimisation function value at the end of the step.
     ldouble stepSparse(ldouble gamma);
 
   protected:
+
+    /// \brief Solve using the standard method for a specific energy and lambda values.
+    /// \param E Energies.
+    /// \param lambda Lambda.
+    /// \param Sn Overlap vectors.
+    /// \param Fn Mismatch at the matching point.
+    /// \param matchedOrb Orbital solutions.
+    /// \return Sum of squares of Fn and Sn.
+    ldouble solveStandard(VectorXld &E, VectorXld &lambda, VectorXld &Sn, VectorXld &Fn, std::map<int, Vradial> &matchedOrb);
+
+    /// Minimize sum f^2 instead of looking for the roots of f
+    bool _findRoots;
 
     /// Numerical Grid
     Grid *_g;
@@ -237,6 +254,12 @@ class SCF {
     /// Lagrange multiplier indices in E for orthogonality condition
     std::map<int, int> _lambdaMap;
     std::vector<ldouble> _lambda;
+
+    /// Previous Hessian
+    MatrixXld _H;
+    VectorXld _gradP;
+    VectorXld _ParN;
+    bool _reestimateHessian;
 };
 
 #endif
