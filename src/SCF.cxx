@@ -222,13 +222,13 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   ldouble F = 0;
   int nStep = 0;
   while (nStep < Niter) {
-    gamma = 0.5*(1 - std::exp(-(nStep+1)/20.0));
     // compute sum of squares of F(x_old)
     nStep += 1;
     if (_method == 0) {
+      gamma = 0.5*(1 - std::exp(-(nStep+1)/20.0));
       F = stepSparse(gamma);
     } else if (_method == 1) {
-      gamma = 0.5*(1 - std::exp(-(nStep+1)/5.0));
+      gamma = 1; //0.5*(1 - std::exp(-(nStep+1)/5.0));
       F = stepStandard(gamma);
     }
   
@@ -540,13 +540,115 @@ ldouble SCF::stepStandard(ldouble gamma) {
   //  dPar(k) = ParN(k)/J(k, k);
   //}
 
+  // now do line search in the direction of dPar
+  // set d (sum F^2) /dalpha = 0 = sum 2 F dF/dalpha = 0
+  ldouble alpha = -1;
+  //ldouble gradAlpha = 0;
+  //int alphaIter = 0;
+  //while (alphaIter++ < 10) {
+  //  ldouble alphaStep = 0.01;
+  //  gradAlpha = 0;
+
+  //  std::vector<ldouble> EdE = E;
+  //  std::vector<ldouble> lambdad = _lambda;
+
+  //  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
+  //    if (k < _o.size()) {
+  //      EdE[k] += alpha*dPar(k);
+  //    } else { 
+  //      lambdad[k-_o.size()] += alpha*dPar(k);
+  //    }
+  //  }
+
+  //  // solve it again
+  //  VectorXld Fn;
+  //  if (_isSpinDependent) {
+  //    Fn = _iss.solve(EdE, _pot, _vsum_up, _vsum_dw, lambdad, _lambdaMap, matchedSt);
+  //  } else {
+  //    Fn = _iss.solve(EdE, _pot, _vd, _vex, lambdad, _lambdaMap, matchedSt);
+  //  }
+
+  //  VectorXld Sn(_lambda.size());
+  //  Sn.setZero();
+  //  for (int k1 = 0; k1 < _o.size(); ++k1) {
+  //    for (int k2 = 0; k2 < _o.size(); ++k2) {
+  //      if (k1 <= k2) continue;
+  //      if (_o[k1]->l() != _o[k2]->l()) continue;
+  //      int lidx = _lambdaMap[k1*100+k2];
+  //      for (int ir = 0; ir < _g->N()-1; ++ir) {
+  //        if (_g->isLog()) // y = psi * sqrt(r) and dr = r dx, so psi1 * psi2 * r^2 * dr = y1 * y2 / r * r^2 * r * dx = y1 y2 r^2 dx
+  //          Sn(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
+  //        else if (_g->isLin()) // y = psi and dr = dx, so psi1 psi2 r^2 dr = y1 y2 r^2 dx
+  //          Sn(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
+  //      }
+  //    }
+  //  }
+
+  //  // step alpha * dPar
+  //  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
+  //    if (k < _o.size()) {
+  //      EdE[k] += alphaStep*dPar(k);
+  //    } else { 
+  //      lambdad[k-_o.size()] += alphaStep*dPar(k);
+  //    }
+  //  }
+
+  //  // solve it again
+  //  VectorXld Fd;
+  //  if (_isSpinDependent) {
+  //    Fd = _iss.solve(EdE, _pot, _vsum_up, _vsum_dw, lambdad, _lambdaMap, matchedSt);
+  //  } else {
+  //    Fd = _iss.solve(EdE, _pot, _vd, _vex, lambdad, _lambdaMap, matchedSt);
+  //  }
+
+  //  VectorXld Sd(_lambda.size());
+  //  Sd.setZero();
+  //  for (int k1 = 0; k1 < _o.size(); ++k1) {
+  //    for (int k2 = 0; k2 < _o.size(); ++k2) {
+  //      if (k1 <= k2) continue;
+  //      if (_o[k1]->l() != _o[k2]->l()) continue;
+  //      int lidx = _lambdaMap[k1*100+k2];
+  //      for (int ir = 0; ir < _g->N()-1; ++ir) {
+  //        if (_g->isLog()) // y = psi * sqrt(r) and dr = r dx, so psi1 * psi2 * r^2 * dr = y1 * y2 / r * r^2 * r * dx = y1 y2 r^2 dx
+  //          Sd(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
+  //        else if (_g->isLin()) // y = psi and dr = dx, so psi1 psi2 r^2 dr = y1 y2 r^2 dx
+  //          Sd(lidx) += matchedSt[k1][ir]*matchedSt[k2][ir]*std::pow((*_g)(ir), 2)*_g->dx();
+  //      }
+  //    }
+  //  }
+
+  //  // get function
+  //  ldouble sumF2 = 0;
+  //  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
+  //    if (k < _o.size()) {
+  //      sumF2 += std::pow(Fn(k), 2);
+  //    } else {
+  //      sumF2 += std::pow(Sn(k - _o.size()), 2);
+  //    }
+  //  }
+  //  std::cout << "sumF2 = " << sumF2 << std::endl;
+
+  //  // get gradient
+  //  for (int k = 0; k < _o.size()+_lambda.size(); ++k) {
+  //    if (k < _o.size()) {
+  //      gradAlpha += 2 * Fn(k) * (Fd(k) - Fn(k))/alphaStep;
+  //    } else {
+  //      gradAlpha += 2 * Sn(k - _o.size()) * (Sd(k - _o.size()) - Sn(k - _o.size()))/alphaStep;
+  //    }
+  //  }
+  //  std::cout << "gradAlpha = " << gradAlpha << std::endl;
+  //  if (gradAlpha == 0 || !(gradAlpha == gradAlpha)) break;
+  //  alpha = alpha - sumF2/gradAlpha;
+  //  std::cout << "New alpha = " << alpha << " (-gamma would be " << -gamma << ")" << std::endl;
+  //}
+
   for (int k = 0; k < _lambda.size(); ++k) {
-    _dlambda[k] = -gamma*dPar(_o.size()+k);
+    _dlambda[k] = alpha*gamma*dPar(_o.size()+k);
     if (std::fabs(_dlambda[k]) > 0.5) _dlambda[k] = 0.5*_dlambda[k]/std::fabs(_dlambda[k]);
     std::cout << "INFO: Lagrange multiplier " << k << " (with the Newton-Raphson method), dlambda = " << _dlambda[k] << " (probe dlambda = " << 1e-2 << ")" << std::endl;
   }
   for (int k = 0; k < _o.size(); ++k) {
-    _dE[k] = -gamma*dPar(k);
+    _dE[k] = alpha*gamma*dPar(k);
     if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
     std::cout << "INFO: Orbital " << k << " (with the Newton-Raphson method), dE = " << _dE[k] << " (probe dE = " << dE[k] << ")" << std::endl;
   }
