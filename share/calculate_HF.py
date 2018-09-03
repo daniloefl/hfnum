@@ -106,7 +106,7 @@ print("Number of grid points: ", len(r))
 # can be adjusted to improve convergence
 h.gammaSCF(0.3)
 
-F0 = 1e-6
+F0 = 1e-7
 if h.getNOrbitals() >= 3: # either need more Grid points or need to allow worse precision
   F0 = 1e-3
 
