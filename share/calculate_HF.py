@@ -107,7 +107,7 @@ print("Number of grid points: ", len(r))
 h.gammaSCF(0.3)
 
 F0 = 1e-6
-if h.getNOrbitals() > 3:
+if h.getNOrbitals() >= 3: # either need more Grid points or need to allow worse precision
   F0 = 1e-3
 
 h.solve(40, 100, F0)

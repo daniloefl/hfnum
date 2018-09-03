@@ -471,7 +471,7 @@ ldouble SCF::stepStandard(ldouble gamma) {
       dE[k] = 0;
       if (iterE >= 1) {
         if (_historyE[iterE-1](k) != 0 && _historyE[iterE](k) != 0)
-          dE[k] = (_historyE[iterE-1](k) - _historyE[iterE](k));
+          dE[k] = 0.1*(_historyE[iterE-1](k) - _historyE[iterE](k));
       }
       if (dE[k] == 0)
         dE[k] = E[k]*1e-2/((ldouble) _o[k]->n());
@@ -561,7 +561,7 @@ ldouble SCF::stepStandard(ldouble gamma) {
 
     int idx = _om.index(k);
 
-    if ((int) std::fabs(_nodes[k] - _o[k]->n() + _o[k]->l() + 1) == 1) { // only one node off
+    if ((int) std::fabs(_nodes[k] - _o[k]->n() + _o[k]->l() + 1) == 1 && std::fabs(_dE[k]/_o[k]->E()) > 0.02) { // only one node off
       std::cout << "INFO: One node off in orbital " << k << "." << std::endl;
       ldouble EE = _o[k]->E() + _dE[k]; // normal shift
       if (EE < _Emax[k] && EE > _Emin[k]) {
