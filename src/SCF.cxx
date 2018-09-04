@@ -33,7 +33,7 @@
 using namespace boost;
 
 SCF::SCF(ldouble Z)
-  : _g(new Grid(expGrid, 1.0/32.0, (int) ((std::log(12.0) + 5 + std::log(Z))/(1.0/32.0))+1, std::exp(-5)/Z)),
+  : _g(new Grid(expGrid, 1.0/32.0, (int) ((std::log(10.0) + 8 + std::log(Z))/(1.0/32.0))+1, std::exp(-8)/Z)),
   _Z(Z), _om(*_g, _o), _lsb(*_g, _o, icl, _om), _iss(*_g, _o, icl, _om) {
   _findRoots = true;
   _own_grid = true;
@@ -463,13 +463,17 @@ ldouble SCF::stepStandard(ldouble gamma) {
   VectorXld dPar(ParN.size());
   dPar.setZero();
 
-  // J = D - O
-  // J^(-1) = D^(-1) (I - D^(-1) O )^(-1)
+  // J = D - O = ( I - O D^(-1) ) D
+  // J^(-1) = D^(-1) (I - O D^(-1) )^(-1)
+  // J^(-1) ~ D^(-1) (I + O D^(-1) + O D^(-1) O D^(-1) )
+  // J^(-1) P ~ D^(-1) (I + O D^(-1) + O D^(-1) O D^(-1) ) P
+  // J^(-1) P ~ D^(-1) (P + O D^(-1) P + O D^(-1) O D^(-1) P )
+  // J^(-1) P ~ D^(-1) P + D^-1 O D^(-1) P +  D^-1 O D^(-1) O D^(-1) P = (I + D^-1 O + D^-1 O D^(-1) O ) (D^-1 P)
   MatrixXld J(ParN.size(), ParN.size());
   J.setZero();
 
-  VectorXld Jdi(ParN.size());
-  Jdi.setZero();
+  VectorXld JdiP(ParN.size());
+  JdiP.setZero();
   MatrixXld Joff(ParN.size(), ParN.size());
   Joff.setZero();
 
@@ -484,15 +488,15 @@ ldouble SCF::stepStandard(ldouble gamma) {
     VectorXld LdL = L;
   
     if (k < E.size()) {
-      probe_dE(k) = E(k)*1e-2/((ldouble) _o[k]->n());
+      probe_dE(k) = E(k)*1e-3/((ldouble) _o[k]->n());
       if (iterE >= 1) {
         if (_historyE[iterE-1](k) != 0 && _historyE[iterE](k) != 0)
-          probe_dE(k) = 0.1*(_historyE[iterE-1](k) - _historyE[iterE](k));
+          probe_dE(k) = 0.01*(_historyE[iterE-1](k) - _historyE[iterE](k));
       }
 
       EdE(k) += probe_dE(k);
     } else {
-      probe_dLambda(k - E.size()) = 1e-2;
+      probe_dLambda(k - E.size()) = 1e-6;
       LdL(k - E.size()) += probe_dLambda(k - E.size());
     }
 
@@ -510,7 +514,8 @@ ldouble SCF::stepStandard(ldouble gamma) {
           J(j, k) = (Sd(j - _o.size()) - Sn(j - _o.size()))/probe_dE(k);
 
         if (j == k) {
-          Jdi(j) = 1.0/J(j, k);
+          if (std::fabs(J(j, k)) > 0)
+            JdiP(j) = ParN(k)/J(j, k);
         } else {
           Joff(j, k) = -J(j, k);
         }
@@ -523,34 +528,30 @@ ldouble SCF::stepStandard(ldouble gamma) {
           J(j, k) = (Sd(j - E.size()) - Sn(j - E.size()))/probe_dLambda(k - E.size());
 
         if (j == k) {
-          Jdi(j) = 1.0/J(j, k);
+          if (std::fabs(J(j, k)) > 0)
+            JdiP(j) = ParN(k)/J(j, k);
         } else {
           Joff(j, k) = -J(j, k);
         }
       }
     }
   }
-  // now Joff = - D^-1 O
-  for (int k = 0; k < ParN.size(); ++k) {
-    for (int j = 0; j < ParN.size(); ++j) {
-      Joff(j, k) *= Jdi(j);
-    }
-  }
-  // now inverse is approx: D^(-1) (I + Joff + Joff*Joff)
-  MatrixXld Jinv = Joff + Joff*Joff;
-  for (int k = 0; k < ParN.size(); ++k) {
-    Jinv(k, k) += 1.0;
-  }
-  // multiply by D^-1
-  for (int k = 0; k < ParN.size(); ++k) {
-    for (int j = 0; j < ParN.size(); ++j) {
-      Jinv(j, k) *= Jdi(j);
-    }
-  }
+  //// this multiplies D^-1 on the right of O
+  //for (int k = 0; k < ParN.size(); ++k) {
+  //  for (int j = 0; j < ParN.size(); ++j) {
+  //    if (std::fabs(J(j, j)) > 0)
+  //      Joff(j, k) /= J(j, j);
+  //    else
+  //      Joff(j, k) = 1e10;
+  //  }
+  //}
+  //std::cout << "D^-1 P: " << std::endl << JdiP.transpose() << std::endl;
+  //std::cout << "- D^-1 O : " << std::endl << Joff << std::endl;
+  //dPar = (MatrixXld::Identity(ParN.size(), ParN.size()) + Joff + Joff*Joff) * JdiP;
+  //std::cout << "J^-1 P: " << std::endl << dPar.transpose() << std::endl;
 
   // exact in principle, but has numerical fluctuations
-  //dPar = J.fullPivLu().solve(ParN);
-  dPar = Jinv*ParN;
+  dPar = J.fullPivLu().solve(ParN);
 
   ldouble alpha = -1;
   for (int k = 0; k < L.size(); ++k) {
