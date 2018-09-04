@@ -463,8 +463,15 @@ ldouble SCF::stepStandard(ldouble gamma) {
   VectorXld dPar(ParN.size());
   dPar.setZero();
 
+  // J = D - O
+  // J^(-1) = D^(-1) (I - D^(-1) O )^(-1)
   MatrixXld J(ParN.size(), ParN.size());
   J.setZero();
+
+  VectorXld Jdi(ParN.size());
+  Jdi.setZero();
+  MatrixXld Joff(ParN.size(), ParN.size());
+  Joff.setZero();
 
   VectorXld probe_dE(E.size());
   probe_dE.setZero();
@@ -501,6 +508,12 @@ ldouble SCF::stepStandard(ldouble gamma) {
           J(j, k) = (Fd(j) - Fn(j))/probe_dE(k);
         else
           J(j, k) = (Sd(j - _o.size()) - Sn(j - _o.size()))/probe_dE(k);
+
+        if (j == k) {
+          Jdi(j) = 1.0/J(j, k);
+        } else {
+          Joff(j, k) = -J(j, k);
+        }
       }
     } else {
       for (int j = 0; j < ParN.size(); ++j) {
@@ -508,11 +521,36 @@ ldouble SCF::stepStandard(ldouble gamma) {
           J(j, k) = (Fd(j) - Fn(j))/probe_dLambda(k - E.size());
         else
           J(j, k) = (Sd(j - E.size()) - Sn(j - E.size()))/probe_dLambda(k - E.size());
+
+        if (j == k) {
+          Jdi(j) = 1.0/J(j, k);
+        } else {
+          Joff(j, k) = -J(j, k);
+        }
       }
     }
   }
+  // now Joff = - D^-1 O
+  for (int k = 0; k < ParN.size(); ++k) {
+    for (int j = 0; j < ParN.size(); ++j) {
+      Joff(j, k) *= Jdi(j);
+    }
+  }
+  // now inverse is approx: D^(-1) (I + Joff + Joff*Joff)
+  MatrixXld Jinv = Joff + Joff*Joff;
+  for (int k = 0; k < ParN.size(); ++k) {
+    Jinv(k, k) += 1.0;
+  }
+  // multiply by D^-1
+  for (int k = 0; k < ParN.size(); ++k) {
+    for (int j = 0; j < ParN.size(); ++j) {
+      Jinv(j, k) *= Jdi(j);
+    }
+  }
 
-  dPar = J.fullPivLu().solve(ParN);
+  // exact in principle, but has numerical fluctuations
+  //dPar = J.fullPivLu().solve(ParN);
+  dPar = Jinv*ParN;
 
   ldouble alpha = -1;
   for (int k = 0; k < L.size(); ++k) {
