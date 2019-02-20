@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 import sys
 sys.path.append("../lib/")
@@ -25,7 +26,7 @@ print('What is the input file to load?')
 print('Examples are any result*.txt file in the output directory.')
 print('The ones with dft in their name are to be used with load_result_dft.py instead, so please do not load them with this script.')
 print('[feel free to use TAB to auto-complete]')
-fname = raw_input('')
+fname = input('')
 
 print "Loading result from file %s" % fname
 

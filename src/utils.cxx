@@ -19,6 +19,7 @@ lm::lm(const lm &o)
 lm &lm::operator =(const lm &o) {
   l = o.l;
   m = o.m;
+  return *this;
 }
 
 bool lm::operator ==(const lm &o) const {

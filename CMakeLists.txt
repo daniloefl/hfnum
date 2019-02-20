@@ -14,18 +14,19 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib )
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib )
 
-FIND_PACKAGE(PythonInterp 3 REQUIRED)
-FIND_PACKAGE(PythonLibs 3 REQUIRED)
+FIND_PACKAGE(Python3 COMPONENTS Interpreter Development REQUIRED)
 FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(GSL REQUIRED)
 
 INCLUDE_DIRECTORIES ( "${EIGEN3_INCLUDE_DIR}" )
+INCLUDE_DIRECTORIES ( "${Python3_INCLUDE_DIRS}" )
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.36.0 REQUIRED COMPONENTS python)
-include_directories(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} ) 
+find_package(Boost 1.67.0 REQUIRED COMPONENTS python36)
+
+include_directories( "${Boost_INCLUDE_DIRS}" ) 
 
 include_directories (AFTER include)
 
@@ -37,7 +38,6 @@ if(DOXYGEN_FOUND)
       doxygen ${doxyfile}
     )
 endif()
-
 
 subdirs(src)
 

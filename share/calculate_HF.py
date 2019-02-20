@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 import sys
 sys.path.append("../lib/")
@@ -15,7 +16,7 @@ Z = 1
 
 print("Please enter the atomic number.")
 
-Z = raw_input('[default: %d] ' % Z)
+Z = input('[default: %d] ' % Z)
 if Z.strip() == '':
   Z = 1
 Z = float(Z) ## allow for effective atomic numbers
@@ -27,7 +28,7 @@ if Z >= 10:
 config = ""
 while config.strip() == "":
   print("Please enter the electron configuration in the format: 1s2 2s2 2p3")
-  config = raw_input("")
+  config = input("")
   if config.strip() == "":
     print("Configuration %s does not match the allowed electron configuration format." % i)
     print("Please enter a valid electron configuration.")
@@ -96,7 +97,7 @@ readline.parse_and_bind("tab: complete")
 readline.set_completer(complete)
 fname_default = "calculate_HF_output/results_%s.txt" % symbol_name
 fname = fname_default
-fname = raw_input('[default: %s] ' % fname_default)
+fname = input('[default: %s] ' % fname_default)
 if fname.strip() == '':
     fname = fname_default
 

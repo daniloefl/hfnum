@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 import sys
 sys.path.append("../lib/")
@@ -21,7 +22,7 @@ def complete(text, state):
 readline.set_completer_delims(' \t\n;')
 readline.parse_and_bind("tab: complete")
 readline.set_completer(complete)
-fname = raw_input('What is the input file to load? [feel free to use TAB to auto-complete; examples are shipped in the output directory]    ')
+fname = input('What is the input file to load? [feel free to use TAB to auto-complete; examples are shipped in the output directory]    ')
 
 print "Loading result from file %s" % fname
 
