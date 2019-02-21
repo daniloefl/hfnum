@@ -46,14 +46,42 @@ VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<in
     snew[idx].resize(_g.N(), 0);
   }
 
+  // get part multiplying function in the equation
+  coeff = vd;
+  // get non-homogeneous term in the equation
+  indep = vex;
+  for (int idx = 0; idx < M; ++idx) {
+    for (int k = 0; k < _g.N(); ++k) {
+      coeff[idx][k] += -indep[std::pair<int, int>(idx, idx)][k];
+      coeff[idx][k] += pot[k];
+      indep[std::pair<int, int>(idx, idx)][k] = 0;
+    }
+  }
+  for (int idx1 = 0; idx1 < M; ++idx1) {
+    double maxIdx1 = 0;
+    for (int k = 0; k < _g.N(); ++k) {
+      if (std::fabs(matched[idx1][k]) > maxIdx1) maxIdx1 = std::fabs(matched[idx1][k]);
+    }
+
+    for (int idx2 = 0; idx2 < M; ++idx2) {
+      if (idx1 == idx2) continue;
+      for (int k = 0; k < _g.N(); ++k) {
+        if (std::fabs(matched[idx1][k]) > maxIdx1*0.05) {
+          coeff[idx1][k] += -indep[std::pair<int, int>(idx1, idx2)][k]*matched[idx2][k]/matched[idx1][k];
+          indep[std::pair<int, int>(idx1, idx2)][k] = 0;
+        }
+      }
+    }
+  }
+
   for (int idx = 0; idx < M; ++idx) {
     if (_g.isLog()) {
       for (int k = 0; k < _g.N(); ++k) {
-        f[idx][k] = 1.0L + std::pow(_g.dx(), 2)/12.0L*(2*std::pow(_g(k), 2)*(E(idx) - pot[k] - vd[idx][k] + vex[std::pair<int,int>(idx,idx)][k]) - std::pow(((ldouble ) _o[idx]->l()) + 0.5, 2));
+        f[idx][k] = 1.0L + std::pow(_g.dx(), 2)/12.0L*(2*std::pow(_g(k), 2)*(E(idx) - coeff[idx][k]) - std::pow(((ldouble ) _o[idx]->l()) + 0.5, 2));
       }
     } else {
       for (int k = 0; k < _g.N(); ++k) {
-        f[idx][k] = 1.0L + std::pow(_g.dx(), 2)/12.0L*((E(idx) - pot[k] - vd[idx][k] + vex[std::pair<int,int>(idx,idx)][k]) - std::pow(_o[idx]->l() + 0.5, 2));
+        f[idx][k] = 1.0L + std::pow(_g.dx(), 2)/12.0L*((E(idx) - coeff[idx][k]) - std::pow(_o[idx]->l() + 0.5, 2));
       }
     }
   }
@@ -75,7 +103,7 @@ VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<in
 
   // Procedure:
   // Start with non-homogeneous terms s for each equation at zero (they come from the exchange potential multiplying solutions for other orbitals)
-  // Do the following 10 times
+  // Do the following 3 times
   //   -> For current eq. k from 0 to M:
   //     -> Solve eq. k using last non-homogeneus term s(k) for that eq.
   //     -> Recalculate all the non-homogeneous terms snew(*) with the last solution
@@ -92,7 +120,7 @@ VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<in
   //     -> Use as the new non-homogeneus terms: s <- ic * snew + (1 - ic) * s [where ic is a constant, set at 0.3]
   //   -> Go back to the beginning to repeat this.
 
-  for (int nIter = 0; nIter < 20; ++nIter) {
+  for (int nIter = 0; nIter < 3; ++nIter) {
 
     // solve in direct order
     for (int idx = 0; idx < M; ++idx) {
@@ -107,13 +135,13 @@ VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<in
           if (idx1 == idx2) continue;
           for (int k = 0; k < _g.N(); ++k) {
             if (_g.isLog()) {
-              snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
+              snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*indep[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
               if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                 int lidx = lambdaMap[100*idx1 + idx2];
                 snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda(lidx)*matched[idx2][k];
               }
             } else {
-              snew[idx1][k] += std::pow(_g.dx(), 2)/12.0*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
+              snew[idx1][k] += std::pow(_g.dx(), 2)/12.0*indep[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
               if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                 int lidx = lambdaMap[100*idx1 + idx2];
                 snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda(lidx)*matched[idx2][k];
@@ -142,13 +170,13 @@ VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<in
             if (idx1 == idx2) continue;
             for (int k = 0; k < _g.N(); ++k) {
               if (_g.isLog()) {
-                snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
+                snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*indep[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
                 if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                   int lidx = lambdaMap[100*idx1 + idx2];
                   snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda(lidx)*matched[idx2][k];
                 }
               } else {
-                snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
+                snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*indep[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
                 if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
                   int lidx = lambdaMap[100*idx1 + idx2];
                   snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda(lidx)*matched[idx2][k];
@@ -193,13 +221,13 @@ VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<in
         if (idx1 == idx2) continue;
         for (int k = 0; k < _g.N(); ++k) {
           if (_g.isLog()) {
-            snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
+            snew[idx1][k] += std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*indep[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
             if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
               int lidx = lambdaMap[100*idx1 + idx2];
               snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*2.0L*std::pow(_g(k), 2)*lambda(lidx)*matched[idx2][k];
             }
           } else {
-            snew[idx1][k] += std::pow(_g.dx(), 2)/12.0*vex[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
+            snew[idx1][k] += std::pow(_g.dx(), 2)/12.0*indep[std::pair<int,int>(idx1, idx2)][k]*matched[idx2][k];
             if (lambdaMap.find(100*idx1 + idx2) != lambdaMap.end()) {
               int lidx = lambdaMap[100*idx1 + idx2];
               snew[idx1][k] += -std::pow(_g.dx(), 2)/12.0L*lambda(lidx)*matched[idx2][k];

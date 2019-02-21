@@ -22,8 +22,9 @@ if Z.strip() == '':
 Z = float(Z) ## allow for effective atomic numbers
 
 h = hfnum.HF(Z)
-if Z >= 10:
-  h.resetGrid(1, 1.0/32.0, int( (np.log(12.0) + 10 + np.log(Z))/(1.0/32.0) )+1, np.exp(-10)/Z)
+#if Z >= 10:
+#  h.resetGrid(1, 1.0/32.0, int( (np.log(12.0) + 10 + np.log(Z))/(1.0/32.0) )+1, np.exp(-10)/Z)
+h.resetGrid(1, 1.0/32.0, int( (np.log(15.0) + 4 + np.log(Z))/(1.0/32.0) )+1, np.exp(-4)/Z)
 
 config = ""
 while config.strip() == "":
@@ -108,12 +109,9 @@ print("First r:", r[0])
 print("Number of grid points: ", len(r))
 
 # can be adjusted to improve convergence
-h.gammaSCF(0.3)
+h.gammaSCF(0.4)
 
 F0 = 1e-7
-if h.getNOrbitals() >= 3: # either need more Grid points or need to allow worse precision
-  F0 = 1e-3
-
 h.solve(40, 100, F0)
 
 for n in range(0, h.getNOrbitals()):

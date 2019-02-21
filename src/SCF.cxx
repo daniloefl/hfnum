@@ -190,6 +190,12 @@ std::vector<ldouble> SCF::getNucleusPotential() {
 ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
   ldouble gamma = 1; // move in the direction of the negative slope with this velocity per step
 
+  for (int k = 0; k < _o.size(); ++k) {
+    if (prev_o.find(k) == prev_o.end()) {
+      prev_o[k] = Vradial(_g->N(), 0);
+    }
+  }
+
   std::string strMethod = "";
   if (_method == 0) {
     strMethod = "Sparse Matrix Numerov";
@@ -298,6 +304,12 @@ ldouble SCF::solveForFixedPotentials(int Niter, ldouble F0stop) {
     if (PyErr_Occurred())
       throw HFException("Received signal. Interrupting.");
 
+  }
+  for (int k = 0; k < _o.size(); ++k) {
+    int idx = _om.index(k);
+    for (int i = 0; i < _g->N(); ++i) {
+      prev_o[k][i] = (*_o[idx])(i);
+    }
   }
 
   return F;
@@ -426,6 +438,10 @@ ldouble SCF::stepStandard(ldouble gamma) {
 
   VectorXld Fn(E.size());
   VectorXld Sn(L.size());
+  for (int k = 0; k < _o.size(); ++k) {
+    int idx = _om.index(k);
+    matchedSt[idx] = prev_o[k];
+  }
   ldouble sumFn2 = solveStandard(E, L, Sn, Fn, matchedSt);
 
   for (int k = 0; k < _o.size(); ++k) {
@@ -502,6 +518,10 @@ ldouble SCF::stepStandard(ldouble gamma) {
 
     VectorXld Fd;
     VectorXld Sd(L.size());
+    for (int k = 0; k < _o.size(); ++k) {
+      int idx = _om.index(k);
+      matchedSt[idx] = prev_o[k];
+    }
     ldouble sumFd2 = solveStandard(EdE, LdL, Sd, Fd, matchedSt);
 
     // two criteria to satisfy:
@@ -673,6 +693,10 @@ ldouble SCF::stepStandardMinim(ldouble gamma) {
 
   VectorXld Fn(E.size());
   VectorXld Sn(L.size());
+  for (int k = 0; k < _o.size(); ++k) {
+    int idx = _om.index(k);
+    matchedSt[idx] = prev_o[k];
+  }
   ldouble sumFn = solveStandard(E, L, Sn, Fn, matchedSt);
 
   for (int k = 0; k < _o.size(); ++k) {
@@ -755,6 +779,10 @@ ldouble SCF::stepStandardMinim(ldouble gamma) {
 
     VectorXld Fd2;
     VectorXld Sd2(L.size());
+    for (int k = 0; k < _o.size(); ++k) {
+      int idx = _om.index(k);
+      matchedSt[idx] = prev_o[k];
+    }
     ldouble sumFn2 = solveStandard(EdE2, LdL2, Sd2, Fd2, matchedSt);
 
     if (k < E.size()) {
@@ -776,6 +804,10 @@ ldouble SCF::stepStandardMinim(ldouble gamma) {
         }
         VectorXld Fd1;
         VectorXld Sd1(L.size());
+        for (int k = 0; k < _o.size(); ++k) {
+          int idx = _om.index(k);
+          matchedSt[idx] = prev_o[k];
+        }
         ldouble sumFd1 = solveStandard(EdE1, LdL1, Sd1, Fd1, matchedSt);
 
         VectorXld EdE2 = EdE1;
@@ -787,6 +819,10 @@ ldouble SCF::stepStandardMinim(ldouble gamma) {
         }
         VectorXld Fd2;
         VectorXld Sd2(L.size());
+        for (int k = 0; k < _o.size(); ++k) {
+          int idx = _om.index(k);
+          matchedSt[idx] = prev_o[k];
+        }
         ldouble sumFd2 = solveStandard(EdE2, LdL2, Sd2, Fd2, matchedSt);
 
         if (k < E.size()) {

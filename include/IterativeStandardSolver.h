@@ -116,6 +116,11 @@ class IterativeStandardSolver {
     std::map<int, Vradial> homoInward;
     std::map<int, Vradial> homoOutward;
 
+    // part multiplying function in the equation
+    std::map<int, Vradial> coeff;
+    // non-homogeneous part of equation
+    std::map<std::pair<int, int>, Vradial> indep;
+
     ldouble _Z;
 };
 

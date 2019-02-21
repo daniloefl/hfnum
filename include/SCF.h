@@ -242,6 +242,8 @@ class SCF {
     /// temporary variable for standard solver
     std::map<int, Vradial> matchedSt;
 
+    /// previous solution
+    std::map<int, Vradial> prev_o;
 
     /// Set to true of the method uses vsum_up and vsum_dw for the standard method
     bool _isSpinDependent;
