@@ -103,7 +103,7 @@ VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<in
 
   // Procedure:
   // Start with non-homogeneous terms s for each equation at zero (they come from the exchange potential multiplying solutions for other orbitals)
-  // Do the following 3 times
+  // Do the following 10 times
   //   -> For current eq. k from 0 to M:
   //     -> Solve eq. k using last non-homogeneus term s(k) for that eq.
   //     -> Recalculate all the non-homogeneous terms snew(*) with the last solution
@@ -120,7 +120,7 @@ VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<in
   //     -> Use as the new non-homogeneus terms: s <- ic * snew + (1 - ic) * s [where ic is a constant, set at 0.3]
   //   -> Go back to the beginning to repeat this.
 
-  for (int nIter = 0; nIter < 3; ++nIter) {
+  for (int nIter = 0; nIter < 10; ++nIter) {
 
     // solve in direct order
     for (int idx = 0; idx < M; ++idx) {
