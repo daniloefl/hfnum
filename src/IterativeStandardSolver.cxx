@@ -66,7 +66,7 @@ VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<in
     for (int idx2 = 0; idx2 < M; ++idx2) {
       if (idx1 == idx2) continue;
       for (int k = 0; k < _g.N(); ++k) {
-        if (std::fabs(matched[idx1][k]) > maxIdx1*0.05) {
+        if (std::fabs(matched[idx1][k]) > maxIdx1*0.01) {
           coeff[idx1][k] += -indep[std::pair<int, int>(idx1, idx2)][k]*matched[idx2][k]/matched[idx1][k];
           indep[std::pair<int, int>(idx1, idx2)][k] = 0;
         }
@@ -86,7 +86,7 @@ VectorXld IterativeStandardSolver::solve(VectorXld &E, Vradial &pot, std::map<in
     }
   }
 
-  ldouble ic = 0.5;
+  ldouble ic = 0.7;
 
   if (_i0.size() != _o.size()) {
     _i0.resize(_o.size(), 0);

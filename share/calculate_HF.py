@@ -22,9 +22,7 @@ if Z.strip() == '':
 Z = float(Z) ## allow for effective atomic numbers
 
 h = hfnum.HF(Z)
-#if Z >= 10:
-#  h.resetGrid(1, 1.0/32.0, int( (np.log(12.0) + 10 + np.log(Z))/(1.0/32.0) )+1, np.exp(-10)/Z)
-h.resetGrid(1, 1.0/32.0, int( (np.log(15.0) + 4 + np.log(Z))/(1.0/32.0) )+1, np.exp(-4)/Z)
+h.resetGrid(1, 1.0/32.0, int( (np.log(10.0) + 10 + np.log(Z))/(1.0/32.0) )+1, np.exp(-10)/Z)
 
 config = ""
 while config.strip() == "":

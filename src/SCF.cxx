@@ -576,12 +576,12 @@ ldouble SCF::stepStandard(ldouble gamma) {
   ldouble alpha = -1;
   for (int k = 0; k < L.size(); ++k) {
     _dlambda[k] = alpha*gamma*dPar(_o.size()+k);
-    if (std::fabs(_dlambda[k]) > 0.5) _dlambda[k] = 0.5*_dlambda[k]/std::fabs(_dlambda[k]);
+    //if (std::fabs(_dlambda[k]) > 0.5) _dlambda[k] = 0.5*_dlambda[k]/std::fabs(_dlambda[k]);
     std::cout << "INFO: Lagrange multiplier " << k << " (with the Newton-Raphson method), dlambda = " << _dlambda[k] << " (probe dlambda = " << probe_dLambda(k) << ")" << std::endl;
   }
   for (int k = 0; k < E.size(); ++k) {
     _dE[k] = alpha*gamma*dPar(k);
-    if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
+    //if (std::fabs(_dE[k]) > 0.5) _dE[k] = 0.5*_dE[k]/std::fabs(_dE[k]);
     std::cout << "INFO: Orbital " << k << " (with the Newton-Raphson method), dE = " << _dE[k] << " (probe dE = " << probe_dE(k) << ")" << std::endl;
   }
 
