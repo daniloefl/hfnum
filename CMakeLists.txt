@@ -1,6 +1,8 @@
 project (hfnum)
 cmake_minimum_required(VERSION 3.2)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_extra/")
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
@@ -24,7 +26,7 @@ INCLUDE_DIRECTORIES ( "${Python3_INCLUDE_DIRS}" )
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.67.0 REQUIRED COMPONENTS python36)
+find_package(Boost 1.65.0 REQUIRED COMPONENTS python)
 
 include_directories( "${Boost_INCLUDE_DIRS}" ) 
 
